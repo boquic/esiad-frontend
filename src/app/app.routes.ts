@@ -7,6 +7,7 @@ import { ClientDashboardComponent } from './features/client/dashboard/dashboard.
 import { OperatorDashboardComponent } from './features/operator/dashboard/dashboard.component';
 import { AdminDashboardComponent } from './features/admin/dashboard/dashboard.component';
 import { ServicesAdminComponent } from './features/admin/services/services-admin.component';
+import { MaterialsAdminComponent } from './features/admin/materials/materials-admin.component';
 
 // Guards Creados
 import { authGuard, publicGuard } from './core/guards/auth.guard';
@@ -41,6 +42,12 @@ export const routes: Routes = [
     {
         path: 'admin/services',
         component: ServicesAdminComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['ADMIN'] }
+    },
+    {
+        path: 'admin/materials',
+        component: MaterialsAdminComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: ['ADMIN'] }
     },

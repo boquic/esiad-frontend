@@ -28,6 +28,7 @@
                placeholder="Ingrese su DNI o Nro. de Celular">
         <div *ngIf="f['identifier'].touched && f['identifier'].invalid" class="text-red-400 text-xs mt-1 font-medium transition-all">
           <span *ngIf="f['identifier'].errors?.['required']">Este campo es obligatorio.</span>
+          <span *ngIf="f['identifier'].errors?.['pattern']">Ingrese un DNI (8 dígitos) o celular (9 dígitos).</span>
         </div>
       </div>
 
@@ -41,6 +42,7 @@
                placeholder="Su contraseña">
         <div *ngIf="f['password'].touched && f['password'].invalid" class="text-red-400 text-xs mt-1 font-medium transition-all">
           <span *ngIf="f['password'].errors?.['required']">La contraseña es obligatoria.</span>
+          <span *ngIf="f['password'].errors?.['minlength']">Debe tener al menos 6 caracteres.</span>
         </div>
       </div>
 

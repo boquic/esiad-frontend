@@ -16,8 +16,8 @@ export class LoginComponent {
   private router = inject(Router);
 
   loginForm: FormGroup = this.fb.group({
-    identifier: ['', [Validators.required]], // Puede ser DNI o celular
-    password: ['', [Validators.required]]
+    identifier: ['', [Validators.required, Validators.pattern('^[0-9]{8,9}$')]], // Puede ser DNI (8) o celular (9)
+    password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
   isLoading = false;
@@ -32,10 +32,24 @@ export class LoginComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
+    const { identifier, password } = this.loginForm.getRawValue();
+    const payload = {
+      identifier: String(identifier ?? '').trim(),
+      password: String(password ?? '')
+    };
+
+    console.info('[Auth/Login] Request payload', {
+      identifier: payload.identifier,
+      passwordLength: payload.password.length
+    });
+
     const url = 'http://localhost:3000/api/auth/login';
-    this.http.post<{ token: string }>(url, this.loginForm.value).subscribe({
+    this.http.post<{ token: string }>(url, payload).subscribe({
       next: (res) => {
         this.isLoading = false;
+        console.info('[Auth/Login] Success response', {
+          hasToken: !!res?.token
+        });
         if (res.token) {
           if (typeof window !== 'undefined') {
             localStorage.setItem('token', res.token);
@@ -64,6 +78,11 @@ export class LoginComponent {
       },
       error: (err) => {
         this.isLoading = false;
+        console.error('[Auth/Login] Error response', {
+          status: err?.status,
+          message: err?.error?.message ?? err?.message,
+          error: err?.error
+        });
         this.errorMessage = err.error?.message || 'Credenciales inválidas. Por favor verifique sus datos e intente nuevamente.';
       }
     });

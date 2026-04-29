@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { getRoleFromToken } from '../utils/jwt.utils';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
@@ -17,22 +18,20 @@ export const publicGuard: CanActivateFn = (route, state) => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
   if (token) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const role = payload.role;
+    const role = getRoleFromToken(token);
 
-      switch (role) {
-        case 'ADMIN':
-          return router.parseUrl('/admin/dashboard');
-        case 'OPERATOR':
-          return router.parseUrl('/operator/dashboard');
-        case 'CLIENT':
-        default:
-          return router.parseUrl('/client/dashboard');
-      }
-    } catch (e) {
-      // Invalid token, allow access to public routes
+    if (!role) {
       return true;
+    }
+
+    switch (role) {
+      case 'ADMIN':
+        return router.parseUrl('/admin/dashboard');
+      case 'OPERATOR':
+        return router.parseUrl('/operator/dashboard');
+      case 'CLIENT':
+      default:
+        return router.parseUrl('/client/dashboard');
     }
   }
 

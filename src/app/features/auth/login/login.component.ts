@@ -3,6 +3,51 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs/operators';
+import { getRoleFromToken } from '../../../core/utils/jwt.utils';
+
+type LoginResponse = {
+  token?: string;
+  accessToken?: string;
+  jwt?: string;
+  access_token?: string;
+  data?: {
+    token?: string;
+    accessToken?: string;
+    jwt?: string;
+    access_token?: string;
+  };
+  user?: {
+    role?: string;
+    roles?: string[];
+  };
+};
+
+function extractToken(response: LoginResponse | string | null | undefined): string | null {
+  if (!response) {
+    return null;
+  }
+
+  if (typeof response === 'string') {
+    try {
+      return extractToken(JSON.parse(response) as LoginResponse);
+    } catch {
+      return null;
+    }
+  }
+
+  const directToken = response.token ?? response.accessToken ?? response.jwt ?? response.access_token;
+  if (typeof directToken === 'string' && directToken.trim()) {
+    return directToken.trim();
+  }
+
+  const nestedToken = response.data?.token ?? response.data?.accessToken ?? response.data?.jwt ?? response.data?.access_token;
+  if (typeof nestedToken === 'string' && nestedToken.trim()) {
+    return nestedToken.trim();
+  }
+
+  return null;
+}
 
 @Component({
   selector: 'app-login',
@@ -44,40 +89,48 @@ export class LoginComponent {
     });
 
     const url = 'http://localhost:3000/api/auth/login';
-    this.http.post<{ token: string }>(url, payload).subscribe({
-      next: (res) => {
+    this.http.post<LoginResponse>(url, payload).pipe(
+      finalize(() => {
         this.isLoading = false;
+      })
+    ).subscribe({
+      next: (res) => {
         console.info('[Auth/Login] Success response', {
-          hasToken: !!res?.token
+          type: typeof res,
+          keys: res && typeof res === 'object' ? Object.keys(res as Record<string, unknown>) : [],
+          nestedKeys: res && typeof res === 'object' && (res as LoginResponse).data ? Object.keys((res as LoginResponse).data ?? {}) : []
         });
-        if (res.token) {
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('token', res.token);
-          }
-          
-          try {
-            const payload = JSON.parse(atob(res.token.split('.')[1]));
-            const role = payload.role;
 
-            switch (role) {
-              case 'ADMIN':
-                this.router.navigate(['/admin/dashboard']);
-                break;
-              case 'OPERATOR':
-                this.router.navigate(['/operator/dashboard']);
-                break;
-              case 'CLIENT':
-              default:
-                this.router.navigate(['/client/dashboard']);
-                break;
-            }
-          } catch (err) {
-            this.router.navigate(['/']);
-          }
+        const token = extractToken(res);
+        console.info('[Auth/Login] Success response', {
+          hasToken: !!token
+        });
+
+        if (!token) {
+          this.errorMessage = 'La respuesta de login no incluyo un token valido.';
+          return;
+        }
+
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', token);
+        }
+
+        const role = getRoleFromToken(token);
+
+        switch (role) {
+          case 'ADMIN':
+            this.router.navigate(['/admin/dashboard']);
+            break;
+          case 'OPERATOR':
+            this.router.navigate(['/operator/dashboard']);
+            break;
+          case 'CLIENT':
+          default:
+            this.router.navigate(['/client/dashboard']);
+            break;
         }
       },
       error: (err) => {
-        this.isLoading = false;
         console.error('[Auth/Login] Error response', {
           status: err?.status,
           message: err?.error?.message ?? err?.message,

@@ -15,6 +15,9 @@ import { Router } from '@angular/router';
         <div>
           <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">Administración Central</h1>
           <p class="text-slate-400 mt-1">Control absoluto de SIGEPED</p>
+          <div class="mt-3">
+            <a routerLink="/admin/services" class="text-sm text-blue-400 hover:underline">Gestionar Servicios</a>
+          </div>
         </div>
         <button (click)="logout()" class="px-5 py-2.5 bg-slate-800/50 hover:bg-slate-700/50 text-slate-200 rounded-xl border border-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-slate-500 font-medium flex items-center space-x-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>

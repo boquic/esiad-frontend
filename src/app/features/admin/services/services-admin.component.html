@@ -1,0 +1,32 @@
+<div class="p-8">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold">Servicios (Admin)</h2>
+    <a routerLink="/admin/dashboard" class="text-sm text-slate-300 hover:underline">Volver</a>
+  </div>
+
+  <div *ngIf="error" class="mb-4 text-red-400">{{ error }}</div>
+
+  <div *ngIf="loading" class="text-slate-400">Cargando servicios...</div>
+
+  <table *ngIf="!loading && services.length" class="w-full table-auto bg-slate-900/40 border border-slate-800 rounded-lg">
+    <thead class="text-left text-slate-300 border-b border-slate-800">
+      <tr>
+        <th class="p-3">Nombre</th>
+        <th class="p-3">Estado</th>
+        <th class="p-3">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of services" class="border-b border-slate-800 even:bg-slate-900/20">
+        <td class="p-3">{{ s.name }}</td>
+        <td class="p-3">{{ s.is_active ? 'Activo' : 'Inactivo' }}</td>
+        <td class="p-3">
+          <button (click)="edit(s)" class="mr-3 px-3 py-1 bg-blue-600 text-white rounded">Editar</button>
+          <button (click)="toggle(s)" class="px-3 py-1 bg-slate-700 text-white rounded">{{ s.is_active ? 'Desactivar' : 'Activar' }}</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && services.length === 0" class="text-slate-400">No hay servicios registrados.</div>
+</div>

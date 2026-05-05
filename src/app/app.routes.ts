@@ -4,6 +4,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ClientDashboardComponent } from './features/client/dashboard/dashboard.component';
+import { NewOrderComponent } from './features/client/orders/new-order.component';
 import { OperatorDashboardComponent } from './features/operator/dashboard/dashboard.component';
 import { AdminDashboardComponent } from './features/admin/dashboard/dashboard.component';
 import { ServicesAdminComponent } from './features/admin/services/services-admin.component';
@@ -24,6 +25,12 @@ export const routes: Routes = [
     {
         path: 'client/dashboard',
         component: ClientDashboardComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['CLIENT'] }
+    },
+    {
+        path: 'client/orders/new',
+        component: NewOrderComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: ['CLIENT'] }
     },

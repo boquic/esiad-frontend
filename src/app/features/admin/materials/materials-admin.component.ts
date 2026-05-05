@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MaterialsService } from './materials.service';
 import { ServicesService } from '../services/services.service';
 
@@ -16,7 +17,7 @@ type MaterialItem = {
 @Component({
   selector: 'app-materials-admin',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, HttpClientModule, FormsModule, RouterLink],
   templateUrl: './materials-admin.component.html'
 })
 export class MaterialsAdminComponent {

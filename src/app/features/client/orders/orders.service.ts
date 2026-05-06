@@ -33,7 +33,67 @@ export type MaterialOption = {
   [key: string]: unknown;
 };
 
+export type OrderStatus =
+  | 'BUDGETED'
+  | 'PENDING_PAYMENT'
+  | 'IN_PROGRESS'
+  | 'READY'
+  | 'DELIVERED'
+  | 'CANCELLED'
+  | 'EXPIRED';
+
+export type ClientOrder = {
+  id: string;
+  status: OrderStatus | string;
+  payment_condition?: string | null;
+  estimated_price?: number | string | null;
+  advance_amount?: number | string | null;
+  budget_expires_at?: string | null;
+  created_at?: string | null;
+  service_type?: {
+    name?: string | null;
+  } | null;
+  serviceType?: {
+    name?: string | null;
+  } | null;
+  material?: {
+    name?: string | null;
+  } | null;
+  [key: string]: unknown;
+};
+
+export type OrderFile = {
+  id?: string;
+  file_url?: string | null;
+  fileUrl?: string | null;
+  file_type?: string | null;
+  fileType?: string | null;
+  uploaded_at?: string | null;
+  uploadedAt?: string | null;
+  [key: string]: unknown;
+};
+
+export type OrderPayment = {
+  id?: string;
+  amount?: number | string | null;
+  payment_type?: string | null;
+  paymentType?: string | null;
+  status?: string | null;
+  created_at?: string | null;
+  createdAt?: string | null;
+  [key: string]: unknown;
+};
+
+export type ClientOrderDetail = ClientOrder & {
+  notes?: string | null;
+  updated_at?: string | null;
+  updatedAt?: string | null;
+  files?: OrderFile[] | null;
+  payments?: OrderPayment[] | null;
+};
+
 type CollectionResponse<T> = T[] | { data?: T[] | null; total?: number } | { data?: T | null };
+type ResourceResponse<T> = T | { data?: T | null };
 
 @Injectable({ providedIn: 'root' })
 export class ClientOrdersService {
@@ -46,6 +106,14 @@ export class ClientOrdersService {
   getMaterials(serviceTypeId: string): Observable<CollectionResponse<MaterialOption>> {
     const params = new HttpParams().set('serviceTypeId', serviceTypeId);
     return this.http.get<CollectionResponse<MaterialOption>>('/api/materials', { params });
+  }
+
+  getMyOrders(): Observable<CollectionResponse<ClientOrder>> {
+    return this.http.get<CollectionResponse<ClientOrder>>('/api/orders/my');
+  }
+
+  getOrderById(orderId: string): Observable<ResourceResponse<ClientOrderDetail>> {
+    return this.http.get<ResourceResponse<ClientOrderDetail>>(`/api/orders/${orderId}`);
   }
 
   normalizePricingModel(service: ServiceOption | null | undefined): PricingModel {
@@ -108,9 +176,51 @@ export class ClientOrdersService {
     return [];
   }
 
+  unwrapResource<T>(response: ResourceResponse<T> | null | undefined): T | null {
+    if (!response) {
+      return null;
+    }
+
+    if (typeof response === 'object' && response !== null && 'data' in response) {
+      return response.data ?? null;
+    }
+
+    return response as T;
+  }
+
   getMaterialPrice(material: MaterialOption | null | undefined): number {
     const rawPrice = material?.price ?? material?.unit_price ?? material?.unitPrice;
     const parsed = typeof rawPrice === 'number' ? rawPrice : Number(rawPrice ?? 0);
     return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  getOrderEstimatedPrice(order: ClientOrder | null | undefined): number {
+    const rawPrice = order?.estimated_price;
+    const parsed = typeof rawPrice === 'number' ? rawPrice : Number(rawPrice ?? 0);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  getPaymentAmount(payment: OrderPayment | null | undefined): number {
+    const rawAmount = payment?.amount;
+    const parsed = typeof rawAmount === 'number' ? rawAmount : Number(rawAmount ?? 0);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  getOrderFiles(order: ClientOrderDetail | null | undefined): OrderFile[] {
+    return Array.isArray(order?.files) ? order.files : [];
+  }
+
+  getOrderPayments(order: ClientOrderDetail | null | undefined): OrderPayment[] {
+    return Array.isArray(order?.payments) ? order.payments : [];
+  }
+
+  getFileUrl(file: OrderFile | null | undefined): string {
+    const url = file?.file_url ?? file?.fileUrl;
+    return typeof url === 'string' ? url : '';
+  }
+
+  getFileType(file: OrderFile | null | undefined): string {
+    const type = file?.file_type ?? file?.fileType;
+    return typeof type === 'string' ? type : 'Archivo';
   }
 }

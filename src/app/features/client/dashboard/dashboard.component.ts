@@ -45,12 +45,20 @@ import { Router, RouterLink } from '@angular/router';
               </p>
             </div>
 
-            <a
-              routerLink="/client/orders/new"
-              class="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
-            >
-              Abrir formulario
-            </a>
+            <div class="flex flex-wrap gap-3">
+              <a
+                routerLink="/client/orders"
+                class="inline-flex items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-6 py-3 text-sm font-bold text-cyan-100 transition hover:border-cyan-300 hover:text-white"
+              >
+                Ver mis pedidos
+              </a>
+              <a
+                routerLink="/client/orders/new"
+                class="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
+              >
+                Abrir formulario
+              </a>
+            </div>
           </div>
 
           <div class="mt-8 grid gap-4 md:grid-cols-3">
@@ -78,11 +86,10 @@ import { Router, RouterLink } from '@angular/router';
           <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-200/80">Alcance actual</p>
           <h3 class="mt-3 text-2xl font-bold text-white">Solo lo solicitado</h3>
           <p class="mt-4 text-sm leading-7 text-slate-200">
-            Esta iteracion se concentra unicamente en el formulario de nuevo pedido: servicio, material, campos dinamicos por
-            <code>pricing_model</code> y preview en tiempo real.
+            Esta iteracion se concentra en el flujo visible del cliente: formulario de nuevo pedido y lista de mis pedidos con estado actual.
           </p>
           <div class="mt-6 rounded-3xl border border-white/10 bg-slate-950/45 p-5 text-sm leading-6 text-slate-300">
-            No se agregaron vistas de detalle, lista de pedidos, subida de archivos ni confirmacion de presupuesto, para mantenernos estrictamente dentro del alcance.
+            El detalle de pedido, la subida de archivos y la confirmacion de presupuesto siguen fuera de esta entrega puntual.
           </div>
         </aside>
       </main>

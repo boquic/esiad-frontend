@@ -95,6 +95,15 @@ export type ClientOrderDetail = ClientOrder & {
 type CollectionResponse<T> = T[] | { data?: T[] | null; total?: number } | { data?: T | null };
 type ResourceResponse<T> = T | { data?: T | null };
 
+export type CreateOrderPayload = {
+  service_type_id: string;
+  material_id: string;
+  quantity?: number;
+  area?: number;
+  volume?: number;
+  notes?: string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class ClientOrdersService {
   private http = inject(HttpClient);
@@ -114,6 +123,10 @@ export class ClientOrdersService {
 
   getOrderById(orderId: string): Observable<ResourceResponse<ClientOrderDetail>> {
     return this.http.get<ResourceResponse<ClientOrderDetail>>(`/api/orders/${orderId}`);
+  }
+
+  createOrder(payload: CreateOrderPayload): Observable<ResourceResponse<ClientOrderDetail>> {
+    return this.http.post<ResourceResponse<ClientOrderDetail>>('/api/orders', payload);
   }
 
   normalizePricingModel(service: ServiceOption | null | undefined): PricingModel {

@@ -4,7 +4,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { distinctUntilChanged } from 'rxjs';
 import {
+  ClientOrderDetail,
   ClientOrdersService,
+  CreateOrderPayload,
   MaterialOption,
   PricingModel,
   ServiceOption,
@@ -45,6 +47,7 @@ export class NewOrderComponent {
     linearMeters: [1, [Validators.required, Validators.min(0.01)]],
     hours: [1, [Validators.required, Validators.min(0.01)]],
     volume: [1, [Validators.required, Validators.min(0.01)]],
+    notes: [''],
   });
 
   services: ServiceOption[] = [];
@@ -56,8 +59,12 @@ export class NewOrderComponent {
 
   loadingServices = false;
   loadingMaterials = false;
+  submitting = false;
   servicesError = '';
   materialsError = '';
+  submitError = '';
+  submitSuccess = '';
+  createdOrder: ClientOrderDetail | null = null;
 
   ngOnInit(): void {
     this.orderForm.controls.serviceTypeId.valueChanges
@@ -170,12 +177,42 @@ export class NewOrderComponent {
     return this.selectedService !== null && this.selectedMaterial !== null && this.preview !== null;
   }
 
+  submitOrder(): void {
+    this.submitError = '';
+    this.submitSuccess = '';
+    this.createdOrder = null;
+
+    if (this.orderForm.invalid || !this.selectedService || !this.selectedMaterial || !this.preview) {
+      this.orderForm.markAllAsTouched();
+      this.submitError = 'Completa los campos requeridos antes de crear el pedido.';
+      return;
+    }
+
+    const payload = this.buildCreatePayload();
+    this.submitting = true;
+
+    this.ordersService.createOrder(payload).subscribe({
+      next: (response) => {
+        this.createdOrder = this.ordersService.unwrapResource(response);
+        this.submitting = false;
+        this.submitSuccess = 'Pedido creado y presupuesto generado correctamente.';
+      },
+      error: (error: { error?: { message?: string } }) => {
+        this.submitting = false;
+        this.submitError = error.error?.message ?? 'No se pudo crear el pedido.';
+      },
+    });
+  }
+
   private handleServiceChange(serviceId: string): void {
     this.selectedService = this.services.find((service) => String(service.id) === serviceId) ?? null;
     this.pricingModel = this.ordersService.normalizePricingModel(this.selectedService);
     this.materials = [];
     this.selectedMaterial = null;
     this.preview = null;
+    this.submitError = '';
+    this.submitSuccess = '';
+    this.createdOrder = null;
     this.materialsError = '';
     this.orderForm.controls.materialId.setValue('', { emitEvent: false });
     this.resetMeasurementDefaults();
@@ -248,6 +285,51 @@ export class NewOrderComponent {
   private readControlValue(controlName: DynamicFieldConfig['controlName']): number {
     const rawValue = this.orderForm.controls[controlName].value;
     return typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0);
+  }
+
+  private buildCreatePayload(): CreateOrderPayload {
+    const payload: CreateOrderPayload = {
+      service_type_id: this.orderForm.controls.serviceTypeId.value,
+      material_id: this.orderForm.controls.materialId.value,
+    };
+
+    const notes = this.orderForm.controls.notes.value.trim();
+    if (notes) {
+      payload.notes = notes;
+    }
+
+    switch (this.pricingModel) {
+      case 'PER_AREA':
+        payload.area = this.readControlValue('area');
+        break;
+      case 'PER_VOLUME':
+        payload.volume = this.readControlValue('volume');
+        break;
+      case 'FIXED':
+        break;
+      case 'PER_UNIT':
+      case 'PER_LINEAR_METER':
+      case 'PER_HOUR':
+      case 'UNKNOWN':
+      default:
+        payload.quantity = this.readQuantityValueForBackend();
+        break;
+    }
+
+    return payload;
+  }
+
+  private readQuantityValueForBackend(): number {
+    switch (this.pricingModel) {
+      case 'PER_LINEAR_METER':
+        return this.readControlValue('linearMeters');
+      case 'PER_HOUR':
+        return this.readControlValue('hours');
+      case 'PER_UNIT':
+      case 'UNKNOWN':
+      default:
+        return this.readControlValue('quantity');
+    }
   }
 
   private getDefaultUnitName(): string {

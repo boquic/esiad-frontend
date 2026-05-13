@@ -54,45 +54,21 @@ export class MyOrdersComponent {
 
     switch (normalizedStatus) {
       case 'BUDGETED':
-        return {
-          label: 'Presupuestado',
-          classes: 'border-amber-400/30 bg-amber-400/10 text-amber-200',
-        };
+        return { label: 'Presupuestado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
       case 'PENDING_PAYMENT':
-        return {
-          label: 'Pendiente de pago',
-          classes: 'border-fuchsia-400/30 bg-fuchsia-400/10 text-fuchsia-200',
-        };
+        return { label: 'Pendiente de pago', classes: 'border-purple-300 bg-purple-50 text-purple-700' };
       case 'IN_PROGRESS':
-        return {
-          label: 'En proceso',
-          classes: 'border-sky-400/30 bg-sky-400/10 text-sky-200',
-        };
+        return { label: 'En proceso', classes: 'border-blue-300 bg-blue-50 text-blue-700' };
       case 'READY':
-        return {
-          label: 'Listo para recoger',
-          classes: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200',
-        };
+        return { label: 'Listo para recoger', classes: 'border-green-300 bg-green-50 text-green-700' };
       case 'DELIVERED':
-        return {
-          label: 'Entregado',
-          classes: 'border-teal-400/30 bg-teal-400/10 text-teal-200',
-        };
+        return { label: 'Entregado', classes: 'border-teal-300 bg-teal-50 text-teal-700' };
       case 'CANCELLED':
-        return {
-          label: 'Cancelado',
-          classes: 'border-rose-400/30 bg-rose-400/10 text-rose-200',
-        };
+        return { label: 'Cancelado', classes: 'border-red-300 bg-red-50 text-red-700' };
       case 'EXPIRED':
-        return {
-          label: 'Expirado',
-          classes: 'border-slate-400/30 bg-slate-400/10 text-slate-200',
-        };
+        return { label: 'Expirado', classes: 'border-gray-300 bg-gray-100 text-gray-500' };
       default:
-        return {
-          label: normalizedStatus || 'Desconocido',
-          classes: 'border-slate-500/30 bg-slate-500/10 text-slate-200',
-        };
+        return { label: normalizedStatus || 'Desconocido', classes: 'border-gray-300 bg-gray-100 text-gray-500' };
     }
   }
 

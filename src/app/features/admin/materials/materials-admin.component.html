@@ -1,40 +1,118 @@
-<div class="p-8">
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold">Materiales (Admin)</h2>
-  </div>
+<div class="min-h-screen font-sans" style="background: #f4f5f6;">
 
-  <div *ngIf="error" class="mb-4 text-red-400">{{ error }}</div>
+  <!-- Navbar -->
+  <nav style="background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg width="28" height="32" viewBox="0 0 72 80" fill="none">
+          <polygon points="4,76 26,4 36,4 18,76" fill="#3a8f8b"/>
+          <polygon points="68,76 46,4 36,4 54,76" fill="#3a8f8b"/>
+          <rect x="16" y="42" width="40" height="8" rx="1" fill="#3a8f8b"/>
+        </svg>
+        <div>
+          <p class="font-bold text-sm tracking-widest uppercase" style="color: #2c2c2c; letter-spacing: 0.15em;">ESIAD ARQ</p>
+          <p class="text-xs" style="color: #3a8f8b; letter-spacing: 0.08em;">Administración</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a routerLink="/admin/services" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Servicios</a>
+        <a routerLink="/admin/dashboard" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Dashboard</a>
+      </div>
+    </div>
+  </nav>
 
-  <div class="mb-4">
-    <label class="block text-sm text-slate-300 mb-2">Filtrar por servicio</label>
-    <select [(ngModel)]="selectedServiceId" (change)="loadMaterials()" class="px-3 py-2 bg-slate-900 border border-slate-800 rounded">
-      <option *ngFor="let s of services" [value]="s.id">{{ s.name }}</option>
-    </select>
-  </div>
+  <!-- Contenido -->
+  <main class="max-w-7xl mx-auto px-6 py-10">
 
-  <div *ngIf="loading" class="text-slate-400">Cargando materiales...</div>
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: #1f2937;">Materiales</h1>
+        <p class="text-sm mt-1" style="color: #6b7280;">Administra precios y disponibilidad de materiales por servicio.</p>
+      </div>
+    </div>
 
-  <table *ngIf="!loading && materials.length" class="w-full table-auto bg-slate-900/40 border border-slate-800 rounded-lg">
-    <thead class="text-left text-slate-300 border-b border-slate-800">
-      <tr>
-        <th class="p-3">Nombre</th>
-        <th class="p-3">Precio</th>
-        <th class="p-3">Estado</th>
-        <th class="p-3">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let m of materials" class="border-b border-slate-800 even:bg-slate-900/20">
-        <td class="p-3">{{ m.name }}</td>
-        <td class="p-3">{{ m.price | number:'1.2-2' }}</td>
-        <td class="p-3">{{ m.is_active ? 'Activo' : 'Inactivo' }}</td>
-        <td class="p-3">
-          <button (click)="edit(m)" class="mr-3 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-500 cursor-pointer">Editar</button>
-          <button (click)="toggle(m)" class="px-3 py-1 bg-slate-700 text-white rounded hover:bg-slate-600 cursor-pointer">{{ m.is_active ? 'Desactivar' : 'Activar' }}</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <!-- Error -->
+    <div *ngIf="error" class="mb-5 px-4 py-3 rounded-lg text-sm flex items-center gap-2"
+         style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      {{ error }}
+    </div>
 
-  <div *ngIf="!loading && materials.length === 0" class="text-slate-400">No hay materiales para este servicio.</div>
+    <!-- Card principal -->
+    <div class="rounded-xl overflow-hidden" style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+
+      <!-- Filtro -->
+      <div class="px-6 py-4" style="border-bottom: 1px solid #f0f0f0;">
+        <label class="block text-xs font-semibold uppercase tracking-wider mb-2" style="color: #6b7280;">Filtrar por servicio</label>
+        <select [(ngModel)]="selectedServiceId" (change)="loadMaterials()"
+                class="px-3 py-2 rounded-lg text-sm focus:outline-none"
+                style="border: 1px solid #e0e0e0; background: #f9fafb; color: #1f2937; min-width: 220px;">
+          <option *ngFor="let s of services" [value]="s.id">{{ s.name }}</option>
+        </select>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="px-6 py-8 text-sm text-center" style="color: #6b7280;">
+        Cargando materiales...
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!loading && materials.length" class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr style="background: #3a8f8b;">
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Nombre</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Precio</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Estado</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let m of materials; let i = index"
+                [style.background]="i % 2 === 0 ? 'white' : '#f9fafb'"
+                style="border-bottom: 1px solid #f0f0f0;">
+              <td class="px-5 py-3 font-medium" style="color: #1f2937;">{{ m.name }}</td>
+              <td class="px-5 py-3" style="color: #374151;">S/ {{ m.price | number:'1.2-2' }}</td>
+              <td class="px-5 py-3">
+                <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                      [style.background]="m.is_active ? '#d1fae5' : '#f3f4f6'"
+                      [style.color]="m.is_active ? '#065f46' : '#6b7280'"
+                      [style.border]="m.is_active ? '1px solid #a7f3d0' : '1px solid #e5e7eb'">
+                  {{ m.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-2">
+                  <button (click)="edit(m)"
+                          class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer"
+                          style="background: #3a8f8b;"
+                          onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
+                    Editar
+                  </button>
+                  <button (click)="toggle(m)"
+                          class="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
+                          style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+                          onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+                    {{ m.is_active ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty -->
+      <div *ngIf="!loading && materials.length === 0"
+           class="px-6 py-12 text-center text-sm" style="color: #6b7280;">
+        <svg class="w-8 h-8 mx-auto mb-3" fill="none" stroke="#d1d5db" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+        No hay materiales para este servicio.
+      </div>
+
+    </div>
+  </main>
 </div>

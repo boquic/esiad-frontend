@@ -1,266 +1,276 @@
-<div class="min-h-screen bg-[radial-gradient(circle_at_top,rgba(14,116,144,0.24),transparent_42%),linear-gradient(180deg,#020617_0%,#0f172a_45%,#111827_100%)] text-slate-100">
-  <div class="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8 lg:px-10">
-    <header class="mb-10 flex flex-col gap-6 border-b border-cyan-900/40 pb-6 lg:flex-row lg:items-center lg:justify-between">
-      <div>
-        <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/70">SIGEPED</p>
-        <h1 class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">Nuevo pedido</h1>
-        <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-          Selecciona tu servicio, el material adecuado y completa solo los campos que necesita el modelo de cobro.
-          El presupuesto se actualiza al instante para que avances con claridad.
-        </p>
-      </div>
+<div class="min-h-screen font-sans" style="background: #f4f5f6;">
 
-      <div class="flex flex-wrap gap-3">
-        <a
-          routerLink="/client/dashboard"
-          class="rounded-2xl border border-slate-700/70 bg-slate-900/50 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/50 hover:text-white"
-        >
-          Volver al dashboard
-        </a>
-        <button
-          type="button"
-          (click)="logout()"
-          class="rounded-2xl border border-slate-700/70 bg-slate-900/50 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-rose-400/50 hover:text-white"
-        >
-          Cerrar sesion
+  <!-- Navbar -->
+  <nav style="background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg width="28" height="32" viewBox="0 0 72 80" fill="none">
+          <polygon points="4,76 26,4 36,4 18,76" fill="#3a8f8b"/>
+          <polygon points="68,76 46,4 36,4 54,76" fill="#3a8f8b"/>
+          <rect x="16" y="42" width="40" height="8" rx="1" fill="#3a8f8b"/>
+        </svg>
+        <div>
+          <p class="font-bold text-sm tracking-widest uppercase" style="color: #2c2c2c; letter-spacing: 0.15em;">ESIAD ARQ</p>
+          <p class="text-xs" style="color: #3a8f8b; letter-spacing: 0.08em;">Portal Cliente</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <a routerLink="/client/dashboard" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Dashboard</a>
+        <a routerLink="/client/orders" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Mis Pedidos</a>
+        <button type="button" (click)="logout()"
+                class="ml-1 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
+                style="color: #6b7280; border: 1px solid #e5e7eb; background: white;"
+                onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='white'">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          Salir
         </button>
       </div>
-    </header>
+    </div>
+  </nav>
 
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
-      <section class="rounded-[28px] border border-slate-800/80 bg-slate-950/55 p-6 shadow-[0_20px_80px_rgba(8,15,30,0.45)] backdrop-blur-xl sm:p-8">
-        <div class="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300/70">Configuracion</p>
-            <h2 class="mt-3 text-2xl font-bold text-white">Formulario base del pedido</h2>
-          </div>
-          <div class="rounded-2xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-cyan-200">
-            Preview en tiempo real
-          </div>
+  <!-- Contenido -->
+  <main class="max-w-7xl mx-auto px-6 py-10">
+
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold" style="color: #1f2937;">Nuevo Pedido</h1>
+      <p class="text-sm mt-1" style="color: #6b7280;">Selecciona tu servicio, material y obtén un presupuesto en tiempo real.</p>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.95fr)]">
+
+      <!-- Formulario -->
+      <section class="rounded-xl overflow-hidden"
+               style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+        <div class="px-6 py-4" style="border-bottom: 1px solid #f0f0f0;">
+          <h2 class="font-semibold text-base" style="color: #1f2937;">Datos del pedido</h2>
+          <p class="text-xs mt-0.5" style="color: #6b7280;">Preview en tiempo real mientras completas el formulario</p>
         </div>
 
-        <div *ngIf="servicesError" class="mb-6 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-          {{ servicesError }}
-        </div>
+        <div class="px-6 py-5">
 
-        <div *ngIf="loadingServices && !hasServices" class="rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-slate-300">
-          Cargando servicios disponibles...
-        </div>
-
-        <form *ngIf="hasServices || !loadingServices" [formGroup]="orderForm" class="space-y-8" novalidate (ngSubmit)="submitOrder()">
-          <div class="grid gap-6 md:grid-cols-2">
-            <div class="space-y-2">
-              <label for="serviceTypeId" class="text-sm font-semibold text-slate-200">Servicio</label>
-              <select
-                id="serviceTypeId"
-                formControlName="serviceTypeId"
-                class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/80 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-400"
-              >
-                <option value="">Selecciona un servicio</option>
-                <option *ngFor="let service of services" [value]="service.id">{{ service.name }}</option>
-              </select>
-              <p *ngIf="orderForm.controls.serviceTypeId.touched && orderForm.controls.serviceTypeId.invalid" class="text-sm text-amber-300">
-                Selecciona un servicio.
-              </p>
-            </div>
-
-            <div class="space-y-2">
-              <label for="materialId" class="text-sm font-semibold text-slate-200">Material</label>
-              <select
-                id="materialId"
-                formControlName="materialId"
-                [disabled]="loadingMaterials || materials.length === 0"
-                class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/80 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <option value="">Selecciona un material</option>
-                <option *ngFor="let material of materials" [value]="material.id">{{ material.name }}</option>
-              </select>
-              <p *ngIf="orderForm.controls.materialId.touched && orderForm.controls.materialId.invalid" class="text-sm text-amber-300">
-                Selecciona un material.
-              </p>
-            </div>
+          <!-- Error servicios -->
+          <div *ngIf="servicesError" class="mb-5 px-4 py-3 rounded-lg text-sm flex items-center gap-2"
+               style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+            {{ servicesError }}
           </div>
 
-          <div *ngIf="materialsError" class="rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {{ materialsError }}
+          <div *ngIf="loadingServices && !hasServices" class="text-sm py-2" style="color: #6b7280;">
+            Cargando servicios disponibles...
           </div>
 
-          <div *ngIf="loadingMaterials" class="rounded-2xl border border-slate-800 bg-slate-900/60 px-4 py-3 text-sm text-slate-300">
-            Cargando materiales del servicio...
-          </div>
+          <form *ngIf="hasServices || !loadingServices" [formGroup]="orderForm" class="space-y-5" novalidate (ngSubmit)="submitOrder()">
 
-          <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_240px]">
-            <div *ngIf="requiresMeasurementInput; else fixedPricingInfo" class="space-y-2">
-              <label [for]="activeField.controlName" class="text-sm font-semibold text-slate-200">{{ activeField.label }}</label>
-              <input
-                type="number"
-                min="0.01"
-                [step]="activeField.step"
-                [id]="activeField.controlName"
-                [formControlName]="activeField.controlName"
-                [placeholder]="activeField.placeholder"
-                class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/80 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-400"
-              />
-              <p class="text-sm text-slate-400">{{ activeField.hint }}</p>
-              <p
-                *ngIf="orderForm.controls[activeField.controlName].touched && orderForm.controls[activeField.controlName].invalid"
-                class="text-sm text-amber-300"
-              >
-                Ingresa un valor mayor a 0.
-              </p>
-            </div>
-
-            <ng-template #fixedPricingInfo>
-              <div class="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 p-5">
-                <p class="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-200/80">Tarifa fija</p>
-                <p class="mt-3 text-sm leading-6 text-slate-200">
-                  Este servicio no requiere una medida variable. El presupuesto usa directamente el precio del material seleccionado.
-                </p>
+            <!-- Servicio + Material -->
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="serviceTypeId" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: #6b7280;">Servicio</label>
+                <select id="serviceTypeId" formControlName="serviceTypeId"
+                        class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                        style="border: 1px solid #e0e0e0; background: #f9fafb; color: #1f2937;">
+                  <option value="">Selecciona un servicio</option>
+                  <option *ngFor="let service of services" [value]="service.id">{{ service.name }}</option>
+                </select>
+                <p *ngIf="orderForm.controls.serviceTypeId.touched && orderForm.controls.serviceTypeId.invalid"
+                   class="text-xs mt-1" style="color: #e74c3c;">Selecciona un servicio.</p>
               </div>
-            </ng-template>
 
-            <div class="rounded-3xl border border-slate-800 bg-slate-900/55 p-5">
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-400">Modelo detectado</p>
-              <p class="mt-3 text-lg font-bold text-white">{{ pricingModel === 'UNKNOWN' ? 'PER_UNIT (fallback)' : pricingModel }}</p>
-              <p class="mt-3 text-sm leading-6 text-slate-400">
-                Si el backend entrega variantes de nombre para el modelo, esta vista las normaliza para mantener el flujo estable.
-              </p>
+              <div>
+                <label for="materialId" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: #6b7280;">Material</label>
+                <select id="materialId" formControlName="materialId"
+                        [disabled]="loadingMaterials || materials.length === 0"
+                        class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+                        style="border: 1px solid #e0e0e0; background: #f9fafb; color: #1f2937;">
+                  <option value="">Selecciona un material</option>
+                  <option *ngFor="let material of materials" [value]="material.id">{{ material.name }}</option>
+                </select>
+                <p *ngIf="orderForm.controls.materialId.touched && orderForm.controls.materialId.invalid"
+                   class="text-xs mt-1" style="color: #e74c3c;">Selecciona un material.</p>
+              </div>
             </div>
-          </div>
 
-          <div class="space-y-2">
-            <label for="notes" class="text-sm font-semibold text-slate-200">Notas adicionales</label>
-            <textarea
-              id="notes"
-              formControlName="notes"
-              rows="4"
-              placeholder="Ej: Corte con borde pulido"
-              class="w-full rounded-2xl border border-slate-700/70 bg-slate-950/80 px-4 py-3 text-slate-100 outline-none transition focus:border-cyan-400"
-            ></textarea>
-          </div>
+            <!-- Error materiales -->
+            <div *ngIf="materialsError" class="px-4 py-3 rounded-lg text-sm" style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+              {{ materialsError }}
+            </div>
+            <div *ngIf="loadingMaterials" class="text-sm" style="color: #6b7280;">Cargando materiales del servicio...</div>
 
-          <div *ngIf="submitError" class="rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {{ submitError }}
-          </div>
+            <!-- Campo dinámico + modelo -->
+            <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
+              <div *ngIf="requiresMeasurementInput; else fixedPricingInfo">
+                <label [for]="activeField.controlName" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: #6b7280;">
+                  {{ activeField.label }}
+                </label>
+                <input type="number" min="0.01" [step]="activeField.step"
+                       [id]="activeField.controlName" [formControlName]="activeField.controlName"
+                       [placeholder]="activeField.placeholder"
+                       class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                       style="border: 1px solid #e0e0e0; background: #f9fafb; color: #1f2937;"/>
+                <p class="text-xs mt-1" style="color: #9ca3af;">{{ activeField.hint }}</p>
+                <p *ngIf="orderForm.controls[activeField.controlName].touched && orderForm.controls[activeField.controlName].invalid"
+                   class="text-xs mt-1" style="color: #e74c3c;">Ingresa un valor mayor a 0.</p>
+              </div>
 
-          <div *ngIf="submitSuccess" class="rounded-2xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-            {{ submitSuccess }}
-          </div>
+              <ng-template #fixedPricingInfo>
+                <div class="rounded-lg px-4 py-3" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
+                  <p class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: #166534;">Tarifa fija</p>
+                  <p class="text-xs leading-5" style="color: #374151;">
+                    Este servicio no requiere medida variable. El precio depende directamente del material.
+                  </p>
+                </div>
+              </ng-template>
 
-          <div class="flex flex-wrap justify-end gap-3">
-            <a
-              routerLink="/client/orders"
-              class="rounded-2xl border border-slate-700/70 bg-slate-900/50 px-5 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400/50 hover:text-white"
-            >
-              Ver mis pedidos
-            </a>
-            <button
-              type="submit"
-              [disabled]="submitting || loadingMaterials || loadingServices"
-              class="rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {{ submitting ? 'Creando pedido...' : 'Crear pedido' }}
-            </button>
-          </div>
-        </form>
+              <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #e5e7eb;">
+                <p class="text-xs uppercase tracking-wider mb-1" style="color: #9ca3af;">Modelo detectado</p>
+                <p class="font-semibold text-sm" style="color: #1f2937;">{{ pricingModel === 'UNKNOWN' ? 'PER_UNIT (fallback)' : pricingModel }}</p>
+              </div>
+            </div>
+
+            <!-- Notas -->
+            <div>
+              <label for="notes" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: #6b7280;">Notas adicionales</label>
+              <textarea id="notes" formControlName="notes" rows="3"
+                        placeholder="Ej: Corte con borde pulido"
+                        class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none resize-none"
+                        style="border: 1px solid #e0e0e0; background: #f9fafb; color: #1f2937;"></textarea>
+            </div>
+
+            <!-- Mensajes submit -->
+            <div *ngIf="submitError" class="px-4 py-3 rounded-lg text-sm" style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+              {{ submitError }}
+            </div>
+            <div *ngIf="submitSuccess" class="px-4 py-3 rounded-lg text-sm" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;">
+              {{ submitSuccess }}
+            </div>
+
+            <!-- Acciones -->
+            <div class="flex flex-wrap justify-end gap-3 pt-2" style="border-top: 1px solid #f0f0f0;">
+              <a routerLink="/client/orders"
+                 class="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium"
+                 style="color: #6b7280; border: 1px solid #e5e7eb; background: white;">
+                Ver mis pedidos
+              </a>
+              <button type="submit"
+                      [disabled]="submitting || loadingMaterials || loadingServices"
+                      class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                      style="background: #3a8f8b;"
+                      onmouseover="if(!this.disabled) this.style.background='#2e7874'" onmouseout="if(!this.disabled) this.style.background='#3a8f8b'">
+                <svg *ngIf="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                {{ submitting ? 'Creando pedido...' : 'Crear pedido' }}
+              </button>
+            </div>
+
+          </form>
+        </div>
       </section>
 
-      <aside class="space-y-6">
-        <section class="rounded-[28px] border border-cyan-500/20 bg-cyan-500/10 p-6 shadow-[0_16px_60px_rgba(6,182,212,0.12)] backdrop-blur-xl">
-          <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-200/80">Presupuesto</p>
-          <h2 class="mt-3 text-2xl font-bold text-white">Vista previa instantanea</h2>
+      <!-- Sidebar -->
+      <aside class="space-y-5">
 
-          <div *ngIf="canShowPreview && preview" class="mt-6 space-y-4">
-            <div class="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-              <p class="text-sm text-slate-400">Servicio</p>
-              <p class="mt-1 text-lg font-semibold text-white">{{ selectedService?.name }}</p>
-            </div>
-
-            <div class="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-              <p class="text-sm text-slate-400">Material</p>
-              <p class="mt-1 text-lg font-semibold text-white">{{ selectedMaterial?.name }}</p>
-            </div>
-
-            <div class="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-              <div class="flex items-center justify-between gap-4 text-sm text-slate-300">
-                <span>{{ preview.measureLabel }}</span>
-                <strong class="text-white">{{ preview.units }} {{ preview.unitName }}</strong>
-              </div>
-              <div class="mt-3 flex items-center justify-between gap-4 text-sm text-slate-300">
-                <span>Precio unitario</span>
-                <strong class="text-white">{{ preview.unitPrice | currency:'PEN':'symbol':'1.2-2' }} / {{ preview.unitName }}</strong>
-              </div>
-            </div>
-
-            <div class="rounded-3xl border border-cyan-300/30 bg-slate-950/75 p-5">
-              <p class="text-sm uppercase tracking-[0.3em] text-cyan-200/80">Estimado actual</p>
-              <p class="mt-3 text-4xl font-black tracking-tight text-white">
-                {{ preview.total | currency:'PEN':'symbol':'1.2-2' }}
-              </p>
-              <p class="mt-3 text-sm leading-6 text-slate-300">
-                Este monto se calcula en tiempo real usando el precio del material seleccionado y el valor ingresado en el campo activo.
-              </p>
-            </div>
+        <!-- Presupuesto preview -->
+        <section class="rounded-xl overflow-hidden"
+                 style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div class="px-5 py-4" style="background: #3a8f8b;">
+            <p class="text-xs font-semibold uppercase tracking-wider text-white opacity-80">Presupuesto</p>
+            <h2 class="text-base font-bold text-white mt-0.5">Vista previa instantánea</h2>
           </div>
 
-          <div *ngIf="!canShowPreview" class="mt-6 rounded-3xl border border-dashed border-cyan-200/25 bg-slate-950/40 p-5 text-sm leading-6 text-slate-300">
-            Selecciona un servicio y un material para ver el presupuesto. Cuando el modelo lo requiera, completa el valor del campo dinamico para actualizar el total.
+          <div class="px-5 py-5">
+            <div *ngIf="canShowPreview && preview" class="space-y-3">
+              <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
+                <p class="text-xs" style="color: #9ca3af;">Servicio</p>
+                <p class="font-semibold text-sm mt-0.5" style="color: #1f2937;">{{ selectedService?.name }}</p>
+              </div>
+              <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
+                <p class="text-xs" style="color: #9ca3af;">Material</p>
+                <p class="font-semibold text-sm mt-0.5" style="color: #1f2937;">{{ selectedMaterial?.name }}</p>
+              </div>
+              <div class="rounded-lg px-4 py-3 space-y-2" style="background: #f9fafb; border: 1px solid #f0f0f0;">
+                <div class="flex items-center justify-between text-xs">
+                  <span style="color: #9ca3af;">{{ preview.measureLabel }}</span>
+                  <span class="font-medium" style="color: #374151;">{{ preview.units }} {{ preview.unitName }}</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                  <span style="color: #9ca3af;">Precio unitario</span>
+                  <span class="font-medium" style="color: #374151;">{{ preview.unitPrice | currency:'PEN':'symbol':'1.2-2' }} / {{ preview.unitName }}</span>
+                </div>
+              </div>
+              <div class="rounded-lg px-4 py-4 text-center" style="background: #f0fafa; border: 1px solid #b2dedd;">
+                <p class="text-xs uppercase tracking-wider mb-1" style="color: #3a8f8b;">Estimado actual</p>
+                <p class="text-3xl font-black" style="color: #3a8f8b;">{{ preview.total | currency:'PEN':'symbol':'1.2-2' }}</p>
+              </div>
+            </div>
+
+            <div *ngIf="!canShowPreview" class="py-4 text-center text-sm" style="color: #9ca3af;">
+              <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="#d1d5db" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              Selecciona servicio y material para ver el presupuesto.
+            </div>
           </div>
         </section>
 
-        <section *ngIf="createdOrder" class="rounded-[28px] border border-emerald-500/20 bg-emerald-500/10 p-6 shadow-[0_16px_60px_rgba(16,185,129,0.12)] backdrop-blur-xl">
-          <p class="text-sm font-semibold uppercase tracking-[0.3em] text-emerald-200/80">Pedido creado</p>
-          <h2 class="mt-3 text-2xl font-bold text-white">Presupuesto generado</h2>
-
-          <div class="mt-6 space-y-4">
-            <div class="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-              <p class="text-sm text-slate-400">Codigo</p>
-              <p class="mt-1 break-all text-lg font-semibold text-white">{{ createdOrder.id }}</p>
+        <!-- Pedido creado -->
+        <section *ngIf="createdOrder" class="rounded-xl overflow-hidden"
+                 style="background: white; border: 1px solid #a7f3d0; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <div class="px-5 py-4" style="background: #10b981;">
+            <p class="text-xs font-semibold uppercase tracking-wider text-white opacity-80">Pedido creado</p>
+            <h2 class="text-base font-bold text-white mt-0.5">Presupuesto generado</h2>
+          </div>
+          <div class="px-5 py-5 space-y-3">
+            <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
+              <p class="text-xs" style="color: #9ca3af;">Código</p>
+              <p class="font-semibold text-sm mt-0.5 break-all" style="color: #1f2937;">{{ createdOrder.id }}</p>
             </div>
-
-            <div class="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-              <p class="text-sm text-slate-400">Estado</p>
-              <p class="mt-1 text-lg font-semibold text-white">{{ createdOrder.status }}</p>
-            </div>
-
-            <div class="rounded-2xl border border-white/10 bg-slate-950/45 p-4">
-              <p class="text-sm text-slate-400">Condicion de pago</p>
-              <p class="mt-1 text-lg font-semibold text-white">
+            <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
+              <p class="text-xs" style="color: #9ca3af;">Condición de pago</p>
+              <p class="font-semibold text-sm mt-0.5" style="color: #1f2937;">
                 {{ createdOrder.payment_condition === 'CASH_ON_DELIVERY' ? 'Contraentrega' : 'Adelanto 50%' }}
               </p>
             </div>
-
-            <div class="rounded-3xl border border-emerald-300/30 bg-slate-950/75 p-5">
-              <p class="text-sm uppercase tracking-[0.3em] text-emerald-200/80">Monto estimado</p>
-              <p class="mt-3 text-4xl font-black tracking-tight text-white">
-                {{ createdOrder.estimated_price | currency:'PEN':'symbol':'1.2-2' }}
-              </p>
-              <p class="mt-3 text-sm leading-6 text-slate-300">
-                Vigente hasta {{ createdOrder.budget_expires_at | date:'dd/MM/yyyy HH:mm' }}.
-              </p>
+            <div class="rounded-lg px-4 py-4 text-center" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
+              <p class="text-xs uppercase tracking-wider mb-1" style="color: #166534;">Monto estimado</p>
+              <p class="text-3xl font-black" style="color: #059669;">{{ createdOrder.estimated_price | currency:'PEN':'symbol':'1.2-2' }}</p>
+              <p class="text-xs mt-1" style="color: #6b7280;">Vigente hasta {{ createdOrder.budget_expires_at | date:'dd/MM/yyyy HH:mm' }}</p>
             </div>
-
-            <a
-              *ngIf="createdOrder.id"
-              [routerLink]="['/client/orders', createdOrder.id]"
-              class="inline-flex w-full items-center justify-center rounded-2xl border border-emerald-300/30 bg-emerald-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-emerald-300"
-            >
+            <a *ngIf="createdOrder.id" [routerLink]="['/client/orders', createdOrder.id]"
+               class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold text-white"
+               style="background: #059669;"
+               onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
               Ver detalle del pedido
             </a>
           </div>
         </section>
 
-        <section class="rounded-[28px] border border-slate-800/80 bg-slate-950/55 p-6 backdrop-blur-xl">
-          <p class="text-sm font-semibold uppercase tracking-[0.3em] text-slate-400">Alcance actual</p>
-          <ul class="mt-4 space-y-3 text-sm leading-6 text-slate-300">
-            <li>Servicio activo del catalogo.</li>
-            <li>Material filtrado por servicio.</li>
-            <li>Campo dinamico segun <code>pricing_model</code>.</li>
-            <li>Creacion del pedido con presupuesto generado.</li>
-            <li>Preview del presupuesto sin mencionar delivery.</li>
+        <!-- Alcance -->
+        <section class="rounded-xl px-5 py-4"
+                 style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: #9ca3af;">Alcance actual</p>
+          <ul class="space-y-2 text-xs leading-5" style="color: #6b7280;">
+            <li class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Servicio activo del catálogo
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Material filtrado por servicio
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Campo dinámico según <code class="font-mono" style="color: #374151;">pricing_model</code>
+            </li>
+            <li class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Presupuesto generado al instante
+            </li>
           </ul>
         </section>
+
       </aside>
     </div>
-  </div>
+  </main>
 </div>

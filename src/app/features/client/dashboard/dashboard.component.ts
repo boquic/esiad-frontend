@@ -7,91 +7,141 @@ import { Router, RouterLink } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(14,116,144,0.24),_transparent_42%),linear-gradient(180deg,_#020617_0%,_#0f172a_48%,_#111827_100%)] p-8 font-sans text-slate-100">
-      <header class="relative z-10 mb-12 flex flex-col gap-6 border-b border-cyan-900/30 pb-6 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p class="text-sm uppercase tracking-[0.35em] text-cyan-300/70">SIGEPED</p>
-          <h1 class="mt-3 bg-gradient-to-r from-cyan-300 via-sky-200 to-blue-300 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent">
-            Portal de Cliente
-          </h1>
-          <p class="mt-2 text-slate-300">Tu flujo de pedidos ya empieza a tomar forma en el Sprint 3.</p>
+    <div class="min-h-screen font-sans" style="background: #f4f5f6;">
+
+      <!-- Navbar -->
+      <nav style="background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <svg width="28" height="32" viewBox="0 0 72 80" fill="none">
+              <polygon points="4,76 26,4 36,4 18,76" fill="#3a8f8b"/>
+              <polygon points="68,76 46,4 36,4 54,76" fill="#3a8f8b"/>
+              <rect x="16" y="42" width="40" height="8" rx="1" fill="#3a8f8b"/>
+            </svg>
+            <div>
+              <p class="font-bold text-sm tracking-widest uppercase" style="color: #2c2c2c; letter-spacing: 0.15em;">ESIAD ARQ</p>
+              <p class="text-xs" style="color: #3a8f8b; letter-spacing: 0.08em;">Portal Cliente</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <a routerLink="/client/orders"
+               class="px-4 py-2 rounded-lg text-sm font-medium"
+               style="color: #3a8f8b;">
+              Mis Pedidos
+            </a>
+            <a routerLink="/client/orders/new"
+               class="px-4 py-2 rounded-lg text-sm font-medium"
+               style="color: #3a8f8b;">
+              Nuevo Pedido
+            </a>
+            <button (click)="logout()"
+              class="ml-2 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
+              style="background: #3a8f8b;"
+              onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              </svg>
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Contenido -->
+      <main class="max-w-7xl mx-auto px-6 py-10">
+
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold" style="color: #1f2937;">Bienvenido</h1>
+          <p class="text-sm mt-1" style="color: #6b7280;">Gestiona tus pedidos y presupuestos de diseño y fabricación digital.</p>
         </div>
 
-        <button
-          (click)="logout()"
-          class="flex items-center space-x-2 rounded-2xl border border-slate-700 bg-slate-900/50 px-5 py-3 font-medium text-slate-200 transition-all hover:border-cyan-400/50 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-        >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-          </svg>
-          <span>Cerrar sesion</span>
-        </button>
-      </header>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <main class="relative z-10 flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.9fr)]">
-        <section class="rounded-[32px] border border-slate-800/70 bg-slate-950/55 p-8 shadow-[0_20px_80px_rgba(8,15,30,0.45)] backdrop-blur-xl">
-          <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div class="max-w-2xl">
-              <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-cyan-500/20 bg-cyan-500/10 p-4 text-cyan-300">
-                <svg class="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          <!-- Card principal: flujo de pedido -->
+          <div class="lg:col-span-2 rounded-xl p-6"
+               style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+
+            <div class="flex items-center gap-3 mb-5">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: #f0fafa; border: 1px solid #b2dedd;">
+                <svg class="w-5 h-5" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
               </div>
+              <div>
+                <h2 class="font-bold text-base" style="color: #1f2937;">Nuevo pedido con presupuesto instantáneo</h2>
+                <p class="text-xs" style="color: #6b7280;">Selecciona servicio, material y obtén un presupuesto en tiempo real</p>
+              </div>
+            </div>
 
-              <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-300/75">Sprint 3</p>
-              <h2 class="mt-3 text-3xl font-black tracking-tight text-white">Nuevo pedido con presupuesto instantaneo</h2>
-              <p class="mt-4 text-base leading-7 text-slate-300">
-                Ya puedes iniciar el flujo del cliente seleccionando servicio, material y la medida exacta que depende del modelo de precio configurado en el backend.
-              </p>
+            <!-- Pasos -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div class="rounded-xl p-4" style="background: #f9fafb; border: 1px solid #f0f0f0;">
+                <p class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: #3a8f8b;">Paso 1</p>
+                <h3 class="font-semibold text-sm mb-1" style="color: #1f2937;">Servicio</h3>
+                <p class="text-xs leading-5" style="color: #6b7280;">Elige entre los servicios activos del catálogo.</p>
+              </div>
+              <div class="rounded-xl p-4" style="background: #f9fafb; border: 1px solid #f0f0f0;">
+                <p class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: #3a8f8b;">Paso 2</p>
+                <h3 class="font-semibold text-sm mb-1" style="color: #1f2937;">Material</h3>
+                <p class="text-xs leading-5" style="color: #6b7280;">Lista filtrada según el servicio elegido.</p>
+              </div>
+              <div class="rounded-xl p-4" style="background: #f9fafb; border: 1px solid #f0f0f0;">
+                <p class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: #3a8f8b;">Paso 3</p>
+                <h3 class="font-semibold text-sm mb-1" style="color: #1f2937;">Presupuesto</h3>
+                <p class="text-xs leading-5" style="color: #6b7280;">Monto estimado que se recalcula en pantalla.</p>
+              </div>
             </div>
 
             <div class="flex flex-wrap gap-3">
-              <a
-                routerLink="/client/orders"
-                class="inline-flex items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-500/10 px-6 py-3 text-sm font-bold text-cyan-100 transition hover:border-cyan-300 hover:text-white"
-              >
+              <a routerLink="/client/orders/new"
+                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
+                 style="background: #3a8f8b;"
+                 onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Nuevo pedido
+              </a>
+              <a routerLink="/client/orders"
+                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold"
+                 style="color: #3a8f8b; border: 1px solid #b2dedd; background: #f0fafa;">
                 Ver mis pedidos
               </a>
-              <a
-                routerLink="/client/orders/new"
-                class="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-6 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
-              >
-                Abrir formulario
-              </a>
             </div>
           </div>
 
-          <div class="mt-8 grid gap-4 md:grid-cols-3">
-            <div class="rounded-3xl border border-slate-800 bg-slate-900/50 p-5">
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Paso 1</p>
-              <h3 class="mt-3 text-lg font-bold text-white">Servicio</h3>
-              <p class="mt-2 text-sm leading-6 text-slate-400">El cliente parte de servicios activos y visibles en catalogo.</p>
-            </div>
-
-            <div class="rounded-3xl border border-slate-800 bg-slate-900/50 p-5">
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Paso 2</p>
-              <h3 class="mt-3 text-lg font-bold text-white">Material</h3>
-              <p class="mt-2 text-sm leading-6 text-slate-400">La lista se filtra segun el servicio elegido para evitar errores en la solicitud.</p>
-            </div>
-
-            <div class="rounded-3xl border border-slate-800 bg-slate-900/50 p-5">
-              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Paso 3</p>
-              <h3 class="mt-3 text-lg font-bold text-white">Presupuesto</h3>
-              <p class="mt-2 text-sm leading-6 text-slate-400">El monto estimado se recalcula en pantalla a medida que cambian los datos del pedido.</p>
-            </div>
+          <!-- Sidebar info -->
+          <div class="rounded-xl p-6" style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+            <h3 class="font-semibold text-sm mb-4" style="color: #1f2937;">Información</h3>
+            <ul class="space-y-3 text-sm" style="color: #6b7280;">
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Servicios activos del catálogo
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Material filtrado por servicio
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Presupuesto generado al instante
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Estado visible por pedido
+              </li>
+            </ul>
           </div>
-        </section>
 
-        <aside class="rounded-[32px] border border-cyan-500/20 bg-cyan-500/10 p-8 backdrop-blur-xl">
-          <p class="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-200/80">Alcance actual</p>
-          <h3 class="mt-3 text-2xl font-bold text-white">Solo lo solicitado</h3>
-          <p class="mt-4 text-sm leading-7 text-slate-200">
-            Esta iteracion se concentra en el flujo visible del cliente: formulario de nuevo pedido y lista de mis pedidos con estado actual.
-          </p>
-          <div class="mt-6 rounded-3xl border border-white/10 bg-slate-950/45 p-5 text-sm leading-6 text-slate-300">
-            El detalle de pedido, la subida de archivos y la confirmacion de presupuesto siguen fuera de esta entrega puntual.
-          </div>
-        </aside>
+        </div>
       </main>
     </div>
   `,

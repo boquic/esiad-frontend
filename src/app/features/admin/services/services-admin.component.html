@@ -1,32 +1,106 @@
-<div class="p-8">
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold">Servicios (Admin)</h2>
-    <a routerLink="/admin/dashboard" class="text-sm text-slate-300 hover:underline">Volver</a>
-  </div>
+<div class="min-h-screen font-sans" style="background: #f4f5f6;">
 
-  <div *ngIf="error" class="mb-4 text-red-400">{{ error }}</div>
+  <!-- Navbar -->
+  <nav style="background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg width="28" height="32" viewBox="0 0 72 80" fill="none">
+          <polygon points="4,76 26,4 36,4 18,76" fill="#3a8f8b"/>
+          <polygon points="68,76 46,4 36,4 54,76" fill="#3a8f8b"/>
+          <rect x="16" y="42" width="40" height="8" rx="1" fill="#3a8f8b"/>
+        </svg>
+        <div>
+          <p class="font-bold text-sm tracking-widest uppercase" style="color: #2c2c2c; letter-spacing: 0.15em;">ESIAD ARQ</p>
+          <p class="text-xs" style="color: #3a8f8b; letter-spacing: 0.08em;">Administración</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a routerLink="/admin/materials" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Materiales</a>
+        <a routerLink="/admin/dashboard" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Dashboard</a>
+      </div>
+    </div>
+  </nav>
 
-  <div *ngIf="loading" class="text-slate-400">Cargando servicios...</div>
+  <!-- Contenido -->
+  <main class="max-w-7xl mx-auto px-6 py-10">
 
-  <table *ngIf="!loading && services.length" class="w-full table-auto bg-slate-900/40 border border-slate-800 rounded-lg">
-    <thead class="text-left text-slate-300 border-b border-slate-800">
-      <tr>
-        <th class="p-3">Nombre</th>
-        <th class="p-3">Estado</th>
-        <th class="p-3">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let s of services" class="border-b border-slate-800 even:bg-slate-900/20">
-        <td class="p-3">{{ s.name }}</td>
-        <td class="p-3">{{ s.is_active ? 'Activo' : 'Inactivo' }}</td>
-        <td class="p-3">
-          <button (click)="edit(s)" class="mr-3 px-3 py-1 bg-blue-600 text-white rounded">Editar</button>
-          <button (click)="toggle(s)" class="px-3 py-1 bg-slate-700 text-white rounded">{{ s.is_active ? 'Desactivar' : 'Activar' }}</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: #1f2937;">Servicios</h1>
+        <p class="text-sm mt-1" style="color: #6b7280;">Activa, edita y configura los servicios disponibles en el catálogo.</p>
+      </div>
+    </div>
 
-  <div *ngIf="!loading && services.length === 0" class="text-slate-400">No hay servicios registrados.</div>
+    <!-- Error -->
+    <div *ngIf="error" class="mb-5 px-4 py-3 rounded-lg text-sm flex items-center gap-2"
+         style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      {{ error }}
+    </div>
+
+    <!-- Card principal -->
+    <div class="rounded-xl overflow-hidden" style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+
+      <!-- Loading -->
+      <div *ngIf="loading" class="px-6 py-8 text-sm text-center" style="color: #6b7280;">
+        Cargando servicios...
+      </div>
+
+      <!-- Tabla -->
+      <div *ngIf="!loading && services.length" class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr style="background: #3a8f8b;">
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Nombre</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Estado</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of services; let i = index"
+                [style.background]="i % 2 === 0 ? 'white' : '#f9fafb'"
+                style="border-bottom: 1px solid #f0f0f0;">
+              <td class="px-5 py-3 font-medium" style="color: #1f2937;">{{ s.name }}</td>
+              <td class="px-5 py-3">
+                <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                      [style.background]="s.is_active ? '#d1fae5' : '#f3f4f6'"
+                      [style.color]="s.is_active ? '#065f46' : '#6b7280'"
+                      [style.border]="s.is_active ? '1px solid #a7f3d0' : '1px solid #e5e7eb'">
+                  {{ s.is_active ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-2">
+                  <button (click)="edit(s)"
+                          class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer"
+                          style="background: #3a8f8b;"
+                          onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
+                    Editar
+                  </button>
+                  <button (click)="toggle(s)"
+                          class="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
+                          style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+                          onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+                    {{ s.is_active ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty -->
+      <div *ngIf="!loading && services.length === 0"
+           class="px-6 py-12 text-center text-sm" style="color: #6b7280;">
+        <svg class="w-8 h-8 mx-auto mb-3" fill="none" stroke="#d1d5db" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+        </svg>
+        No hay servicios registrados.
+      </div>
+
+    </div>
+  </main>
 </div>

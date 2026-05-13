@@ -177,6 +177,10 @@ export class NewOrderComponent {
     return this.selectedService !== null && this.selectedMaterial !== null && this.preview !== null;
   }
 
+  get hasServices(): boolean {
+    return this.services.length > 0;
+  }
+
   submitOrder(): void {
     this.submitError = '';
     this.submitSuccess = '';

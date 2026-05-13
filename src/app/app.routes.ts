@@ -12,6 +12,12 @@ import { AdminDashboardComponent } from './features/admin/dashboard/dashboard.co
 import { ServicesAdminComponent } from './features/admin/services/services-admin.component';
 import { MaterialsAdminComponent } from './features/admin/materials/materials-admin.component';
 import { AdminOrdersComponent } from './features/admin/orders/admin-orders.component';
+import { ClientPaymentComponent } from './features/client/payments/client-payment.component';
+import { AdminPaymentsComponent } from './features/admin/payments/admin-payments.component';
+import { OperatorOrderDetailComponent } from './features/operator/order-detail/order-detail.component';
+import { OperatorHistoryComponent } from './features/operator/history/operator-history.component';
+import { AdminUsersComponent } from './features/admin/users/admin-users.component';
+import { AdminReportsComponent } from './features/admin/reports/admin-reports.component';
 
 // Guards Creados
 import { authGuard, publicGuard } from './core/guards/auth.guard';
@@ -56,6 +62,18 @@ export const routes: Routes = [
         data: { roles: ['OPERATOR'] }
     },
     {
+        path: 'operator/orders/:id',
+        component: OperatorOrderDetailComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['OPERATOR'] }
+    },
+    {
+        path: 'operator/history',
+        component: OperatorHistoryComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['OPERATOR'] }
+    },
+    {
         path: 'admin/dashboard',
         component: AdminDashboardComponent,
         canActivate: [authGuard, roleGuard],
@@ -76,6 +94,30 @@ export const routes: Routes = [
     {
         path: 'admin/orders',
         component: AdminOrdersComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['ADMIN'] }
+    },
+    {
+        path: 'client/orders/:id/payment',
+        component: ClientPaymentComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['CLIENT'] }
+    },
+    {
+        path: 'admin/payments',
+        component: AdminPaymentsComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['ADMIN'] }
+    },
+    {
+        path: 'admin/users',
+        component: AdminUsersComponent,
+        canActivate: [authGuard, roleGuard],
+        data: { roles: ['ADMIN'] }
+    },
+    {
+        path: 'admin/reports',
+        component: AdminReportsComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: ['ADMIN'] }
     },

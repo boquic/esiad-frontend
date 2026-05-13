@@ -161,6 +161,28 @@ export class AdminStatsService {
     );
   }
 
+  /**
+   * GET /api/admin/stats/clients
+   * Returns top clients
+   */
+  getClientsStats(): Observable<any[]> {
+    return this.http.get<any>(`${this.base}/clients`).pipe(
+      map(res => Array.isArray(res) ? res : (res?.data || [])),
+      catchError(() => of([]))
+    );
+  }
+
+  /**
+   * GET /api/admin/stats/operators
+   * Returns operator performance stats
+   */
+  getOperatorsStats(): Observable<any[]> {
+    return this.http.get<any>(`${this.base}/operators`).pipe(
+      map(res => Array.isArray(res) ? res : (res?.data || [])),
+      catchError(() => of([]))
+    );
+  }
+
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   private normalizeTrendItems(items: SalesTrendItem[]): SalesTrendItem[] {

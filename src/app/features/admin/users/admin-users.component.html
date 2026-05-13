@@ -1,0 +1,219 @@
+<div class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
+    <button *ngIf="activeTab === 'operators'" (click)="openCreateModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Nuevo Operario
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-md">
+    <p class="text-sm text-red-700">{{ error }}</p>
+  </div>
+  <div *ngIf="success" class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-md">
+    <p class="text-sm text-green-700">{{ success }}</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="border-b border-gray-200 mb-6">
+    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+      <button (click)="setTab('operators')" 
+              [ngClass]="activeTab === 'operators' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+        Operarios
+      </button>
+      <button (click)="setTab('clients')" 
+              [ngClass]="activeTab === 'clients' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+        Clientes
+      </button>
+    </nav>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center py-12">
+    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+  </div>
+
+  <!-- Operators Tab -->
+  <div *ngIf="!isLoading && activeTab === 'operators'">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DNI</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Especialidades</th>
+            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let op of operators" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              {{ op.user?.first_name }} {{ op.user?.last_name }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ op.user?.dni }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ op.user?.phone }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ getSpecialtiesLabel(op.specialties) }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button (click)="deleteOperator(op)" class="text-red-600 hover:text-red-900">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="operators.length === 0">
+            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No hay operarios registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Clients Tab -->
+  <div *ngIf="!isLoading && activeTab === 'clients'">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DNI / Teléfono</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pedidos Exitosos</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente Frecuente</th>
+            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Toggle</span></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let client of clients" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              {{ client.first_name }} {{ client.last_name }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ client.dni }} <br> <span class="text-xs text-gray-400">{{ client.phone }}</span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-semibold">
+              {{ client.completed_orders_count }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [ngClass]="client.is_frequent ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
+                {{ client.is_frequent ? 'Sí' : 'No' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <!-- Toggle switch for is_frequent -->
+              <button type="button" 
+                      (click)="toggleFrequent(client)"
+                      [ngClass]="client.is_frequent ? 'bg-blue-600' : 'bg-gray-200'"
+                      class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" role="switch">
+                <span class="sr-only">Toggle Frecuente</span>
+                <span aria-hidden="true" 
+                      [ngClass]="client.is_frequent ? 'translate-x-5' : 'translate-x-0'"
+                      class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="clients.length === 0">
+            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No hay clientes registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Create Operator Modal -->
+  <div *ngIf="showCreateModal" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" (click)="closeCreateModal()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+      
+      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+        <div>
+          <div class="mt-3 text-center sm:mt-5">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Nuevo Operario</h3>
+            <div class="mt-4 text-left space-y-4">
+              
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Nombres</label>
+                  <input type="text" [(ngModel)]="newOperator.first_name" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Apellidos</label>
+                  <input type="text" [(ngModel)]="newOperator.last_name" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">DNI</label>
+                  <input type="text" [(ngModel)]="newOperator.dni" maxlength="8" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Teléfono</label>
+                  <input type="text" [(ngModel)]="newOperator.phone" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Contraseña temporal</label>
+                <input type="password" [(ngModel)]="newOperator.password" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
+              </div>
+
+              <fieldset>
+                <legend class="text-base font-medium text-gray-900 mt-2">Especialidades</legend>
+                <div class="mt-2 space-y-2 grid grid-cols-2 gap-2">
+                  <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                      <input id="laser" type="checkbox" [(ngModel)]="newOperator.specialties.LASER" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                    </div>
+                    <div class="ml-3 text-sm">
+                      <label for="laser" class="font-medium text-gray-700">Corte Láser</label>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                      <input id="plotting" type="checkbox" [(ngModel)]="newOperator.specialties.PLOTTING" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                    </div>
+                    <div class="ml-3 text-sm">
+                      <label for="plotting" class="font-medium text-gray-700">Ploteo</label>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                      <input id="printing_3d" type="checkbox" [(ngModel)]="newOperator.specialties.PRINTING_3D" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                    </div>
+                    <div class="ml-3 text-sm">
+                      <label for="printing_3d" class="font-medium text-gray-700">Impresión 3D</label>
+                    </div>
+                  </div>
+                  <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                      <input id="model" type="checkbox" [(ngModel)]="newOperator.specialties.MODEL" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                    </div>
+                    <div class="ml-3 text-sm">
+                      <label for="model" class="font-medium text-gray-700">Maquetas</label>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+          <button type="button" [disabled]="isSubmitting" (click)="submitCreateOperator()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm disabled:opacity-50">
+            Guardar Operario
+          </button>
+          <button type="button" (click)="closeCreateModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

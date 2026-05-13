@@ -1,0 +1,101 @@
+<div class="min-h-screen font-sans bg-gray-50">
+  <!-- Navbar -->
+  <nav class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg width="28" height="32" viewBox="0 0 72 80" fill="none">
+          <polygon points="4,76 26,4 36,4 18,76" fill="#3a8f8b"/>
+          <polygon points="68,76 46,4 36,4 54,76" fill="#3a8f8b"/>
+          <rect x="16" y="42" width="40" height="8" rx="1" fill="#3a8f8b"/>
+        </svg>
+        <div>
+          <p class="font-bold text-sm tracking-widest uppercase text-gray-800" style="letter-spacing: 0.15em;">ESIAD ARQ</p>
+          <p class="text-xs text-teal-600" style="letter-spacing: 0.08em;">Panel Operario</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <a routerLink="/operator/history" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+          Mi Historial
+        </a>
+        <button (click)="logout()" class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          Salir
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-gray-900">Cola de Trabajo</h1>
+      <p class="text-sm mt-1 text-gray-500">Aquí se muestran los pedidos asignados a ti que están en proceso de producción.</p>
+    </div>
+
+    <!-- Messages -->
+    <div *ngIf="error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-md">
+      <p class="text-sm text-red-700">{{ error }}</p>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center py-12">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && orders.length === 0" class="bg-white shadow overflow-hidden sm:rounded-lg py-12 text-center">
+      <div class="mx-auto w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h3 class="mt-2 text-lg font-medium text-gray-900">¡Todo al día!</h3>
+      <p class="mt-1 text-sm text-gray-500">No tienes pedidos en proceso asignados actualmente.</p>
+    </div>
+
+    <!-- Orders Grid -->
+    <div *ngIf="!isLoading && orders.length > 0" class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div *ngFor="let order of orders" class="bg-white overflow-hidden shadow rounded-lg border border-gray-100 hover:shadow-md transition-shadow">
+        <div class="px-4 py-5 sm:p-6">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Pedido #</p>
+              <p class="text-sm font-medium text-gray-900">{{ order.id.slice(0, 8) }}</p>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              En Proceso
+            </span>
+          </div>
+
+          <div class="space-y-3 mb-5">
+            <div>
+              <p class="text-xs text-gray-500">Servicio y Material</p>
+              <p class="text-sm font-medium text-gray-900">
+                {{ order.service_type?.name || 'Servicio Desconocido' }} - {{ order.material?.name || 'Material Desconocido' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500">Cliente</p>
+              <p class="text-sm text-gray-900">
+                {{ order.client?.first_name }} {{ order.client?.last_name }}
+              </p>
+            </div>
+            <div *ngIf="order.budget_expires_at">
+              <p class="text-xs text-gray-500">Vencimiento de Entrega Estimado</p>
+              <!-- En un caso real habría una fecha de entrega estimada, pero usamos created_at o expires_at como referencia -->
+              <p class="text-sm text-gray-900 font-medium text-orange-600">
+                {{ order.created_at | date:'dd/MM/yyyy HH:mm' }} (Registro)
+              </p>
+            </div>
+          </div>
+
+          <a [routerLink]="['/operator/orders', order.id]" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-teal-700 bg-teal-100 hover:bg-teal-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors">
+            Ver Detalles y Trabajar
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

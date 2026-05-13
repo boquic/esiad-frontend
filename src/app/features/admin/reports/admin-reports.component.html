@@ -1,0 +1,103 @@
+<div class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+  <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Reportes y Estadísticas Avanzadas</h1>
+      <p class="text-sm text-gray-500 mt-1">Exporta datos clave del negocio en formato Excel.</p>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-md">
+    <p class="text-sm text-red-700">{{ error }}</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <!-- Top Clients Panel -->
+    <div class="bg-white shadow rounded-lg border border-gray-200 flex flex-col">
+      <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
+        <div>
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Top 10 Clientes</h3>
+          <p class="text-xs text-gray-500 mt-1">Clientes con más pedidos finalizados</p>
+        </div>
+        <button (click)="exportClientsToExcel()" [disabled]="isLoadingClients || topClients.length === 0 || isExporting" 
+                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors">
+          <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Exportar XLSX
+        </button>
+      </div>
+      
+      <div class="flex-1 p-6">
+        <div *ngIf="isLoadingClients" class="flex justify-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        </div>
+        
+        <div *ngIf="!isLoadingClients && topClients.length === 0" class="text-center py-8">
+          <p class="text-sm text-gray-500">No hay datos de clientes para mostrar.</p>
+        </div>
+
+        <ul *ngIf="!isLoadingClients && topClients.length > 0" class="divide-y divide-gray-200">
+          <li *ngFor="let client of topClients; let i = index" class="py-3 flex items-center justify-between">
+            <div class="flex items-center">
+              <span class="w-6 h-6 rounded-full bg-green-100 text-green-800 flex items-center justify-center text-xs font-bold mr-3">{{ i + 1 }}</span>
+              <div>
+                <p class="text-sm font-medium text-gray-900">{{ client.first_name }} {{ client.last_name }}</p>
+                <p class="text-xs text-gray-500">DNI: {{ client.dni }}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                {{ client.completed_orders_count }} pedidos
+              </span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Operator Performance Panel -->
+    <div class="bg-white shadow rounded-lg border border-gray-200 flex flex-col">
+      <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
+        <div>
+          <h3 class="text-lg leading-6 font-medium text-gray-900">Rendimiento de Operarios</h3>
+          <p class="text-xs text-gray-500 mt-1">Productividad y tiempos promedios</p>
+        </div>
+        <button (click)="exportOperatorsToExcel()" [disabled]="isLoadingOperators || operatorStats.length === 0 || isExporting" 
+                class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition-colors">
+          <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Exportar XLSX
+        </button>
+      </div>
+      
+      <div class="flex-1 p-6">
+        <div *ngIf="isLoadingOperators" class="flex justify-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        </div>
+        
+        <div *ngIf="!isLoadingOperators && operatorStats.length === 0" class="text-center py-8">
+          <p class="text-sm text-gray-500">No hay datos de operarios para mostrar.</p>
+        </div>
+
+        <ul *ngIf="!isLoadingOperators && operatorStats.length > 0" class="divide-y divide-gray-200">
+          <li *ngFor="let op of operatorStats; let i = index" class="py-4">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-sm font-medium text-gray-900">{{ op.first_name || op.user?.first_name }} {{ op.last_name || op.user?.last_name }}</p>
+              <span class="text-xs font-semibold text-gray-700">{{ op.completed_count || 0 }} trabajos</span>
+            </div>
+            <div class="flex items-center text-xs text-gray-500">
+              <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Tiempo promedio: <span class="font-medium text-gray-900 ml-1">{{ op.avg_time_hours | number:'1.0-1' }} hrs</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>

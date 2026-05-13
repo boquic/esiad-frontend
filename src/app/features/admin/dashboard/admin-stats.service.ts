@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, catchError, of } from 'rxjs';
 
-// ── Response shapes (flexible to handle nested data wrapper) ──────────────────
+// ── Response shapes ───────────────────────────────────────────────────────────
 
 export type SalesStatsRaw = {
   data?: {
@@ -34,11 +34,22 @@ export type ServiceStatsRaw = {
   data?: ServiceStatsItem[] | null;
 } | ServiceStatsItem[];
 
+export type SalesTrendItem = {
+  date: string;              // "YYYY-MM-DD"
+  total: number | string;   // sum of approved payments for this day
+  count?: number | string | null;
+};
+
+export type SalesTrendRaw = {
+  data?: SalesTrendItem[] | SalesTrendItem | null;
+  total?: number | string | null;
+} | SalesTrendItem[];
+
 // ── Normalized output types ───────────────────────────────────────────────────
 
 export type SalesStats = {
-  total: number;       // Sum of approved payments (PEN)
-  ordersCount: number; // Number of orders that generated those sales
+  total: number;
+  ordersCount: number;
 };
 
 export type OrdersByStatus = Map<string, number>;
@@ -52,7 +63,7 @@ export class AdminStatsService {
 
   /**
    * GET /api/admin/stats/sales
-   * Returns total approved sales amount and related order count.
+   * Returns total approved sales amount and related order count (no date filter).
    */
   getSales(): Observable<SalesStats> {
     return this.http.get<SalesStatsRaw>(`${this.base}/sales`).pipe(
@@ -69,8 +80,45 @@ export class AdminStatsService {
   }
 
   /**
+   * GET /api/admin/stats/sales?from=YYYY-MM-DD&to=YYYY-MM-DD&groupBy=day
+   * Returns time-series daily data for the sales line chart.
+   * Falls back gracefully if the backend returns a single aggregate or an error.
+   */
+  getSalesTrend(from: string, to: string): Observable<SalesTrendItem[]> {
+    return this.http
+      .get<SalesTrendRaw>(`${this.base}/sales`, {
+        params: { from, to, groupBy: 'day' },
+      })
+      .pipe(
+        map((res) => {
+          // Array directly at root
+          if (Array.isArray(res)) {
+            return this.normalizeTrendItems(res);
+          }
+          const data = (res as { data?: unknown }).data;
+          // Array wrapped in { data: [...] }
+          if (Array.isArray(data)) {
+            return this.normalizeTrendItems(data as SalesTrendItem[]);
+          }
+          // Single aggregate wrapped in { data: { total, count } } → single point
+          if (data && typeof data === 'object') {
+            const raw = data as { total?: number | string | null };
+            return [{ date: to, total: Number(raw.total ?? 0) }];
+          }
+          // Top-level single aggregate (no data wrapper)
+          const topRaw = res as { total?: number | string | null };
+          if (topRaw.total !== undefined) {
+            return [{ date: to, total: Number(topRaw.total ?? 0) }];
+          }
+          return [];
+        }),
+        catchError(() => of([])),
+      );
+  }
+
+  /**
    * GET /api/admin/stats/orders-by-status
-   * Returns a list of { status, count } items.
+   * Returns a Map of status → count.
    */
   getOrdersByStatus(): Observable<OrdersByStatus> {
     return this.http.get<OrdersByStatusRaw>(`${this.base}/orders-by-status`).pipe(
@@ -78,7 +126,7 @@ export class AdminStatsService {
         const items: OrdersByStatusItem[] = Array.isArray(res)
           ? res
           : Array.isArray((res as { data?: OrdersByStatusItem[] | null })?.data)
-            ? ((res as { data: OrdersByStatusItem[] }).data)
+            ? (res as { data: OrdersByStatusItem[] }).data
             : [];
 
         const map_ = new Map<string, number>();
@@ -101,7 +149,7 @@ export class AdminStatsService {
         const items: ServiceStatsItem[] = Array.isArray(res)
           ? res
           : Array.isArray((res as { data?: ServiceStatsItem[] | null })?.data)
-            ? ((res as { data: ServiceStatsItem[] }).data)
+            ? (res as { data: ServiceStatsItem[] }).data
             : [];
 
         return items
@@ -111,5 +159,11 @@ export class AdminStatsService {
       }),
       catchError(() => of([])),
     );
+  }
+
+  // ── Private helpers ─────────────────────────────────────────────────────────
+
+  private normalizeTrendItems(items: SalesTrendItem[]): SalesTrendItem[] {
+    return items.map((item) => ({ ...item, total: Number(item.total ?? 0) }));
   }
 }

@@ -1,0 +1,291 @@
+<div class="min-h-screen font-sans" style="background: #f4f5f6;">
+
+  <!-- ── Navbar ─────────────────────────────────────────────────────────── -->
+  <nav style="background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg width="28" height="32" viewBox="0 0 72 80" fill="none">
+          <polygon points="4,76 26,4 36,4 18,76"  fill="#3a8f8b"/>
+          <polygon points="68,76 46,4 36,4 54,76" fill="#3a8f8b"/>
+          <rect x="16" y="42" width="40" height="8" rx="1" fill="#3a8f8b"/>
+        </svg>
+        <div>
+          <p class="font-bold text-sm tracking-widest uppercase"
+             style="color: #2c2c2c; letter-spacing: 0.15em;">ESIAD ARQ</p>
+          <p class="text-xs" style="color: #3a8f8b; letter-spacing: 0.08em;">Administración</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <a routerLink="/admin/dashboard"
+           class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">
+          Dashboard
+        </a>
+        <a routerLink="/admin/services"
+           class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #6b7280;">
+          Servicios
+        </a>
+        <a routerLink="/admin/materials"
+           class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #6b7280;">
+          Materiales
+        </a>
+        <button type="button" (click)="logout()"
+                class="ml-2 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
+                style="background: #3a8f8b;"
+                onmouseover="this.style.background='#2e7874'"
+                onmouseout="this.style.background='#3a8f8b'">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Contenido ─────────────────────────────────────────────────────── -->
+  <main class="max-w-7xl mx-auto px-6 py-10">
+
+    <!-- Encabezado -->
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: #1f2937;">Gestión de Pedidos</h1>
+        <p class="text-sm mt-1" style="color: #6b7280;">
+          Consulta y filtra todos los pedidos del sistema.
+        </p>
+      </div>
+      <a routerLink="/admin/dashboard"
+         class="flex items-center gap-1.5 text-sm font-medium"
+         style="color: #3a8f8b;">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Volver al panel
+      </a>
+    </div>
+
+    <!-- ── Barra de filtros ─────────────────────────────────────────────── -->
+    <section class="rounded-xl p-5 mb-6"
+             style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+      <p class="text-xs font-semibold uppercase tracking-wider mb-4" style="color: #9ca3af;">Filtros</p>
+
+      <div class="flex flex-wrap items-end gap-4">
+
+        <!-- Estado -->
+        <div class="flex-1 min-w-[160px]">
+          <label class="block text-xs font-medium mb-1.5" style="color: #374151;">Estado</label>
+          <select (change)="onStatusChange($event)"
+                  class="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+                  style="background: #f9fafb; border: 1px solid #e5e7eb; color: #374151;">
+            <option *ngFor="let opt of statusOptions"
+                    [value]="opt.value"
+                    [selected]="selectedStatus === opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Desde -->
+        <div class="flex-1 min-w-[140px]">
+          <label class="block text-xs font-medium mb-1.5" style="color: #374151;">Desde</label>
+          <input type="date"
+                 [value]="filterFrom"
+                 (change)="onFromChange($event)"
+                 class="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+                 style="background: #f9fafb; border: 1px solid #e5e7eb; color: #374151;">
+        </div>
+
+        <!-- Hasta -->
+        <div class="flex-1 min-w-[140px]">
+          <label class="block text-xs font-medium mb-1.5" style="color: #374151;">Hasta</label>
+          <input type="date"
+                 [value]="filterTo"
+                 (change)="onToChange($event)"
+                 class="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+                 style="background: #f9fafb; border: 1px solid #e5e7eb; color: #374151;">
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-2 flex-shrink-0">
+          <button type="button" (click)="applyFilters()"
+                  class="px-5 py-2 rounded-lg text-sm font-semibold text-white"
+                  style="background: #3a8f8b;"
+                  onmouseover="this.style.background='#2e7874'"
+                  onmouseout="this.style.background='#3a8f8b'">
+            Buscar
+          </button>
+          <button type="button" (click)="clearFilters()"
+                  class="px-4 py-2 rounded-lg text-sm font-medium"
+                  style="color: #6b7280; border: 1px solid #e5e7eb; background: white;"
+                  onmouseover="this.style.background='#f9fafb'"
+                  onmouseout="this.style.background='white'">
+            Limpiar
+          </button>
+        </div>
+
+      </div>
+    </section>
+    <!-- ── fin filtros ──────────────────────────────────────────────────── -->
+
+    <!-- Error -->
+    <div *ngIf="error" class="mb-5 px-4 py-3 rounded-lg text-sm flex items-center gap-2"
+         style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      No se pudieron cargar los pedidos. Verifica que el backend esté en línea.
+      <button (click)="applyFilters()" class="ml-auto text-xs font-semibold underline"
+              style="color: #c0392b;">Reintentar</button>
+    </div>
+
+    <!-- ── Tabla ───────────────────────────────────────────────────────── -->
+    <section class="rounded-xl overflow-hidden"
+             style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+
+      <!-- Cabecera de la sección -->
+      <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid #f0f0f0;">
+        <div>
+          <h2 class="font-semibold text-sm" style="color: #1f2937;">Resultados</h2>
+          <p *ngIf="!loading" class="text-xs mt-0.5" style="color: #6b7280;">
+            {{ orders.length }} pedido{{ orders.length !== 1 ? 's' : '' }} encontrado{{ orders.length !== 1 ? 's' : '' }}
+          </p>
+        </div>
+        <!-- Active filter chips -->
+        <div class="flex gap-2 flex-wrap justify-end">
+          <span *ngIf="appliedStatus" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                style="background: #f0fafa; color: #3a8f8b; border: 1px solid #b2dedd;">
+            {{ getStatusLabel(appliedStatus) }}
+            <button (click)="clearStatus()" class="ml-0.5 leading-none" style="color: #3a8f8b;">✕</button>
+          </span>
+          <span *ngIf="appliedFrom || appliedTo" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
+                style="background: #f0fafa; color: #3a8f8b; border: 1px solid #b2dedd;">
+            {{ appliedFrom || '…' }} → {{ appliedTo || 'hoy' }}
+            <button (click)="clearDates()" class="ml-0.5 leading-none" style="color: #3a8f8b;">✕</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div *ngIf="loading" class="animate-pulse">
+        <div *ngFor="let _ of [1,2,3,4,5]"
+             class="flex gap-4 px-6 py-4 items-center"
+             style="border-bottom: 1px solid #f9fafb;">
+          <div class="h-3.5 rounded w-20" style="background: #f0f0f0;"></div>
+          <div class="h-3.5 rounded flex-1" style="background: #f0f0f0;"></div>
+          <div class="h-3.5 rounded w-28" style="background: #f0f0f0;"></div>
+          <div class="h-3.5 rounded w-20" style="background: #f0f0f0;"></div>
+          <div class="h-5 rounded-full w-24" style="background: #f0f0f0;"></div>
+          <div class="h-3.5 rounded w-20" style="background: #f0f0f0;"></div>
+        </div>
+      </div>
+
+      <!-- Estado vacío -->
+      <div *ngIf="!loading && !error && orders.length === 0"
+           class="text-center py-16">
+        <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4"
+             style="background: #f9fafb; border: 1px solid #f0f0f0;">
+          <svg class="w-7 h-7" fill="none" stroke="#d1d5db" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+        </div>
+        <p class="text-sm font-medium" style="color: #6b7280;">No se encontraron pedidos</p>
+        <p class="text-xs mt-1" style="color: #9ca3af;">Prueba cambiando los filtros de búsqueda</p>
+      </div>
+
+      <!-- Tabla de resultados -->
+      <div *ngIf="!loading && orders.length > 0" class="overflow-x-auto">
+        <table class="w-full text-sm" style="border-collapse: collapse;">
+          <thead>
+            <tr style="background: #3a8f8b;">
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white">#</th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white">Cliente</th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white">Servicio / Material</th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white">Estado</th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white">Condición</th>
+              <th class="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-white">Precio Est.</th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white">Operario</th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-white">Creado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of orders; let i = index"
+                style="border-bottom: 1px solid #f3f4f6;"
+                [style.background]="i % 2 === 0 ? 'white' : '#fafafa'"
+                onmouseover="this.style.background='#f0fafa'"
+                onmouseout="this.style.background=''">
+
+              <!-- ID -->
+              <td class="px-5 py-3.5">
+                <span class="font-mono text-xs px-2 py-0.5 rounded"
+                      style="background: #f3f4f6; color: #6b7280;">
+                  #{{ order.shortId }}
+                </span>
+              </td>
+
+              <!-- Cliente -->
+              <td class="px-5 py-3.5">
+                <p class="font-medium" style="color: #1f2937;">{{ order.clientName }}</p>
+                <p class="text-xs mt-0.5" style="color: #9ca3af;">DNI: {{ order.clientDni }}</p>
+              </td>
+
+              <!-- Servicio / Material -->
+              <td class="px-5 py-3.5">
+                <p class="font-medium" style="color: #1f2937;">{{ order.serviceName }}</p>
+                <p class="text-xs mt-0.5" style="color: #9ca3af;">{{ order.materialName }}</p>
+              </td>
+
+              <!-- Estado -->
+              <td class="px-5 py-3.5">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border"
+                      [class]="getStatusMeta(order.status).classes">
+                  {{ getStatusMeta(order.status).label }}
+                </span>
+              </td>
+
+              <!-- Condición de pago -->
+              <td class="px-5 py-3.5">
+                <span class="text-xs font-medium"
+                      [style.color]="order.paymentCondition === 'CASH_ON_DELIVERY' ? '#059669' : '#d97706'">
+                  {{ order.paymentCondition === 'CASH_ON_DELIVERY' ? 'Contraentrega' : 'Adelanto 50%' }}
+                </span>
+              </td>
+
+              <!-- Precio -->
+              <td class="px-5 py-3.5 text-right">
+                <span class="font-semibold text-sm" style="color: #1f2937;">
+                  {{ order.estimatedPrice | currency:'PEN':'symbol':'1.2-2' }}
+                </span>
+              </td>
+
+              <!-- Operario -->
+              <td class="px-5 py-3.5">
+                <span *ngIf="order.operatorName" class="text-sm" style="color: #374151;">
+                  {{ order.operatorName }}
+                </span>
+                <span *ngIf="!order.operatorName" class="text-xs" style="color: #d1d5db;">
+                  Sin asignar
+                </span>
+              </td>
+
+              <!-- Fecha -->
+              <td class="px-5 py-3.5">
+                <span class="text-xs" style="color: #6b7280;">
+                  {{ order.createdAt ? (order.createdAt | date:'dd/MM/yyyy') : '—' }}
+                </span>
+                <p class="text-xs mt-0.5" style="color: #9ca3af;">
+                  {{ order.createdAt ? (order.createdAt | date:'HH:mm') : '' }}
+                </p>
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+    <!-- ── fin tabla ──────────────────────────────────────────────────── -->
+
+  </main>
+</div>

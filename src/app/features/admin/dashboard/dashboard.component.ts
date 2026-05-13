@@ -179,7 +179,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
         <!-- Error banner de KPIs -->
         <div *ngIf="statsError" class="mb-6 px-4 py-3 rounded-lg text-sm flex items-center gap-2"
              style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
-          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
           </svg>
@@ -334,7 +334,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
                 <h2 class="font-bold text-sm" style="color: #1f2937;">Servicios más solicitados</h2>
                 <p class="text-xs mt-0.5" style="color: #6b7280;">Ranking por número de pedidos registrados</p>
               </div>
-              <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                    style="background: #f0fafa; border: 1px solid #b2dedd;">
                 <svg class="w-4 h-4" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -375,7 +375,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
                 <div *ngFor="let item of topServices; let i = index">
                   <div class="flex items-center justify-between gap-4 mb-1.5">
                     <div class="flex items-center gap-2.5 min-w-0">
-                      <span class="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                      <span class="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
                             [style.background]="i === 0 ? '#f0fafa' : '#f9fafb'"
                             [style.color]="i === 0 ? '#3a8f8b' : '#9ca3af'"
                             [style.border]="i === 0 ? '1px solid #b2dedd' : '1px solid #f0f0f0'">
@@ -385,7 +385,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
                         {{ getServiceLabel(item) }}
                       </span>
                     </div>
-                    <span class="flex-shrink-0 text-sm font-bold" style="color: #1f2937;">
+                    <span class="shrink-0 text-sm font-bold" style="color: #1f2937;">
                       {{ +item.count }} pedido{{ +item.count !== 1 ? 's' : '' }}
                     </span>
                   </div>
@@ -409,7 +409,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
           <a routerLink="/admin/orders"
              class="flex items-center gap-4 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer"
              style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                  style="background: #f0fafa; border: 1px solid #b2dedd;">
               <svg class="w-5 h-5" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -420,16 +420,16 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
               <h2 class="font-bold text-sm" style="color: #1f2937;">Gestionar Pedidos</h2>
               <p class="text-xs mt-0.5" style="color: #6b7280;">Filtrar por estado y fecha</p>
             </div>
-            <svg class="w-4 h-4 ml-auto flex-shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 ml-auto shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
           </a>
 
-          <a routerLink="/admin/services"
+           <a routerLink="/admin/services"
              class="flex items-center gap-4 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer"
              style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                 style="background: #f0fafa; border: 1px solid #b2dedd;">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style="background: #f0fafa; border: 1px solid #b2dedd;">
               <svg class="w-5 h-5" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
@@ -439,7 +439,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
               <h2 class="font-bold text-sm" style="color: #1f2937;">Gestionar Servicios</h2>
               <p class="text-xs mt-0.5" style="color: #6b7280;">Activar, editar y configurar servicios</p>
             </div>
-            <svg class="w-4 h-4 ml-auto flex-shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 ml-auto shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
           </a>
@@ -447,7 +447,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
           <a routerLink="/admin/materials"
              class="flex items-center gap-4 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer"
              style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                  style="background: #f0fafa; border: 1px solid #b2dedd;">
               <svg class="w-5 h-5" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -458,7 +458,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
               <h2 class="font-bold text-sm" style="color: #1f2937;">Gestionar Materiales</h2>
               <p class="text-xs mt-0.5" style="color: #6b7280;">Precios, disponibilidad y catálogo</p>
             </div>
-            <svg class="w-4 h-4 ml-auto flex-shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 ml-auto shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
           </a>

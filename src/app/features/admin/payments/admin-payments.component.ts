@@ -36,7 +36,7 @@ export class AdminPaymentsComponent implements OnInit {
     this.isLoading = true;
     this.paymentsService.getPendingPayments().subscribe({
       next: (response) => {
-        this.payments = response.data || [];
+        this.payments = Array.isArray(response) ? response : (response?.data || []);
         this.isLoading = false;
       },
       error: (err) => {
@@ -50,7 +50,7 @@ export class AdminPaymentsComponent implements OnInit {
   loadOperators(): void {
     this.paymentsService.getOperators().subscribe({
       next: (response) => {
-        this.operators = response.data || [];
+        this.operators = Array.isArray(response) ? response : (response?.data || []);
       },
       error: (err) => {
         console.error('Error al cargar operarios:', err);

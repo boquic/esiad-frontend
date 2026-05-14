@@ -26,7 +26,7 @@ export class OperatorDashboardComponent implements OnInit {
     this.error = null;
     this.operatorService.getAssignedOrders('IN_PROGRESS').subscribe({
       next: (response) => {
-        this.orders = response.data || [];
+        this.orders = Array.isArray(response) ? response : (response?.data || []);
         this.isLoading = false;
       },
       error: (err) => {

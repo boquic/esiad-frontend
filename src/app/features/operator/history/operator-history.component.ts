@@ -28,7 +28,7 @@ export class OperatorHistoryComponent implements OnInit {
     // También podríamos tener un endpoint específico si el backend lo soporta.
     this.operatorService.getAssignedOrders().subscribe({
       next: (response) => {
-        const allOrders = response.data || [];
+        const allOrders = Array.isArray(response) ? response : (response?.data || []);
         // Filtramos solo los pedidos que ya pasaron por el operario (READY o DELIVERED)
         this.historyOrders = allOrders.filter(o => o.status === 'READY' || o.status === 'DELIVERED');
         this.isLoading = false;

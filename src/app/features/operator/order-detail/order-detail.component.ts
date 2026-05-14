@@ -40,8 +40,8 @@ export class OperatorOrderDetailComponent implements OnInit {
     this.error = null;
     this.operatorService.getOrderById(id).subscribe({
       next: (response) => {
-        this.order = response.data;
-        this.internalNotes = this.order.notes || '';
+        this.order = (response?.data !== undefined ? response.data : response) as OperatorOrder;
+        this.internalNotes = this.order?.notes || '';
         this.isLoading = false;
       },
       error: (err) => {

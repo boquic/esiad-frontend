@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +23,7 @@ type MaterialItem = {
 export class MaterialsAdminComponent {
   private svc = inject(MaterialsService);
   private servicesSvc = inject(ServicesService);
+  private cd = inject(ChangeDetectorRef);
 
   services: Array<{ id: string | number; name: string }> = [];
   materials: MaterialItem[] = [];
@@ -42,9 +43,11 @@ export class MaterialsAdminComponent {
           this.selectedServiceId = this.services[0].id;
           this.loadMaterials();
         }
+        this.cd.detectChanges();
       },
       error: (err) => {
         this.error = err?.error?.message || 'No se pudieron cargar los servicios';
+        this.cd.detectChanges();
       }
     });
   }
@@ -54,8 +57,8 @@ export class MaterialsAdminComponent {
     this.loading = true;
     this.error = '';
     this.svc.getMaterials(String(this.selectedServiceId)).subscribe({
-      next: (res) => { this.materials = Array.isArray(res) ? res : (res?.data || []); this.loading = false; },
-      error: (err) => { this.loading = false; this.error = err?.error?.message || 'No se pudieron cargar los materiales'; }
+      next: (res) => { this.materials = Array.isArray(res) ? res : (res?.data || []); this.loading = false; this.cd.detectChanges(); },
+      error: (err) => { this.loading = false; this.error = err?.error?.message || 'No se pudieron cargar los materiales'; this.cd.detectChanges(); }
     });
   }
 

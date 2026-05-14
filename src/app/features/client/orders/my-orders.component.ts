@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ClientOrder, ClientOrdersService, OrderStatus } from './orders.service';
 
@@ -17,6 +17,7 @@ type OrderStatusMeta = {
 export class MyOrdersComponent {
   private ordersService = inject(ClientOrdersService);
   private router = inject(Router);
+  private cd = inject(ChangeDetectorRef);
 
   orders: ClientOrder[] = [];
   loading = false;
@@ -34,10 +35,12 @@ export class MyOrdersComponent {
       next: (response) => {
         this.orders = this.ordersService.unwrapCollection(response);
         this.loading = false;
+        this.cd.detectChanges();
       },
       error: (error: { error?: { message?: string } }) => {
         this.loading = false;
         this.error = error.error?.message ?? 'No se pudieron cargar tus pedidos.';
+        this.cd.detectChanges();
       },
     });
   }

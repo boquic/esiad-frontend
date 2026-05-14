@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { distinctUntilChanged } from 'rxjs';
@@ -38,6 +38,7 @@ export class NewOrderComponent {
   private fb = inject(FormBuilder);
   private ordersService = inject(ClientOrdersService);
   private router = inject(Router);
+  private cd = inject(ChangeDetectorRef);
 
   readonly orderForm = this.fb.nonNullable.group({
     serviceTypeId: ['', Validators.required],
@@ -101,10 +102,12 @@ export class NewOrderComponent {
         if (firstServiceId !== undefined) {
           this.orderForm.controls.serviceTypeId.setValue(String(firstServiceId));
         }
+        this.cd.detectChanges();
       },
       error: (error: { error?: { message?: string } }) => {
         this.loadingServices = false;
         this.servicesError = error.error?.message ?? 'No se pudieron cargar los servicios.';
+        this.cd.detectChanges();
       },
     });
   }
@@ -238,10 +241,12 @@ export class NewOrderComponent {
         } else {
           this.recalculatePreview();
         }
+        this.cd.detectChanges();
       },
       error: (error: { error?: { message?: string } }) => {
         this.loadingMaterials = false;
         this.materialsError = error.error?.message ?? 'No se pudieron cargar los materiales.';
+        this.cd.detectChanges();
       },
     });
   }

@@ -1,5 +1,5 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   ClientOrderDetail,
@@ -24,6 +24,7 @@ export class OrderDetailComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private ordersService = inject(ClientOrdersService);
+  private cd = inject(ChangeDetectorRef);
 
   order: ClientOrderDetail | null = null;
   loading = false;
@@ -52,10 +53,12 @@ export class OrderDetailComponent {
         if (!this.order) {
           this.error = 'No se encontro el detalle del pedido.';
         }
+        this.cd.detectChanges();
       },
       error: (error: { error?: { message?: string } }) => {
         this.loading = false;
         this.error = error.error?.message ?? 'No se pudo cargar el detalle del pedido.';
+        this.cd.detectChanges();
       },
     });
   }

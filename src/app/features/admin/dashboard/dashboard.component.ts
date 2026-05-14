@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -472,6 +472,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
 export class AdminDashboardComponent implements OnInit {
   private router       = inject(Router);
   private statsService = inject(AdminStatsService);
+  private cd = inject(ChangeDetectorRef);
 
   userName = getUserName() || 'Administrador';
 
@@ -531,10 +532,12 @@ export class AdminDashboardComponent implements OnInit {
         this.ordersByStatus = byStatus;
         this.topServices    = services;
         this.loadingStats   = false;
+        this.cd.detectChanges();
       },
       error: () => {
         this.loadingStats = false;
         this.statsError   = true;
+        this.cd.detectChanges();
       },
     });
   }
@@ -553,10 +556,12 @@ export class AdminDashboardComponent implements OnInit {
       next: (trend) => {
         this.computeChart(trend);
         this.loadingChart = false;
+        this.cd.detectChanges();
       },
       error: () => {
         this.loadingChart = false;
         this.chartError   = true;
+        this.cd.detectChanges();
       },
     });
   }

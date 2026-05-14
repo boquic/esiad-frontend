@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
@@ -19,6 +19,7 @@ type ServiceItem = {
 })
 export class ServicesAdminComponent {
   private svc = inject(ServicesService);
+  private cd = inject(ChangeDetectorRef);
 
   services: ServiceItem[] = [];
   loading = false;
@@ -35,10 +36,12 @@ export class ServicesAdminComponent {
       next: (res) => {
         this.services = res?.data || [];
         this.loading = false;
+        this.cd.detectChanges();
       },
       error: (err) => {
         this.loading = false;
         this.error = err?.error?.message || 'No se pudieron cargar los servicios';
+        this.cd.detectChanges();
       }
     });
   }

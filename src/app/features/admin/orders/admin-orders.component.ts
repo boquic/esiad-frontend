@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AdminOrdersService, AdminOrder } from './admin-orders.service';
@@ -14,6 +14,7 @@ type StatusMeta = { label: string; classes: string };
 export class AdminOrdersComponent implements OnInit {
   private router  = inject(Router);
   private svc     = inject(AdminOrdersService);
+  private cd = inject(ChangeDetectorRef);
 
   // ── Filter state (pending = not yet applied) ──────────────────────────
   selectedStatus = '';
@@ -119,10 +120,12 @@ export class AdminOrdersComponent implements OnInit {
         next: (orders) => {
           this.orders  = orders;
           this.loading = false;
+          this.cd.detectChanges();
         },
         error: () => {
           this.loading = false;
           this.error   = true;
+          this.cd.detectChanges();
         },
       });
   }

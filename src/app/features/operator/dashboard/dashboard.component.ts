@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
+import { getUserName } from '../../../core/utils/jwt.utils';
 import { OperatorService, OperatorOrder } from '../operator.service';
 
 @Component({
@@ -13,6 +14,7 @@ export class OperatorDashboardComponent implements OnInit {
   private router = inject(Router);
   private operatorService = inject(OperatorService);
 
+  userName = getUserName() || 'Operario';
   orders: OperatorOrder[] = [];
   isLoading = true;
   error: string | null = null;
@@ -40,6 +42,7 @@ export class OperatorDashboardComponent implements OnInit {
   logout() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
+      localStorage.removeItem('userName');
     }
     this.router.navigate(['/login']);
   }

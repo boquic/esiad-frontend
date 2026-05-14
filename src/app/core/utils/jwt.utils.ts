@@ -35,3 +35,10 @@ export function getRoleFromToken(token: string): string | null {
 
   return null;
 }
+
+export function getUserName(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return localStorage.getItem('userName');
+}

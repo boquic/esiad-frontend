@@ -76,7 +76,7 @@
                   <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                   </svg>
-                  <span class="ml-2 flex-1 w-0 truncate">Plano_Adjunto_{{ file.id.slice(0, 4) }}.{{ file.file_type?.toLowerCase() || 'file' }}</span>
+                  <span class="ml-2 flex-1 w-0 truncate">Plano_Adjunto_{{ file.id.slice(0, 4) }}.{{ file.file_type.toLowerCase() || 'file' }}</span>
                 </div>
                 <div class="ml-4 flex-shrink-0">
                   <a [href]="file.file_url" target="_blank" download class="font-medium text-teal-600 hover:text-teal-500 transition-colors">

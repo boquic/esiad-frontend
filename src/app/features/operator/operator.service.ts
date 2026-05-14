@@ -5,14 +5,43 @@ import { Observable } from 'rxjs';
 export interface OperatorOrder {
   id: string;
   status: string;
-  client?: any;
-  service_type?: any;
-  material?: any;
+  client_id?: string;
+  operator_id?: string;
+  service_type_id?: string;
+  material_id?: string;
   budget_expires_at?: string;
+  estimated_delivery_at?: string;
   created_at?: string;
   updated_at?: string;
   notes?: string;
-  files?: any[];
+  operator_notes?: string | null;
+  client?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    dni: string;
+    phone: string;
+  };
+  service_type?: {
+    id: string;
+    name: string;
+    pricing_model: string;
+    required_specialty?: string;
+  };
+  material?: {
+    id: string;
+    name: string;
+    unit?: string;
+    unit_price?: number | string;
+  };
+  files?: Array<{
+    id: string;
+    order_id: string;
+    file_url?: string;
+    file_type: string;
+    uploaded_at: string;
+    download_url?: string;
+  }>;
 }
 
 export interface CollectionResponse<T> {

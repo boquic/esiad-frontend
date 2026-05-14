@@ -7,47 +7,21 @@ import { finalize } from 'rxjs/operators';
 import { getRoleFromToken } from '../../../core/utils/jwt.utils';
 
 type LoginResponse = {
-  token?: string;
-  accessToken?: string;
-  jwt?: string;
-  access_token?: string;
-  data?: {
-    token?: string;
-    accessToken?: string;
-    jwt?: string;
-    access_token?: string;
-  };
-  user?: {
-    role?: string;
-    roles?: string[];
+  data: {
+    user: {
+      id: string;
+      dni: string;
+      first_name: string;
+      last_name: string;
+      phone: string;
+      role: string;
+      completed_orders_count: number;
+      is_frequent: boolean;
+      created_at: string;
+    };
+    token: string;
   };
 };
-
-function extractToken(response: LoginResponse | string | null | undefined): string | null {
-  if (!response) {
-    return null;
-  }
-
-  if (typeof response === 'string') {
-    try {
-      return extractToken(JSON.parse(response) as LoginResponse);
-    } catch {
-      return null;
-    }
-  }
-
-  const directToken = response.token ?? response.accessToken ?? response.jwt ?? response.access_token;
-  if (typeof directToken === 'string' && directToken.trim()) {
-    return directToken.trim();
-  }
-
-  const nestedToken = response.data?.token ?? response.data?.accessToken ?? response.data?.jwt ?? response.data?.access_token;
-  if (typeof nestedToken === 'string' && nestedToken.trim()) {
-    return nestedToken.trim();
-  }
-
-  return null;
-}
 
 @Component({
   selector: 'app-login',
@@ -88,23 +62,15 @@ export class LoginComponent {
       passwordLength: payload.password.length
     });
 
-    const url = 'http://localhost:3000/api/auth/login';
+    const url = '/api/auth/login';
     this.http.post<LoginResponse>(url, payload).pipe(
       finalize(() => {
         this.isLoading = false;
       })
     ).subscribe({
       next: (res) => {
-        console.info('[Auth/Login] Success response', {
-          type: typeof res,
-          keys: res && typeof res === 'object' ? Object.keys(res as Record<string, unknown>) : [],
-          nestedKeys: res && typeof res === 'object' && (res as LoginResponse).data ? Object.keys((res as LoginResponse).data ?? {}) : []
-        });
-
-        const token = extractToken(res);
-        console.info('[Auth/Login] Success response', {
-          hasToken: !!token
-        });
+        const token = res?.data?.token;
+        const user = res?.data?.user;
 
         if (!token) {
           this.errorMessage = 'La respuesta de login no incluyo un token valido.';
@@ -113,6 +79,9 @@ export class LoginComponent {
 
         if (typeof window !== 'undefined') {
           localStorage.setItem('token', token);
+          if (user?.first_name && user?.last_name) {
+            localStorage.setItem('userName', `${user.first_name} ${user.last_name}`);
+          }
         }
 
         const role = getRoleFromToken(token);

@@ -33,7 +33,7 @@ export class ServicesAdminComponent {
     this.error = '';
     this.svc.getServices().subscribe({
       next: (res) => {
-        this.services = res || [];
+        this.services = res?.data || [];
         this.loading = false;
       },
       error: (err) => {

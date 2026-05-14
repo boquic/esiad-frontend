@@ -5,9 +5,18 @@ import { Observable } from 'rxjs';
 export type MaterialDto = {
   id: string | number;
   name: string;
-  price: number;
+  unit_price: number | string;
+  unit?: string | null;
   is_active: boolean;
+  service_type?: {
+    name?: string | null;
+  } | null;
   serviceTypeId?: string | number;
+};
+
+export type CollectionResponse<T> = {
+  data: T[];
+  total?: number;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -15,16 +24,16 @@ export class MaterialsService {
   private http = inject(HttpClient);
   private base = '/api/materials';
 
-  getMaterials(serviceTypeId: string): Observable<MaterialDto[]> {
+  getMaterials(serviceTypeId: string): Observable<CollectionResponse<MaterialDto>> {
     const params = new HttpParams().set('serviceTypeId', serviceTypeId);
-    return this.http.get<MaterialDto[]>(this.base, { params });
+    return this.http.get<CollectionResponse<MaterialDto>>(this.base, { params });
   }
 
-  toggleMaterial(id: string): Observable<any> {
-    return this.http.patch(`${this.base}/${id}/toggle`, {});
+  toggleMaterial(id: string): Observable<{ data: { id: string; is_active: boolean } }> {
+    return this.http.patch<{ data: { id: string; is_active: boolean } }>(`${this.base}/${id}/toggle`, {});
   }
 
-  updateMaterial(id: string, data: Partial<MaterialDto>): Observable<any> {
-    return this.http.patch(`${this.base}/${id}`, data);
+  updateMaterial(id: string, data: Partial<MaterialDto>): Observable<{ data: Partial<MaterialDto> }> {
+    return this.http.patch<{ data: Partial<MaterialDto> }>(`${this.base}/${id}`, data);
   }
 }

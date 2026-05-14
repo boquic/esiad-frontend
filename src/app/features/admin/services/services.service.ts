@@ -5,8 +5,15 @@ import { Observable } from 'rxjs';
 export type ServiceDto = {
   id: string | number;
   name: string;
+  pricing_model: string;
   is_active: boolean;
+  created_at?: string;
   [k: string]: unknown;
+};
+
+export type CollectionResponse<T> = {
+  data: T[];
+  total?: number;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -14,15 +21,15 @@ export class ServicesService {
   private http = inject(HttpClient);
   private base = '/api/services';
 
-  getServices(): Observable<ServiceDto[]> {
-    return this.http.get<ServiceDto[]>(this.base);
+  getServices(): Observable<CollectionResponse<ServiceDto>> {
+    return this.http.get<CollectionResponse<ServiceDto>>(this.base);
   }
 
-  toggleService(id: string): Observable<any> {
-    return this.http.patch(`${this.base}/${id}/toggle`, {});
+  toggleService(id: string): Observable<{ data: { id: string; is_active: boolean } }> {
+    return this.http.patch<{ data: { id: string; is_active: boolean } }>(`${this.base}/${id}/toggle`, {});
   }
 
-  updateService(id: string, data: Partial<ServiceDto>): Observable<any> {
-    return this.http.patch(`${this.base}/${id}`, data);
+  updateService(id: string, data: Partial<ServiceDto>): Observable<{ data: Partial<ServiceDto> }> {
+    return this.http.patch<{ data: Partial<ServiceDto> }>(`${this.base}/${id}`, data);
   }
 }

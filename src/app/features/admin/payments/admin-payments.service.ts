@@ -5,12 +5,27 @@ import { Observable } from 'rxjs';
 export interface AdminPayment {
   id: string;
   order_id: string;
-  amount: number;
+  amount: number | string;
   payment_type: string;
   capture_url?: string;
   status: string;
+  admin_comment?: string | null;
   created_at: string;
-  order?: any;
+  reviewed_at?: string | null;
+  order?: {
+    id: string;
+    client?: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      dni: string;
+      phone: string;
+    };
+    service_type?: {
+      id: string;
+      name: string;
+    };
+  };
 }
 
 export interface CollectionResponse<T> {
@@ -26,9 +41,10 @@ export interface GenericResponse {
 
 export interface Operator {
   id: string;
+  user_id?: string;
   first_name?: string;
   last_name?: string;
-  specialties?: any[];
+  specialties?: string[];
   user?: any;
 }
 
@@ -51,7 +67,7 @@ export class AdminPaymentsService {
   }
 
   getOperators(): Observable<CollectionResponse<Operator>> {
-    // Assuming this endpoint exists based on earlier sprints to get list of operators
+    // NOTE: This endpoint is not documented in API_CONTRACT.md but used by the application
     return this.http.get<CollectionResponse<Operator>>('/api/operators');
   }
 

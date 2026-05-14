@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { getUserName } from '../../../core/utils/jwt.utils';
 import {
   AdminStatsService,
   SalesStats,
@@ -93,7 +94,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
 
         <!-- Encabezado -->
         <div class="mb-8">
-          <h1 class="text-2xl font-bold" style="color: #1f2937;">Panel de Administración</h1>
+          <h1 class="text-2xl font-bold" style="color: #1f2937;">Bienvenido {{ userName || 'Administrador' }}</h1>
           <p class="text-sm mt-1" style="color: #6b7280;">Indicadores del negocio en tiempo real.</p>
         </div>
 
@@ -472,6 +473,8 @@ export class AdminDashboardComponent implements OnInit {
   private router       = inject(Router);
   private statsService = inject(AdminStatsService);
 
+  userName = getUserName() || 'Administrador';
+
   // ── KPI state ─────────────────────────────────────────────────────────────
   loadingStats = false;
   statsError   = false;
@@ -682,7 +685,10 @@ export class AdminDashboardComponent implements OnInit {
 
   // ── Auth ──────────────────────────────────────────────────────────────────
   logout(): void {
-    if (typeof window !== 'undefined') localStorage.removeItem('token');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+    }
     this.router.navigate(['/login']);
   }
 }

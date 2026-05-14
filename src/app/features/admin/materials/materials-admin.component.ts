@@ -8,9 +8,10 @@ import { ServicesService } from '../services/services.service';
 type MaterialItem = {
   id: string | number;
   name: string;
-  price: number;
+  unit_price: number | string;
+  unit?: string | null;
   is_active: boolean;
-  serviceTypeId?: string | number;
+  service_type?: { name?: string | null } | null;
 };
 
 @Component({
@@ -36,7 +37,7 @@ export class MaterialsAdminComponent {
   loadServices() {
     this.servicesSvc.getServices().subscribe({
       next: (res) => {
-        this.services = res.map(s => ({ id: s.id, name: s.name }));
+        this.services = (Array.isArray(res) ? res : (res?.data || [])).map(s => ({ id: s.id, name: s.name }));
         if (this.services.length) {
           this.selectedServiceId = this.services[0].id;
           this.loadMaterials();
@@ -53,7 +54,7 @@ export class MaterialsAdminComponent {
     this.loading = true;
     this.error = '';
     this.svc.getMaterials(String(this.selectedServiceId)).subscribe({
-      next: (res) => { this.materials = res || []; this.loading = false; },
+      next: (res) => { this.materials = Array.isArray(res) ? res : (res?.data || []); this.loading = false; },
       error: (err) => { this.loading = false; this.error = err?.error?.message || 'No se pudieron cargar los materiales'; }
     });
   }
@@ -67,10 +68,10 @@ export class MaterialsAdminComponent {
   edit(item: MaterialItem) {
     const newName = prompt('Nuevo nombre del material', item.name);
     if (newName == null) return;
-    const priceStr = prompt('Nuevo precio (ej: 5.50)', String(item.price));
+    const priceStr = prompt('Nuevo precio unitario (ej: 5.50)', String(item.unit_price));
     if (priceStr == null) return;
-    const price = Number(priceStr);
-    if (!newName.trim() || Number.isNaN(price)) return alert('Datos inválidos');
-    this.svc.updateMaterial(String(item.id), { name: newName.trim(), price }).subscribe({ next: () => this.loadMaterials(), error: (e) => alert(e?.error?.message || 'Error') });
+    const unitPrice = Number(priceStr);
+    if (!newName.trim() || Number.isNaN(unitPrice)) return alert('Datos inválidos');
+    this.svc.updateMaterial(String(item.id), { name: newName.trim(), unit_price: unitPrice }).subscribe({ next: () => this.loadMaterials(), error: (e) => alert(e?.error?.message || 'Error') });
   }
 }

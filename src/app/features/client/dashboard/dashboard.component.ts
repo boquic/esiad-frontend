@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { getUserName } from '../../../core/utils/jwt.utils';
 
 @Component({
   selector: 'app-client-dashboard',
@@ -51,7 +52,7 @@ import { Router, RouterLink } from '@angular/router';
       <main class="max-w-7xl mx-auto px-6 py-10">
 
         <div class="mb-8">
-          <h1 class="text-2xl font-bold" style="color: #1f2937;">Bienvenido</h1>
+          <h1 class="text-2xl font-bold" style="color: #1f2937;">Bienvenido {{ userName || '' }}</h1>
           <p class="text-sm mt-1" style="color: #6b7280;">Gestiona tus pedidos y presupuestos de diseño y fabricación digital.</p>
         </div>
 
@@ -148,10 +149,12 @@ import { Router, RouterLink } from '@angular/router';
 })
 export class ClientDashboardComponent {
   private router = inject(Router);
+  userName = getUserName() || 'Usuario';
 
   logout(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
+      localStorage.removeItem('userName');
     }
     this.router.navigate(['/login']);
   }

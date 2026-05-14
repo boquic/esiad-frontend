@@ -74,7 +74,7 @@
                 [style.background]="i % 2 === 0 ? 'white' : '#f9fafb'"
                 style="border-bottom: 1px solid #f0f0f0;">
               <td class="px-5 py-3 font-medium" style="color: #1f2937;">{{ m.name }}</td>
-              <td class="px-5 py-3" style="color: #374151;">S/ {{ m.price | number:'1.2-2' }}</td>
+              <td class="px-5 py-3" style="color: #374151;">S/ {{ m.unit_price | number:'1.2-2' }}</td>
               <td class="px-5 py-3">
                 <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold"
                       [style.background]="m.is_active ? '#d1fae5' : '#f3f4f6'"

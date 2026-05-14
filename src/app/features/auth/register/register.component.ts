@@ -4,6 +4,20 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 
+type RegisterResponse = {
+  data: {
+    id: string;
+    dni: string;
+    first_name: string;
+    last_name: string;
+    phone: string;
+    role: string;
+    completed_orders_count: number;
+    is_frequent: boolean;
+    created_at: string;
+  };
+};
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -35,8 +49,18 @@ export class RegisterComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
-    const url = 'http://localhost:3000/api/auth/register'; 
-    this.http.post<{ message?: string }>(url, this.registerForm.value).subscribe({
+    // Transform form data to match API contract (camelCase → snake_case)
+    const formValue = this.registerForm.getRawValue();
+    const payload = {
+      first_name: formValue.firstName,
+      last_name: formValue.lastName,
+      dni: formValue.dni,
+      phone: formValue.phone,
+      password: formValue.password
+    };
+
+    const url = '/api/auth/register'; 
+    this.http.post<RegisterResponse>(url, payload).subscribe({
       next: () => {
         this.isLoading = false;
         // Navegar a la página de login luego del registro exitoso

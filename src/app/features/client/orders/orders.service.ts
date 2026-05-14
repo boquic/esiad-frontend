@@ -104,6 +104,24 @@ export type CreateOrderPayload = {
   notes?: string;
 };
 
+export type FileUploadResponse = {
+  data: {
+    id: string;
+    order_id: string;
+    file_url: string;
+    file_type: string;
+    uploaded_at: string;
+  };
+};
+
+export type ConfirmOrderResponse = {
+  data: {
+    id: string;
+    status: string;
+    updated_at: string;
+  };
+};
+
 @Injectable({ providedIn: 'root' })
 export class ClientOrdersService {
   private http = inject(HttpClient);
@@ -127,6 +145,16 @@ export class ClientOrdersService {
 
   createOrder(payload: CreateOrderPayload): Observable<ResourceResponse<ClientOrderDetail>> {
     return this.http.post<ResourceResponse<ClientOrderDetail>>('/api/orders', payload);
+  }
+
+  uploadOrderFile(orderId: string, file: File): Observable<FileUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<FileUploadResponse>(`/api/orders/${orderId}/files`, formData);
+  }
+
+  confirmOrder(orderId: string): Observable<ConfirmOrderResponse> {
+    return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/confirm`, {});
   }
 
   normalizePricingModel(service: ServiceOption | null | undefined): PricingModel {

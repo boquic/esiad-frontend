@@ -10,6 +10,8 @@ export interface UserClient {
   phone: string;
   is_frequent: boolean;
   completed_orders_count: number;
+  role: string;
+  created_at: string;
 }
 
 export interface UserOperator {
@@ -21,12 +23,16 @@ export interface UserOperator {
     dni: string;
     phone: string;
   };
-  specialties?: any[];
+  specialties?: string[];
 }
 
 export interface CollectionResponse<T> {
   data: T[];
   total?: number;
+}
+
+export interface ResourceResponse<T> {
+  data: T;
 }
 
 export interface GenericResponse {

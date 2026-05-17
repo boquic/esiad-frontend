@@ -22,7 +22,7 @@ export class ServicesService {
   private base = '/api/services';
 
   getServices(): Observable<CollectionResponse<ServiceDto>> {
-    return this.http.get<CollectionResponse<ServiceDto>>(this.base);
+    return this.http.get<CollectionResponse<ServiceDto>>(`${this.base}?all=true`);
   }
 
   toggleService(id: string): Observable<{ data: { id: string; is_active: boolean } }> {
@@ -31,5 +31,13 @@ export class ServicesService {
 
   updateService(id: string, data: Partial<ServiceDto>): Observable<{ data: Partial<ServiceDto> }> {
     return this.http.patch<{ data: Partial<ServiceDto> }>(`${this.base}/${id}`, data);
+  }
+
+  createService(data: { name: string; pricing_model: string }): Observable<{ data: ServiceDto }> {
+    return this.http.post<{ data: ServiceDto }>(this.base, data);
+  }
+
+  deleteService(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 }

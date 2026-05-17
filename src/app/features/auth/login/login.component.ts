@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -39,8 +39,8 @@ export class LoginComponent {
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
-  isLoading = false;
-  errorMessage = '';
+  isLoading = signal(false);
+  errorMessage = signal('');
 
   onSubmit() {
     if (this.loginForm.invalid) {
@@ -48,8 +48,8 @@ export class LoginComponent {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     const { identifier, password } = this.loginForm.getRawValue();
     const payload = {
@@ -65,7 +65,7 @@ export class LoginComponent {
     const url = '/api/auth/login';
     this.http.post<LoginResponse>(url, payload).pipe(
       finalize(() => {
-        this.isLoading = false;
+        this.isLoading.set(false);
       })
     ).subscribe({
       next: (res) => {
@@ -73,7 +73,7 @@ export class LoginComponent {
         const user = res?.data?.user;
 
         if (!token) {
-          this.errorMessage = 'La respuesta de login no incluyo un token valido.';
+          this.errorMessage.set('La respuesta de login no incluyo un token valido.');
           return;
         }
 
@@ -105,7 +105,7 @@ export class LoginComponent {
           message: err?.error?.message ?? err?.message,
           error: err?.error
         });
-        this.errorMessage = err.error?.message || 'Credenciales inválidas. Por favor verifique sus datos e intente nuevamente.';
+        this.errorMessage.set(err.error?.message || 'Credenciales inválidas. Por favor verifique sus datos e intente nuevamente.');
       }
     });
   }

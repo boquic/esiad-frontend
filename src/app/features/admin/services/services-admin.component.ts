@@ -16,25 +16,65 @@ type ServiceItem = {
   selector: 'app-services-admin',
   standalone: true,
   imports: [CommonModule, FormsModule, HttpClientModule, RouterLink],
-  templateUrl: './services-admin.component.html'
+  templateUrl: './services-admin.component.html',
+  styles: [`
+    @keyframes togglePulse {
+      0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(58,143,139,0.4); }
+      45%  { transform: scale(1.13); box-shadow: 0 0 0 6px rgba(58,143,139,0.15); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(58,143,139,0); }
+    }
+    .toggle-animating {
+      animation: togglePulse 0.38s ease-out forwards;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-enter {
+      animation: modalIn 0.2s ease-out;
+    }
+  `]
 })
 export class ServicesAdminComponent {
   private svc = inject(ServicesService);
 
-  services = signal<ServiceItem[]>([]);
-  loading = signal(false);
-  error = signal('');
+  services  = signal<ServiceItem[]>([]);
+  loading   = signal(false);
+  error     = signal('');
 
-  // Modal crear servicio
+  // ── Modal crear ────────────────────────────────────────────────
   showCreateModal = signal(false);
-  creating = signal(false);
-  createError = signal('');
-  newName = '';
+  creating        = signal(false);
+  createError     = signal('');
+  newName         = '';
   newPricingModel = 'PER_UNIT';
 
-  ngOnInit() {
-    this.load();
+  // ── Modal eliminar ─────────────────────────────────────────────
+  showDeleteModal = signal(false);
+  deleteTarget    = signal<ServiceItem | null>(null);
+  deleting        = signal(false);
+
+  // ── Modal editar ───────────────────────────────────────────────
+  showEditModal = signal(false);
+  editTarget    = signal<ServiceItem | null>(null);
+  editName      = '';
+  editError     = signal('');
+  editSaving    = signal(false);
+
+  // ── Modal alerta genérica ──────────────────────────────────────
+  showAlertModal = signal(false);
+  alertMessage   = signal('');
+
+  // ── Toggle animation ───────────────────────────────────────────
+  private _togglingIds = signal<Set<string | number>>(new Set());
+
+  isToggling(id: string | number): boolean {
+    return this._togglingIds().has(id);
   }
+
+  // ──────────────────────────────────────────────────────────────
+
+  ngOnInit() { this.load(); }
 
   load() {
     this.loading.set(true);
@@ -51,40 +91,116 @@ export class ServicesAdminComponent {
     });
   }
 
+  // ── Toggle ─────────────────────────────────────────────────────
   toggle(item: ServiceItem) {
+    this._togglingIds.update(ids => new Set([...ids, item.id]));
+
     this.svc.toggleService(String(item.id)).subscribe({
       next: (res) => {
-        // Actualizar solo ese item en el array local, sin recargar toda la lista
         const updatedIsActive = res?.data?.is_active ?? !item.is_active;
         this.services.update(list =>
           list.map(s => s.id === item.id ? { ...s, is_active: updatedIsActive } : s)
         );
+        setTimeout(() => {
+          this._togglingIds.update(ids => {
+            const next = new Set(ids);
+            next.delete(item.id);
+            return next;
+          });
+        }, 420);
       },
-      error: (err) => alert(err?.error?.message || 'No se pudo cambiar el estado')
+      error: (err) => {
+        this._togglingIds.update(ids => {
+          const next = new Set(ids);
+          next.delete(item.id);
+          return next;
+        });
+        this.openAlert(err?.error?.message || 'No se pudo cambiar el estado');
+      }
     });
   }
 
-  delete(item: ServiceItem) {
-    if (!confirm(`¿Eliminar "${item.name}"? Esta acción no se puede deshacer.`)) return;
+  // ── Delete ─────────────────────────────────────────────────────
+  openDeleteModal(item: ServiceItem) {
+    this.deleteTarget.set(item);
+    this.showDeleteModal.set(true);
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal.set(false);
+    this.deleteTarget.set(null);
+  }
+
+  confirmDelete() {
+    const item = this.deleteTarget();
+    if (!item) return;
+    this.deleting.set(true);
 
     this.svc.deleteService(String(item.id)).subscribe({
-      next: () => this.load(),
-      error: (err) => alert(err?.error?.message || 'No se pudo eliminar el servicio')
+      next: () => {
+        this.deleting.set(false);
+        this.closeDeleteModal();
+        this.load();
+      },
+      error: (err) => {
+        this.deleting.set(false);
+        this.closeDeleteModal();
+        this.openAlert(err?.error?.message || 'No se pudo eliminar el servicio');
+      }
     });
   }
 
-  edit(item: ServiceItem) {
-    const newName = prompt('Nuevo nombre de servicio', item.name);
-    if (newName == null) return;
-    const trimmed = String(newName).trim();
-    if (!trimmed) return alert('Nombre inválido');
+  // ── Edit ───────────────────────────────────────────────────────
+  openEditModal(item: ServiceItem) {
+    this.editTarget.set(item);
+    this.editName = item.name;
+    this.editError.set('');
+    this.showEditModal.set(true);
+  }
+
+  closeEditModal() {
+    this.showEditModal.set(false);
+    this.editTarget.set(null);
+    this.editError.set('');
+  }
+
+  confirmEdit() {
+    const trimmed = this.editName.trim();
+    if (!trimmed) {
+      this.editError.set('El nombre no puede estar vacío.');
+      return;
+    }
+    const item = this.editTarget();
+    if (!item) return;
+
+    this.editSaving.set(true);
+    this.editError.set('');
 
     this.svc.updateService(String(item.id), { name: trimmed }).subscribe({
-      next: () => this.load(),
-      error: (err) => alert(err?.error?.message || 'No se pudo actualizar el servicio')
+      next: () => {
+        this.editSaving.set(false);
+        this.closeEditModal();
+        this.load();
+      },
+      error: (err) => {
+        this.editSaving.set(false);
+        this.editError.set(err?.error?.message || 'No se pudo actualizar el servicio');
+      }
     });
   }
 
+  // ── Alert ──────────────────────────────────────────────────────
+  openAlert(msg: string) {
+    this.alertMessage.set(msg);
+    this.showAlertModal.set(true);
+  }
+
+  closeAlert() {
+    this.showAlertModal.set(false);
+    this.alertMessage.set('');
+  }
+
+  // ── Create ─────────────────────────────────────────────────────
   openCreateModal() {
     this.newName = '';
     this.newPricingModel = 'PER_UNIT';

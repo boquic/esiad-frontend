@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -37,8 +37,9 @@ export class RegisterComponent {
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
-  isLoading = false;
-  errorMessage = '';
+  isLoading = signal(false);
+  errorMessage = signal('');
+  showPassword = signal(false);
 
   onSubmit() {
     if (this.registerForm.invalid) {
@@ -46,8 +47,8 @@ export class RegisterComponent {
       return;
     }
 
-    this.isLoading = true;
-    this.errorMessage = '';
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     // Transform form data to match API contract (camelCase → snake_case)
     const formValue = this.registerForm.getRawValue();
@@ -62,14 +63,14 @@ export class RegisterComponent {
     const url = '/api/auth/register'; 
     this.http.post<RegisterResponse>(url, payload).subscribe({
       next: () => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         // Navegar a la página de login luego del registro exitoso
         this.router.navigate(['/login']);
       },
       error: (err) => {
-        this.isLoading = false;
+        this.isLoading.set(false);
         // Mensaje del backend ante duplicado (409) o error validación (400)
-        this.errorMessage = err.error?.message || 'Ocurrió un error al registrarse. Verifique sus datos o intente nuevamente.';
+        this.errorMessage.set(err.error?.message || 'Ocurrió un error al registrarse. Verifique sus datos o intente nuevamente.');
       }
     });
   }

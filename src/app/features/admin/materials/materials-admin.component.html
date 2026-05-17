@@ -86,28 +86,48 @@
               <td class="px-5 py-3 font-medium" style="color: #1f2937;">{{ m.name }}</td>
               <td class="px-5 py-3" style="color: #374151;">S/ {{ m.unit_price | number:'1.2-2' }}</td>
               <td class="px-5 py-3 text-xs" style="color: #6b7280;">{{ m.unit || '—' }}</td>
+              <!-- Toggle estilo iPhone -->
               <td class="px-5 py-3">
-                <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                      [style.background]="m.is_active ? '#d1fae5' : '#f3f4f6'"
-                      [style.color]="m.is_active ? '#065f46' : '#6b7280'"
-                      [style.border]="m.is_active ? '1px solid #a7f3d0' : '1px solid #e5e7eb'">
-                  {{ m.is_active ? 'Activo' : 'Inactivo' }}
-                </span>
+                <button (click)="openToggleModal(m)" type="button"
+                        class="relative inline-flex items-center cursor-pointer rounded-full focus:outline-none"
+                        style="width: 44px; height: 24px; transition: background-color 0.3s;"
+                        [style.background]="m.is_active ? '#3a8f8b' : '#d1d5db'"
+                        [attr.aria-label]="m.is_active ? 'Desactivar' : 'Activar'">
+                  <span class="absolute rounded-full bg-white shadow"
+                        style="width: 18px; height: 18px; top: 3px; transition: transform 0.3s cubic-bezier(.4,0,.2,1);"
+                        [style.transform]="m.is_active ? 'translateX(23px)' : 'translateX(3px)'">
+                  </span>
+                </button>
               </td>
+
+              <!-- Acciones: editar + eliminar (solo iconos) -->
               <td class="px-5 py-3">
-                <div class="flex items-center gap-2">
-                  <button (click)="openEditModal(m)"
-                          class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer"
-                          style="background: #3a8f8b;"
-                          onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
-                    Editar
+                <div class="flex items-center gap-1">
+
+                  <!-- Editar -->
+                  <button (click)="openEditModal(m)" title="Editar"
+                          class="p-1.5 rounded-lg cursor-pointer"
+                          style="background: transparent; border: none; color: #6b7280;"
+                          onmouseover="this.style.background='#f0fafa'; this.style.color='#3a8f8b'"
+                          onmouseout="this.style.background='transparent'; this.style.color='#6b7280'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
                   </button>
-                  <button (click)="openToggleModal(m)"
-                          class="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
-                          style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
-                          onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
-                    {{ m.is_active ? 'Desactivar' : 'Activar' }}
+
+                  <!-- Eliminar -->
+                  <button (click)="openDeleteModal(m)" title="Eliminar"
+                          class="p-1.5 rounded-lg cursor-pointer"
+                          style="background: transparent; border: none; color: #6b7280;"
+                          onmouseover="this.style.background='#fff0f0'; this.style.color='#e53e3e'"
+                          onmouseout="this.style.background='transparent'; this.style.color='#6b7280'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
                   </button>
+
                 </div>
               </td>
             </tr>
@@ -368,6 +388,55 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
           {{ editSaving ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- Modal: Confirmar eliminación                               -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="showDeleteModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       style="background: rgba(0,0,0,0.4);"
+       (click)="closeDeleteModal()">
+
+    <div class="modal-enter w-full max-w-sm rounded-2xl p-6 relative"
+         style="background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.2);"
+         (click)="$event.stopPropagation()">
+
+      <div class="flex flex-col items-center text-center mb-5">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3" style="background: #fff0f0;">
+          <svg class="w-6 h-6" fill="none" stroke="#e53e3e" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </div>
+        <h2 class="text-base font-bold" style="color: #1f2937;">Eliminar material</h2>
+        <p class="text-sm mt-1" style="color: #6b7280;">
+          ¿Estás seguro de que deseas eliminar
+          <span class="font-semibold" style="color: #1f2937;">"{{ deleteTarget?.name }}"</span>?
+          Esta acción no se puede deshacer.
+        </p>
+      </div>
+
+      <div class="flex gap-3">
+        <button (click)="closeDeleteModal()" [disabled]="deleting"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer"
+                style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+                onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+          Cancelar
+        </button>
+        <button (click)="confirmDelete()" [disabled]="deleting"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer flex items-center justify-center gap-2"
+                style="background: #e53e3e;"
+                onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e53e3e'">
+          <svg *ngIf="deleting" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ deleting ? 'Eliminando...' : 'Sí, eliminar' }}
         </button>
       </div>
 

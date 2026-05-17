@@ -40,4 +40,8 @@ export class MaterialsService {
   createMaterial(data: { service_type_id: string; name: string; unit_price: number; unit: string }): Observable<{ data: MaterialDto }> {
     return this.http.post<{ data: MaterialDto }>(this.base, data);
   }
+
+  deleteMaterial(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
+  }
 }

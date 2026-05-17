@@ -53,6 +53,41 @@ export class MaterialsAdminComponent {
   toggleTarget: MaterialItem | null = null;
   toggling         = false;
 
+  // ── Modal eliminar material ────────────────────────────────────
+  showDeleteModal  = false;
+  deleteTarget: MaterialItem | null = null;
+  deleting         = false;
+
+  openDeleteModal(item: MaterialItem) {
+    this.deleteTarget    = item;
+    this.showDeleteModal = true;
+    this.cd.detectChanges();
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.deleteTarget    = null;
+    this.cd.detectChanges();
+  }
+
+  confirmDelete() {
+    const item = this.deleteTarget;
+    if (!item) return;
+    this.deleting = true;
+    this.svc.deleteMaterial(String(item.id)).subscribe({
+      next: () => {
+        this.deleting = false;
+        this.closeDeleteModal();
+        this.loadMaterials();
+      },
+      error: (e) => {
+        this.deleting = false;
+        this.closeDeleteModal();
+        this.openAlert(e?.error?.message || 'No se pudo eliminar el material');
+      }
+    });
+  }
+
   // ── Modal editar material ──────────────────────────────────────
   showEditModal = false;
   editTarget: MaterialItem | null = null;

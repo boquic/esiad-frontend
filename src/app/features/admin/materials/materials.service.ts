@@ -36,4 +36,8 @@ export class MaterialsService {
   updateMaterial(id: string, data: Partial<MaterialDto>): Observable<{ data: Partial<MaterialDto> }> {
     return this.http.patch<{ data: Partial<MaterialDto> }>(`${this.base}/${id}`, data);
   }
+
+  createMaterial(data: { service_type_id: string; name: string; unit_price: number; unit: string }): Observable<{ data: MaterialDto }> {
+    return this.http.post<{ data: MaterialDto }>(this.base, data);
+  }
 }

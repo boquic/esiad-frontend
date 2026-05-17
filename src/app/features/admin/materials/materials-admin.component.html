@@ -29,6 +29,17 @@
         <h1 class="text-2xl font-bold" style="color: #1f2937;">Materiales</h1>
         <p class="text-sm mt-1" style="color: #6b7280;">Administra precios y disponibilidad de materiales por servicio.</p>
       </div>
+
+      <!-- Botón nuevo material -->
+      <button (click)="openCreateModal()"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white cursor-pointer"
+              style="background: #3a8f8b; box-shadow: 0 2px 8px rgba(58,143,139,0.3);"
+              onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nuevo Material
+      </button>
     </div>
 
     <!-- Error -->
@@ -65,6 +76,7 @@
             <tr style="background: #3a8f8b;">
               <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Nombre</th>
               <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Precio</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Unidad</th>
               <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Estado</th>
               <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Acciones</th>
             </tr>
@@ -75,6 +87,7 @@
                 style="border-bottom: 1px solid #f0f0f0;">
               <td class="px-5 py-3 font-medium" style="color: #1f2937;">{{ m.name }}</td>
               <td class="px-5 py-3" style="color: #374151;">S/ {{ m.unit_price | number:'1.2-2' }}</td>
+              <td class="px-5 py-3 text-xs" style="color: #6b7280;">{{ m.unit || '—' }}</td>
               <td class="px-5 py-3">
                 <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold"
                       [style.background]="m.is_active ? '#d1fae5' : '#f3f4f6'"
@@ -85,13 +98,13 @@
               </td>
               <td class="px-5 py-3">
                 <div class="flex items-center gap-2">
-                  <button (click)="edit(m)"
+                  <button (click)="openEditModal(m)"
                           class="px-3 py-1.5 rounded-lg text-xs font-semibold text-white cursor-pointer"
                           style="background: #3a8f8b;"
                           onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
                     Editar
                   </button>
-                  <button (click)="toggle(m)"
+                  <button (click)="openToggleModal(m)"
                           class="px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer"
                           style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
                           onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
@@ -115,4 +128,285 @@
 
     </div>
   </main>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- Modal: Crear Material                                      -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="showCreateModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       style="background: rgba(0,0,0,0.4);"
+       (click)="closeCreateModal()">
+
+    <div class="modal-enter w-full max-w-md rounded-2xl p-6 relative"
+         style="background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.2);"
+         (click)="$event.stopPropagation()">
+
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: #e6f4f4;">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #3a8f8b;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+          </div>
+          <h2 class="text-base font-bold" style="color: #1f2937;">Nuevo Material</h2>
+        </div>
+        <button (click)="closeCreateModal()" class="p-1 rounded-lg cursor-pointer"
+                style="color: #9ca3af; background: transparent; border: none;"
+                onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#9ca3af'">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="createError" class="mb-4 px-3 py-2 rounded-lg text-sm flex items-center gap-2"
+           style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        {{ createError }}
+      </div>
+
+      <!-- Campos -->
+      <div class="space-y-4">
+
+        <!-- Servicio -->
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Servicio</label>
+          <select [(ngModel)]="newServiceId"
+                  class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none cursor-pointer"
+                  style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                  onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                  onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+            <option *ngFor="let s of services" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </div>
+
+        <!-- Nombre -->
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Nombre del material</label>
+          <input type="text" [(ngModel)]="newName" placeholder="Ej: MDF 3mm"
+                 class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                 style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                 onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                 onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+        </div>
+
+        <!-- Precio + Unidad en fila -->
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Precio unitario (S/)</label>
+            <input type="number" [(ngModel)]="newPrice" placeholder="0.00" min="0" step="0.01"
+                   class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                   style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                   onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+          </div>
+          <div class="flex-1">
+            <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Unidad</label>
+            <input type="text" [(ngModel)]="newUnit" placeholder="Ej: unidad, m2, kg"
+                   class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                   style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                   onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 mt-6">
+        <button (click)="closeCreateModal()" [disabled]="creating"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer"
+                style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+                onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+          Cancelar
+        </button>
+        <button (click)="submitCreate()" [disabled]="creating"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer flex items-center justify-center gap-2"
+                style="background: #3a8f8b;"
+                onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
+          <svg *ngIf="creating" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ creating ? 'Creando...' : 'Crear Material' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- Modal: Confirmar cambio de estado                          -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="showToggleModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       style="background: rgba(0,0,0,0.4);"
+       (click)="closeToggleModal()">
+
+    <div class="modal-enter w-full max-w-sm rounded-2xl p-6 relative"
+         style="background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.2);"
+         (click)="$event.stopPropagation()">
+
+      <div class="flex flex-col items-center text-center mb-5">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3"
+             [style.background]="toggleTarget?.is_active ? '#fff7ed' : '#f0fdf4'">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+               [attr.stroke]="toggleTarget?.is_active ? '#ea580c' : '#16a34a'">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <h2 class="text-base font-bold" style="color: #1f2937;">
+          {{ toggleTarget?.is_active ? 'Desactivar' : 'Activar' }} material
+        </h2>
+        <p class="text-sm mt-1" style="color: #6b7280;">
+          ¿Seguro que deseas {{ toggleTarget?.is_active ? 'desactivar' : 'activar' }}
+          <span class="font-semibold" style="color: #1f2937;">"{{ toggleTarget?.name }}"</span>?
+        </p>
+      </div>
+
+      <div class="flex gap-3">
+        <button (click)="closeToggleModal()" [disabled]="toggling"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer"
+                style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+                onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+          Cancelar
+        </button>
+        <button (click)="confirmToggle()" [disabled]="toggling"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer flex items-center justify-center gap-2"
+                [style.background]="toggleTarget?.is_active ? '#ea580c' : '#3a8f8b'"
+                [attr.onmouseover]="toggleTarget?.is_active ? 'this.style.background=\'#c2410c\'' : 'this.style.background=\'#2e7874\''"
+                [attr.onmouseout]="toggleTarget?.is_active ? 'this.style.background=\'#ea580c\'' : 'this.style.background=\'#3a8f8b\''">
+          <svg *ngIf="toggling" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ toggling ? 'Aplicando...' : (toggleTarget?.is_active ? 'Sí, desactivar' : 'Sí, activar') }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- Modal: Editar Material                                     -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="showEditModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       style="background: rgba(0,0,0,0.4);"
+       (click)="closeEditModal()">
+
+    <div class="modal-enter w-full max-w-sm rounded-2xl p-6 relative"
+         style="background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.2);"
+         (click)="$event.stopPropagation()">
+
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: #e6f4f4;">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #3a8f8b;">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+          </div>
+          <h2 class="text-base font-bold" style="color: #1f2937;">Editar material</h2>
+        </div>
+        <button (click)="closeEditModal()" class="p-1 rounded-lg cursor-pointer"
+                style="color: #9ca3af; background: transparent; border: none;"
+                onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#9ca3af'">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="editError" class="mb-4 px-3 py-2 rounded-lg text-sm flex items-center gap-2"
+           style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        {{ editError }}
+      </div>
+
+      <!-- Campos -->
+      <div class="space-y-4 mb-5">
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Nombre</label>
+          <input type="text" [(ngModel)]="editName" placeholder="Nombre del material"
+                 class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                 style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                 onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                 onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Precio unitario (S/)</label>
+          <input type="number" [(ngModel)]="editPrice" placeholder="0.00" min="0" step="0.01"
+                 class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                 style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                 onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                 onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+        </div>
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3">
+        <button (click)="closeEditModal()" [disabled]="editSaving"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer"
+                style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+                onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+          Cancelar
+        </button>
+        <button (click)="confirmEdit()" [disabled]="editSaving"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer flex items-center justify-center gap-2"
+                style="background: #3a8f8b;"
+                onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
+          <svg *ngIf="editSaving" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ editSaving ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- Modal: Alerta genérica                                     -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="showAlertModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       style="background: rgba(0,0,0,0.4);"
+       (click)="closeAlert()">
+
+    <div class="modal-enter w-full max-w-sm rounded-2xl p-6 relative"
+         style="background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.2);"
+         (click)="$event.stopPropagation()">
+
+      <div class="flex flex-col items-center text-center">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3" style="background: #fff0f0;">
+          <svg class="w-6 h-6" fill="none" stroke="#e53e3e" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <h2 class="text-base font-bold mb-1" style="color: #1f2937;">Ocurrió un error</h2>
+        <p class="text-sm" style="color: #6b7280;">{{ alertMsg }}</p>
+      </div>
+
+      <button (click)="closeAlert()"
+              class="w-full mt-5 py-2.5 rounded-lg text-sm font-semibold cursor-pointer"
+              style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+              onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+        Entendido
+      </button>
+
+    </div>
+  </div>
+
 </div>

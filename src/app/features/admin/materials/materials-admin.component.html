@@ -295,10 +295,11 @@
           Cancelar
         </button>
         <button (click)="confirmToggle()" [disabled]="toggling"
+                #confirmToggleBtn
                 class="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer flex items-center justify-center gap-2"
                 [style.background]="toggleTarget?.is_active ? '#ea580c' : '#3a8f8b'"
-                [attr.onmouseover]="toggleTarget?.is_active ? 'this.style.background=\'#c2410c\'' : 'this.style.background=\'#2e7874\''"
-                [attr.onmouseout]="toggleTarget?.is_active ? 'this.style.background=\'#ea580c\'' : 'this.style.background=\'#3a8f8b\''">
+                (mouseover)="confirmToggleBtn.style.background = toggleTarget?.is_active ? '#c2410c' : '#2e7874'"
+                (mouseout)="confirmToggleBtn.style.background = toggleTarget?.is_active ? '#ea580c' : '#3a8f8b'">
           <svg *ngIf="toggling" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>

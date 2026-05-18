@@ -25,7 +25,9 @@ export class MaterialsService {
   private base = '/api/materials';
 
   getMaterials(serviceTypeId: string): Observable<CollectionResponse<MaterialDto>> {
-    const params = new HttpParams().set('serviceTypeId', serviceTypeId);
+    const params = new HttpParams()
+      .set('serviceTypeId', serviceTypeId)
+      .set('includeInactive', 'true');
     return this.http.get<CollectionResponse<MaterialDto>>(this.base, { params });
   }
 
@@ -33,8 +35,8 @@ export class MaterialsService {
     return this.http.patch<{ data: { id: string; is_active: boolean } }>(`${this.base}/${id}/toggle`, {});
   }
 
-  updateMaterial(id: string, data: Partial<MaterialDto>): Observable<{ data: Partial<MaterialDto> }> {
-    return this.http.patch<{ data: Partial<MaterialDto> }>(`${this.base}/${id}`, data);
+  updateMaterial(id: string, data: Partial<MaterialDto>): Observable<any> {
+    return this.http.patch(`${this.base}/${id}`, data, { responseType: 'text' });
   }
 
   createMaterial(data: { service_type_id: string; name: string; unit_price: number; unit: string }): Observable<{ data: MaterialDto }> {

@@ -1,218 +1,396 @@
-<div class="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Gestión de Usuarios</h1>
-    <button *ngIf="activeTab === 'operators'" (click)="openCreateModal()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-      <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-      </svg>
-      Nuevo Operario
-    </button>
-  </div>
+<div class="min-h-screen font-sans" style="background: #f4f5f6;">
 
-  <!-- Messages -->
-  <div *ngIf="error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-md">
-    <p class="text-sm text-red-700">{{ error }}</p>
-  </div>
-  <div *ngIf="success" class="bg-green-50 border-l-4 border-green-400 p-4 mb-6 rounded-r-md">
-    <p class="text-sm text-green-700">{{ success }}</p>
-  </div>
-
-  <!-- Tabs -->
-  <div class="border-b border-gray-200 mb-6">
-    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-      <button (click)="setTab('operators')" 
-              [ngClass]="activeTab === 'operators' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-        Operarios
-      </button>
-      <button (click)="setTab('clients')" 
-              [ngClass]="activeTab === 'clients' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-        Clientes
-      </button>
-    </nav>
-  </div>
-
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="flex justify-center py-12">
-    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-  </div>
-
-  <!-- Operators Tab -->
-  <div *ngIf="!isLoading && activeTab === 'operators'">
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DNI</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teléfono</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Especialidades</th>
-            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let op of operators" class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {{ op.user?.first_name }} {{ op.user?.last_name }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ op.user?.dni }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ op.user?.phone }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ getSpecialtiesLabel(op.specialties) }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <button (click)="deleteOperator(op)" class="text-red-600 hover:text-red-900">Eliminar</button>
-            </td>
-          </tr>
-          <tr *ngIf="operators.length === 0">
-            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No hay operarios registrados.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Clients Tab -->
-  <div *ngIf="!isLoading && activeTab === 'clients'">
-    <div class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DNI / Teléfono</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pedidos Exitosos</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente Frecuente</th>
-            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Toggle</span></th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr *ngFor="let client of clients" class="hover:bg-gray-50 transition-colors">
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {{ client.first_name }} {{ client.last_name }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {{ client.dni }} <br> <span class="text-xs text-gray-400">{{ client.phone }}</span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-semibold">
-              {{ client.completed_orders_count }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                    [ngClass]="client.is_frequent ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">
-                {{ client.is_frequent ? 'Sí' : 'No' }}
-              </span>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <!-- Toggle switch for is_frequent -->
-              <button type="button" 
-                      (click)="toggleFrequent(client)"
-                      [ngClass]="client.is_frequent ? 'bg-blue-600' : 'bg-gray-200'"
-                      class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" role="switch">
-                <span class="sr-only">Toggle Frecuente</span>
-                <span aria-hidden="true" 
-                      [ngClass]="client.is_frequent ? 'translate-x-5' : 'translate-x-0'"
-                      class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"></span>
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="clients.length === 0">
-            <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No hay clientes registrados.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Create Operator Modal -->
-  <div *ngIf="showCreateModal" class="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" (click)="closeCreateModal()"></div>
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-      
-      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+  <!-- Navbar -->
+  <nav style="background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg width="30" height="32" viewBox="0 0 428 451" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#3a8f8b" d="M338.218201,86.728973 C353.860413,151.408997 369.415833,215.680695 384.970825,279.952484 C387.940125,292.221436 390.840485,304.507690 393.925049,316.747589 C394.662476,319.673859 394.105865,321.338928 391.515656,323.246185 C342.889984,359.051361 294.370941,395.001282 245.788925,430.865936 C244.405899,431.886902 242.581299,432.899963 240.955338,432.911713 C221.480286,433.052277 202.003860,433.002502 182.064133,433.002502 C182.064133,369.740967 182.064133,306.692963 182.064133,243.220337 C156.523453,243.220337 131.440903,243.220337 105.658791,243.220337 C107.631348,233.665970 109.492691,224.650269 111.442642,215.205399 C134.681290,215.205399 157.934677,215.205399 181.565598,215.205399 C181.565598,166.064957 181.565598,117.367439 181.565598,68.412415 C164.102737,68.412415 146.678375,68.412415 128.855774,68.412415 C106.826164,160.918610 84.786568,253.466782 62.574501,346.739136 C52.508755,338.510223 43.018585,330.505005 33.227974,322.885803 C29.935354,320.323456 28.893690,318.130646 29.946138,313.832794 C53.059425,219.445343 75.996925,125.014824 98.885536,30.572559 C99.522644,27.943766 100.183640,26.612568 103.295311,26.619930 C148.620865,26.727163 193.946747,26.696535 239.272552,26.709229 C239.928421,26.709412 240.584259,26.842278 241.638443,26.956303 C241.638443,144.742249 241.638443,262.488373 241.638443,381.252350 C249.964066,375.501648 257.571014,370.298615 265.125244,365.020111 C292.395203,345.965363 319.629913,326.860107 346.938019,307.860291 C349.226624,306.267944 350.237488,305.023834 349.516388,301.890533 C331.778564,224.820679 314.192932,147.715790 296.481628,70.185921 C286.269318,70.185921 276.010834,70.185921 265.410156,70.185921 C265.410156,55.537655 265.410156,41.333363 265.410156,26.910526 C284.803619,26.910526 304.073669,26.910526 323.830353,26.910526 C328.590942,46.687450 333.361084,66.504066 338.218201,86.728973 z"/>
+        </svg>
         <div>
-          <div class="mt-3 text-center sm:mt-5">
-            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Nuevo Operario</h3>
-            <div class="mt-4 text-left space-y-4">
-              
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Nombres</label>
-                  <input type="text" [(ngModel)]="newOperator.first_name" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Apellidos</label>
-                  <input type="text" [(ngModel)]="newOperator.last_name" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">DNI</label>
-                  <input type="text" [(ngModel)]="newOperator.dni" maxlength="8" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                  <input type="text" [(ngModel)]="newOperator.phone" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Contraseña temporal</label>
-                <input type="password" [(ngModel)]="newOperator.password" class="mt-1 block w-full shadow-sm sm:text-sm focus:ring-blue-500 focus:border-blue-500 border-gray-300 rounded-md">
-              </div>
-
-              <fieldset>
-                <legend class="text-base font-medium text-gray-900 mt-2">Especialidades</legend>
-                <div class="mt-2 space-y-2 grid grid-cols-2 gap-2">
-                  <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                      <input id="laser" type="checkbox" [(ngModel)]="newOperator.specialties.LASER" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label for="laser" class="font-medium text-gray-700">Corte Láser</label>
-                    </div>
-                  </div>
-                  <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                      <input id="plotting" type="checkbox" [(ngModel)]="newOperator.specialties.PLOTTING" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label for="plotting" class="font-medium text-gray-700">Ploteo</label>
-                    </div>
-                  </div>
-                  <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                      <input id="printing_3d" type="checkbox" [(ngModel)]="newOperator.specialties.PRINTING_3D" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label for="printing_3d" class="font-medium text-gray-700">Impresión 3D</label>
-                    </div>
-                  </div>
-                  <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                      <input id="model" type="checkbox" [(ngModel)]="newOperator.specialties.MODEL" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    </div>
-                    <div class="ml-3 text-sm">
-                      <label for="model" class="font-medium text-gray-700">Maquetas</label>
-                    </div>
-                  </div>
-                </div>
-              </fieldset>
-
-            </div>
-          </div>
-        </div>
-        <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-          <button type="button" [disabled]="isSubmitting" (click)="submitCreateOperator()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm disabled:opacity-50">
-            Guardar Operario
-          </button>
-          <button type="button" (click)="closeCreateModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
-            Cancelar
-          </button>
+          <p class="font-bold text-sm tracking-widest uppercase" style="color: #2c2c2c; letter-spacing: 0.15em;">ESIAD ARQ</p>
+          <p class="text-xs" style="color: #3a8f8b; letter-spacing: 0.08em;">Administración</p>
         </div>
       </div>
+      <div class="flex items-center gap-2">
+        <a routerLink="/admin/services"  class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Servicios</a>
+        <a routerLink="/admin/materials" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Materiales</a>
+        <a routerLink="/admin/dashboard" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Dashboard</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido -->
+  <main class="max-w-7xl mx-auto px-6 py-10">
+
+    <!-- Encabezado -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold" style="color: #1f2937;">Gestión de Usuarios</h1>
+        <p class="text-sm mt-1" style="color: #6b7280;">Administra operarios y clientes del sistema.</p>
+      </div>
+      <button *ngIf="activeTab === 'operators'"
+              (click)="openCreateModal()"
+              class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white cursor-pointer"
+              style="background: #3a8f8b; box-shadow: 0 2px 8px rgba(58,143,139,0.3);"
+              onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nuevo Operario
+      </button>
+    </div>
+
+    <!-- Error / Éxito globales -->
+    <div *ngIf="error" class="mb-5 px-4 py-3 rounded-lg text-sm flex items-center gap-2"
+         style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      {{ error }}
+    </div>
+
+    <div *ngIf="success" class="mb-5 px-4 py-3 rounded-lg text-sm flex items-center gap-2"
+         style="background: #f0fdf4; border: 1px solid #a7f3d0; color: #065f46;">
+      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+      {{ success }}
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 mb-6 p-1 rounded-xl w-fit"
+         style="background: white; border: 1px solid #e5e7eb;">
+      <button (click)="setTab('operators')"
+              class="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all"
+              [style.background]="activeTab === 'operators' ? '#3a8f8b' : 'transparent'"
+              [style.color]="activeTab === 'operators' ? 'white' : '#6b7280'">
+        Operarios
+      </button>
+      <button (click)="setTab('clients')"
+              class="px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all"
+              [style.background]="activeTab === 'clients' ? '#3a8f8b' : 'transparent'"
+              [style.color]="activeTab === 'clients' ? 'white' : '#6b7280'">
+        Clientes
+      </button>
+    </div>
+
+    <!-- Card principal -->
+    <div class="rounded-xl overflow-hidden"
+         style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="px-6 py-8 text-sm text-center" style="color: #6b7280;">
+        Cargando usuarios...
+      </div>
+
+      <!-- ═══ TAB OPERARIOS ═══ -->
+      <div *ngIf="!isLoading && activeTab === 'operators'" class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr style="background: #3a8f8b;">
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Nombre</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">DNI</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Teléfono</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Especialidades</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let op of operators; let i = index"
+                [style.background]="i % 2 === 0 ? 'white' : '#f9fafb'"
+                style="border-bottom: 1px solid #f0f0f0;">
+              <td class="px-5 py-3 font-medium" style="color: #1f2937;">{{ operatorFullName(op) }}</td>
+              <td class="px-5 py-3 font-mono text-xs" style="color: #374151;">{{ op.user?.dni || '—' }}</td>
+              <td class="px-5 py-3 text-xs" style="color: #6b7280;">{{ op.user?.phone || '—' }}</td>
+              <td class="px-5 py-3">
+                <div class="flex flex-wrap gap-1">
+                  <span *ngFor="let sp of op.specialties"
+                        class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold"
+                        style="background: #e6f4f4; color: #3a8f8b;">
+                    {{ getSpecialtiesLabel([sp]) }}
+                  </span>
+                  <span *ngIf="!op.specialties || op.specialties.length === 0"
+                        class="text-xs" style="color: #9ca3af;">—</span>
+                </div>
+              </td>
+              <td class="px-5 py-3">
+                <button (click)="openDeleteModal(op)" title="Eliminar operario"
+                        class="p-1.5 rounded-lg cursor-pointer"
+                        style="background: transparent; border: none; color: #6b7280;"
+                        onmouseover="this.style.background='#fff0f0'; this.style.color='#e53e3e'"
+                        onmouseout="this.style.background='transparent'; this.style.color='#6b7280'">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="operators.length === 0"
+             class="px-6 py-12 text-center text-sm" style="color: #6b7280;">
+          <svg class="w-8 h-8 mx-auto mb-3" fill="none" stroke="#d1d5db" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          No hay operarios registrados.
+        </div>
+      </div>
+
+      <!-- ═══ TAB CLIENTES ═══ -->
+      <div *ngIf="!isLoading && activeTab === 'clients'" class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr style="background: #3a8f8b;">
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Nombre</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">DNI / Teléfono</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Pedidos exitosos</th>
+              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Cliente frecuente</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let client of clients; let i = index"
+                [style.background]="i % 2 === 0 ? 'white' : '#f9fafb'"
+                style="border-bottom: 1px solid #f0f0f0;">
+              <td class="px-5 py-3 font-medium" style="color: #1f2937;">
+                {{ client.first_name }} {{ client.last_name }}
+              </td>
+              <td class="px-5 py-3">
+                <span class="font-mono text-xs block" style="color: #374151;">{{ client.dni }}</span>
+                <span class="text-xs" style="color: #9ca3af;">{{ client.phone }}</span>
+              </td>
+              <td class="px-5 py-3 text-center">
+                <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                      [style.background]="client.completed_orders_count >= 5 ? '#d1fae5' : '#f3f4f6'"
+                      [style.color]="client.completed_orders_count >= 5 ? '#065f46' : '#6b7280'">
+                  {{ client.completed_orders_count }}
+                </span>
+              </td>
+              <!-- Toggle estilo iPhone -->
+              <td class="px-5 py-3">
+                <button (click)="toggleFrequent(client)" type="button"
+                        class="relative inline-flex items-center cursor-pointer rounded-full focus:outline-none"
+                        style="width: 44px; height: 24px; transition: background-color 0.3s;"
+                        [style.background]="client.is_frequent ? '#3a8f8b' : '#d1d5db'"
+                        [attr.aria-label]="client.is_frequent ? 'Desactivar frecuente' : 'Activar frecuente'">
+                  <span class="absolute rounded-full bg-white shadow"
+                        style="width: 18px; height: 18px; top: 3px; transition: transform 0.3s cubic-bezier(.4,0,.2,1);"
+                        [style.transform]="client.is_frequent ? 'translateX(23px)' : 'translateX(3px)'">
+                  </span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="clients.length === 0"
+             class="px-6 py-12 text-center text-sm" style="color: #6b7280;">
+          No hay clientes registrados.
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- Modal: Crear Operario                                      -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="showCreateModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       style="background: rgba(0,0,0,0.4);"
+       (click)="closeCreateModal()">
+
+    <div class="modal-enter w-full max-w-lg rounded-2xl p-6 relative"
+         style="background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.2);"
+         (click)="$event.stopPropagation()">
+
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: #e6f4f4;">
+            <svg class="w-5 h-5" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+            </svg>
+          </div>
+          <h2 class="text-base font-bold" style="color: #1f2937;">Nuevo Operario</h2>
+        </div>
+        <button (click)="closeCreateModal()" class="p-1 rounded-lg cursor-pointer"
+                style="color: #9ca3af; background: transparent; border: none;"
+                onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#9ca3af'">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Error interno -->
+      <div *ngIf="createError" class="mb-4 px-3 py-2 rounded-lg text-sm flex items-center gap-2"
+           style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        {{ createError }}
+      </div>
+
+      <!-- Campos -->
+      <div class="space-y-4">
+
+        <!-- Nombre y Apellido -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Nombre</label>
+            <input type="text" [(ngModel)]="newOperator.first_name" placeholder="Pedro"
+                   class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                   style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                   onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Apellido</label>
+            <input type="text" [(ngModel)]="newOperator.last_name" placeholder="Gómez"
+                   class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                   style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                   onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+          </div>
+        </div>
+
+        <!-- DNI y Teléfono -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">DNI</label>
+            <input type="text" [(ngModel)]="newOperator.dni" placeholder="87654321" maxlength="8"
+                   class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                   style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                   onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Teléfono</label>
+            <input type="text" [(ngModel)]="newOperator.phone" placeholder="987654321"
+                   class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                   style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                   onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Contraseña temporal</label>
+          <input type="password" [(ngModel)]="newOperator.password" placeholder="Mínimo 8 caracteres"
+                 class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                 style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                 onfocus="this.style.borderColor='#3a8f8b'; this.style.boxShadow='0 0 0 3px rgba(58,143,139,0.12)'"
+                 onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+        </div>
+
+        <!-- Especialidades -->
+        <div>
+          <label class="block text-xs font-semibold mb-2 uppercase tracking-wider" style="color: #6b7280;">
+            Especialidades <span style="color: #c0392b;">*</span>
+          </label>
+          <div class="grid grid-cols-2 gap-2">
+            <label *ngFor="let sp of specialties"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all"
+                   [style.background]="newOperator.specialties[sp] ? '#e6f4f4' : '#f9fafb'"
+                   [style.border]="newOperator.specialties[sp] ? '1px solid #3a8f8b' : '1px solid #e5e7eb'">
+              <input type="checkbox" [(ngModel)]="newOperator.specialties[sp]"
+                     class="w-4 h-4 rounded cursor-pointer"
+                     style="accent-color: #3a8f8b;">
+              <span class="text-sm font-medium"
+                    [style.color]="newOperator.specialties[sp] ? '#3a8f8b' : '#374151'">
+                {{ specialtyLabel(sp) }}
+              </span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 mt-6">
+        <button (click)="closeCreateModal()" [disabled]="creating"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer"
+                style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+                onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+          Cancelar
+        </button>
+        <button (click)="submitCreateOperator()" [disabled]="creating"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer flex items-center justify-center gap-2"
+                style="background: #3a8f8b;"
+                onmouseover="this.style.background='#2e7874'" onmouseout="this.style.background='#3a8f8b'">
+          <svg *ngIf="creating" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ creating ? 'Creando...' : 'Crear Operario' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- Modal: Confirmar eliminación de operario                   -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="showDeleteModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       style="background: rgba(0,0,0,0.4);"
+       (click)="closeDeleteModal()">
+
+    <div class="modal-enter w-full max-w-sm rounded-2xl p-6 relative"
+         style="background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.2);"
+         (click)="$event.stopPropagation()">
+
+      <div class="flex flex-col items-center text-center mb-5">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3" style="background: #fff0f0;">
+          <svg class="w-6 h-6" fill="none" stroke="#e53e3e" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </div>
+        <h2 class="text-base font-bold" style="color: #1f2937;">Eliminar operario</h2>
+        <p class="text-sm mt-1" style="color: #6b7280;">
+          ¿Estás seguro de que deseas eliminar a
+          <span class="font-semibold" style="color: #1f2937;">{{ operatorFullName(deleteTarget!) }}</span>?
+          Si tiene pedidos en proceso, la operación será rechazada.
+        </p>
+      </div>
+
+      <!-- Error interno del modal -->
+      <div *ngIf="deleteError" class="mb-4 px-3 py-2 rounded-lg text-sm flex items-center gap-2"
+           style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        {{ deleteError }}
+      </div>
+
+      <div class="flex gap-3">
+        <button (click)="closeDeleteModal()" [disabled]="deleting"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer"
+                style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+                onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+          Cancelar
+        </button>
+        <button (click)="confirmDelete()" [disabled]="deleting"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer flex items-center justify-center gap-2"
+                style="background: #e53e3e;"
+                onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e53e3e'">
+          <svg *ngIf="deleting" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ deleting ? 'Eliminando...' : 'Sí, eliminar' }}
+        </button>
+      </div>
+
     </div>
   </div>
 

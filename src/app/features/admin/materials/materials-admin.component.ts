@@ -202,6 +202,8 @@ export class MaterialsAdminComponent {
     this.svc.updateMaterial(String(item.id), { name, unit_price: price }).subscribe({
       next: () => {
         this.editSaving = false;
+        this.editError  = '';
+        this.cd.detectChanges();
         this.closeEditModal();
         this.loadMaterials();
       },

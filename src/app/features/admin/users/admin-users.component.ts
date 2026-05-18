@@ -42,9 +42,10 @@ export class AdminUsersComponent implements OnInit {
   readonly specialtyLabel = (s: Specialty) => SPECIALTY_LABELS[s];
 
   // ── Modal crear operario ───────────────────────────────────────
-  showCreateModal = false;
-  creating        = false;
-  createError     = '';
+  showCreateModal           = false;
+  showNewOperatorPassword   = false;
+  creating                  = false;
+  createError               = '';
 
   newOperator = {
     dni:        '',
@@ -104,13 +105,15 @@ export class AdminUsersComponent implements OnInit {
       dni: '', first_name: '', last_name: '', phone: '', password: '',
       specialties: { LASER: false, PLOTTING: false, PRINTING_3D: false, MODEL: false }
     };
-    this.createError     = '';
-    this.showCreateModal = true;
+    this.createError              = '';
+    this.showNewOperatorPassword  = false;
+    this.showCreateModal          = true;
   }
 
   closeCreateModal(): void {
-    this.showCreateModal = false;
-    this.createError     = '';
+    this.showCreateModal         = false;
+    this.createError             = '';
+    this.showNewOperatorPassword = false;
   }
 
   submitCreateOperator(): void {

@@ -73,6 +73,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
             <a routerLink="/admin/orders" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Pedidos</a>
             <a routerLink="/admin/services" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Servicios</a>
             <a routerLink="/admin/materials" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Materiales</a>
+            <a routerLink="/admin/users" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Usuarios</a>
             <button (click)="logout()"
               class="ml-2 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white"
               style="background: #3a8f8b;"
@@ -403,7 +404,7 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
         <!-- ── fin GRÁFICO DE SERVICIOS ───────────────────────────────────────── -->
 
         <!-- Accesos rápidos -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-5">
 
           <a routerLink="/admin/orders"
              class="flex items-center gap-4 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer"
@@ -456,6 +457,25 @@ const C_XLY = C_BLY + 20;           // X labels Y   = 164
             <div class="min-w-0">
               <h2 class="font-bold text-sm" style="color: #1f2937;">Gestionar Materiales</h2>
               <p class="text-xs mt-0.5" style="color: #6b7280;">Precios, disponibilidad y catálogo</p>
+            </div>
+            <svg class="w-4 h-4 ml-auto shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
+
+          <a routerLink="/admin/users"
+             class="flex items-center gap-4 rounded-xl p-5 hover:shadow-md transition-shadow cursor-pointer"
+             style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                 style="background: #f0fafa; border: 1px solid #b2dedd;">
+              <svg class="w-5 h-5" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <div class="min-w-0">
+              <h2 class="font-bold text-sm" style="color: #1f2937;">Gestionar Usuarios</h2>
+              <p class="text-xs mt-0.5" style="color: #6b7280;">Operarios, clientes y roles</p>
             </div>
             <svg class="w-4 h-4 ml-auto shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>

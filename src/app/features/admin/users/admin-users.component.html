@@ -94,11 +94,12 @@
               <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">DNI</th>
               <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Teléfono</th>
               <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Especialidades</th>
-              <th class="px-5 py-3 text-left font-semibold text-white text-xs uppercase tracking-wider">Acciones</th>
+              <th class="px-5 py-3 text-center font-semibold text-white text-xs uppercase tracking-wider">Estado</th>
+              <th class="px-5 py-3 text-center font-semibold text-white text-xs uppercase tracking-wider">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let op of operators; let i = index"
+            <tr *ngFor="let op of operators; let i = index; trackBy: trackByOperatorId"
                 [style.background]="i % 2 === 0 ? 'white' : '#f9fafb'"
                 style="border-bottom: 1px solid #f0f0f0;">
               <td class="px-5 py-3 font-medium" style="color: #1f2937;">{{ operatorFullName(op) }}</td>
@@ -115,17 +116,58 @@
                         class="text-xs" style="color: #9ca3af;">—</span>
                 </div>
               </td>
+
+              <!-- ── Columna Estado (toggle) ── -->
+              <td class="px-5 py-3 text-center">
+                <div class="flex flex-col items-center gap-1">
+                  <button (click)="toggleOperatorActive(op)"
+                          [disabled]="togglingId === op.id"
+                          type="button"
+                          class="relative inline-flex items-center rounded-full focus:outline-none"
+                          [class.opacity-50]="togglingId === op.id"
+                          [class.cursor-not-allowed]="togglingId === op.id"
+                          [class.cursor-pointer]="togglingId !== op.id"
+                          style="width: 44px; height: 24px; transition: background-color 0.3s; border: none;"
+                          [style.background]="op.is_active ? '#3a8f8b' : '#d1d5db'"
+                          [attr.aria-label]="op.is_active ? 'Desactivar operario' : 'Activar operario'">
+                    <span class="absolute rounded-full bg-white shadow"
+                          style="width: 18px; height: 18px; top: 3px; transition: transform 0.3s cubic-bezier(.4,0,.2,1);"
+                          [style.transform]="op.is_active ? 'translateX(23px)' : 'translateX(3px)'">
+                    </span>
+                  </button>
+                  <span class="text-xs font-medium"
+                        [style.color]="op.is_active ? '#3a8f8b' : '#9ca3af'">
+                    {{ op.is_active ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- ── Columna Acciones (editar + eliminar) ── -->
               <td class="px-5 py-3">
-                <button (click)="openDeleteModal(op)" title="Eliminar operario"
-                        class="p-1.5 rounded-lg cursor-pointer"
-                        style="background: transparent; border: none; color: #6b7280;"
-                        onmouseover="this.style.background='#fff0f0'; this.style.color='#e53e3e'"
-                        onmouseout="this.style.background='transparent'; this.style.color='#6b7280'">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                  </svg>
-                </button>
+                <div class="flex items-center justify-center gap-1">
+                  <!-- Editar -->
+                  <button (click)="openEditModal(op)" title="Editar operario"
+                          class="p-1.5 rounded-lg cursor-pointer"
+                          style="background: transparent; border: none; color: #6b7280;"
+                          onmouseover="this.style.background='#eff6ff'; this.style.color='#2563eb'"
+                          onmouseout="this.style.background='transparent'; this.style.color='#6b7280'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                  </button>
+                  <!-- Eliminar -->
+                  <button (click)="openDeleteModal(op)" title="Eliminar operario"
+                          class="p-1.5 rounded-lg cursor-pointer"
+                          style="background: transparent; border: none; color: #6b7280;"
+                          onmouseover="this.style.background='#fff0f0'; this.style.color='#e53e3e'"
+                          onmouseout="this.style.background='transparent'; this.style.color='#6b7280'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -152,7 +194,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let client of clients; let i = index"
+            <tr *ngFor="let client of clients; let i = index; trackBy: trackByClientId"
                 [style.background]="i % 2 === 0 ? 'white' : '#f9fafb'"
                 style="border-bottom: 1px solid #f0f0f0;">
               <td class="px-5 py-3 font-medium" style="color: #1f2937;">
@@ -343,6 +385,130 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
           {{ creating ? 'Creando...' : 'Crear Operario' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- Modal: Editar Operario                                     -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="showEditModal"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4"
+       style="background: rgba(0,0,0,0.4);"
+       (click)="closeEditModal()">
+
+    <div class="modal-enter w-full max-w-lg rounded-2xl p-6 relative"
+         style="background: white; box-shadow: 0 20px 60px rgba(0,0,0,0.2);"
+         (click)="$event.stopPropagation()">
+
+      <!-- Cabecera -->
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: #eff6ff;">
+            <svg class="w-5 h-5" fill="none" stroke="#2563eb" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-base font-bold" style="color: #1f2937;">Editar Operario</h2>
+            <p class="text-xs" style="color: #6b7280;">{{ operatorFullName(editTarget!) }}</p>
+          </div>
+        </div>
+        <button (click)="closeEditModal()" class="p-1 rounded-lg cursor-pointer"
+                style="color: #9ca3af; background: transparent; border: none;"
+                onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#9ca3af'">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Error interno -->
+      <div *ngIf="editError" class="mb-4 px-3 py-2 rounded-lg text-sm flex items-center gap-2"
+           style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        {{ editError }}
+      </div>
+
+      <!-- Campos -->
+      <div class="space-y-4">
+
+        <!-- Nombre y Apellido -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Nombre</label>
+            <input type="text" [(ngModel)]="editOperator.first_name"
+                   class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                   style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                   onfocus="this.style.borderColor='#2563eb'; this.style.boxShadow='0 0 0 3px rgba(37,99,235,0.12)'"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">Apellido</label>
+            <input type="text" [(ngModel)]="editOperator.last_name"
+                   class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
+                   style="background: #f9fafb; border: 1px solid #e5e7eb; color: #1f2937;"
+                   onfocus="this.style.borderColor='#2563eb'; this.style.boxShadow='0 0 0 3px rgba(37,99,235,0.12)'"
+                   onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+          </div>
+        </div>
+
+        <!-- DNI (solo lectura) -->
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 uppercase tracking-wider" style="color: #6b7280;">
+            DNI <span class="normal-case font-normal ml-1" style="color: #9ca3af;">(no editable)</span>
+          </label>
+          <input type="text" [value]="editTarget?.user?.dni || '-'" disabled
+                 class="w-full px-3 py-2.5 rounded-lg text-sm"
+                 style="background: #f3f4f6; border: 1px solid #e5e7eb; color: #9ca3af; cursor: not-allowed;">
+        </div>
+
+        <!-- Especialidades -->
+        <div>
+          <label class="block text-xs font-semibold mb-2 uppercase tracking-wider" style="color: #6b7280;">
+            Especialidades <span style="color: #c0392b;">*</span>
+          </label>
+          <div class="grid grid-cols-2 gap-2">
+            <label *ngFor="let sp of specialties"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-all"
+                   [style.background]="editOperator.specialties[sp] ? '#eff6ff' : '#f9fafb'"
+                   [style.border]="editOperator.specialties[sp] ? '1px solid #2563eb' : '1px solid #e5e7eb'">
+              <input type="checkbox" [(ngModel)]="editOperator.specialties[sp]"
+                     class="w-4 h-4 rounded cursor-pointer"
+                     style="accent-color: #2563eb;">
+              <span class="text-sm font-medium"
+                    [style.color]="editOperator.specialties[sp] ? '#2563eb' : '#374151'">
+                {{ specialtyLabel(sp) }}
+              </span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 mt-6">
+        <button (click)="closeEditModal()" [disabled]="editing"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer"
+                style="background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;"
+                onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+          Cancelar
+        </button>
+        <button (click)="submitEditOperator()" [disabled]="editing"
+                class="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer flex items-center justify-center gap-2"
+                style="background: #2563eb;"
+                onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+          <svg *ngIf="editing" class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          {{ editing ? 'Guardando...' : 'Guardar cambios' }}
         </button>
       </div>
 

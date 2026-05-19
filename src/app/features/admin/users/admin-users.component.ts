@@ -1,15 +1,17 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AdminUsersService, UserClient, UserOperator } from './admin-users.service';
+import { forkJoin } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { AdminUsersService, UserClient, UserOperator, UpdateOperatorPayload } from './admin-users.service';
 
 type Specialty = 'LASER' | 'PLOTTING' | 'PRINTING_3D' | 'MODEL';
 
 const SPECIALTY_LABELS: Record<Specialty, string> = {
-  LASER:       'Corte Láser',
+  LASER:       'Corte Laser',
   PLOTTING:    'Ploteo',
-  PRINTING_3D: 'Impresión 3D',
+  PRINTING_3D: 'Impresion 3D',
   MODEL:       'Maquetas'
 };
 
@@ -28,10 +30,11 @@ const SPECIALTY_LABELS: Record<Specialty, string> = {
 })
 export class AdminUsersComponent implements OnInit {
   private usersService = inject(AdminUsersService);
+  private cdr          = inject(ChangeDetectorRef);
 
   activeTab: 'operators' | 'clients' = 'operators';
 
-  clients: UserClient[]   = [];
+  clients: UserClient[]     = [];
   operators: UserOperator[] = [];
 
   isLoading = true;
@@ -41,11 +44,11 @@ export class AdminUsersComponent implements OnInit {
   readonly specialties: Specialty[] = ['LASER', 'PLOTTING', 'PRINTING_3D', 'MODEL'];
   readonly specialtyLabel = (s: Specialty) => SPECIALTY_LABELS[s];
 
-  // ── Modal crear operario ───────────────────────────────────────
-  showCreateModal           = false;
-  showNewOperatorPassword   = false;
-  creating                  = false;
-  createError               = '';
+  // -- Modal crear operario ------------------------------------------
+  showCreateModal         = false;
+  showNewOperatorPassword = false;
+  creating                = false;
+  createError             = '';
 
   newOperator = {
     dni:        '',
@@ -56,13 +59,28 @@ export class AdminUsersComponent implements OnInit {
     specialties: { LASER: false, PLOTTING: false, PRINTING_3D: false, MODEL: false } as Record<Specialty, boolean>
   };
 
-  // ── Modal eliminar operario ────────────────────────────────────
-  showDeleteModal  = false;
-  deleteTarget: UserOperator | null = null;
-  deleting         = false;
-  deleteError      = '';
+  // -- Modal editar operario -----------------------------------------
+  showEditModal = false;
+  editing       = false;
+  editError     = '';
+  editTarget: UserOperator | null = null;
 
-  // ─────────────────────────────────────────────────────────────
+  editOperator = {
+    first_name:  '',
+    last_name:   '',
+    specialties: { LASER: false, PLOTTING: false, PRINTING_3D: false, MODEL: false } as Record<Specialty, boolean>
+  };
+
+  // -- Toggle activo/inactivo ----------------------------------------
+  togglingId: string | null = null;
+
+  // -- Modal eliminar operario ---------------------------------------
+  showDeleteModal = false;
+  deleteTarget: UserOperator | null = null;
+  deleting        = false;
+  deleteError     = '';
+
+  // -----------------------------------------------------------------
 
   ngOnInit(): void { this.loadData(); }
 
@@ -72,42 +90,50 @@ export class AdminUsersComponent implements OnInit {
     this.success = null;
   }
 
+  // Carga inicial: ambas listas en paralelo
   loadData(): void {
     this.isLoading = true;
+    this.error     = null;
+
+    forkJoin({
+      operators: this.usersService.getOperators(),
+      clients:   this.usersService.getClients()
+    }).pipe(
+      finalize(() => {
+        this.isLoading = false;
+        // Forzar deteccion de cambios para garantizar re-render
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: ({ operators, clients }) => {
+        this.operators = operators.data || [];
+        this.clients   = clients.data   || [];
+      },
+      error: () => {
+        this.error = 'Error al cargar los usuarios. Verifica tu conexion o permisos.';
+      }
+    });
+  }
+
+  // Recarga solo operarios (para despues de crear)
+  private reloadOperators(): void {
     this.usersService.getOperators().subscribe({
       next: (res) => {
         this.operators = res.data || [];
-        this.loadClients();
-      },
-      error: () => {
-        this.error     = 'Error al cargar operarios.';
-        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  loadClients(): void {
-    this.usersService.getClients().subscribe({
-      next: (res) => {
-        this.clients   = res.data || [];
-        this.isLoading = false;
-      },
-      error: () => {
-        this.error     = 'Error al cargar clientes.';
-        this.isLoading = false;
-      }
-    });
-  }
-
-  // ── Crear operario ─────────────────────────────────────────────
+  // -- Crear operario ------------------------------------------------
   openCreateModal(): void {
     this.newOperator = {
       dni: '', first_name: '', last_name: '', phone: '', password: '',
       specialties: { LASER: false, PLOTTING: false, PRINTING_3D: false, MODEL: false }
     };
-    this.createError              = '';
-    this.showNewOperatorPassword  = false;
-    this.showCreateModal          = true;
+    this.createError             = '';
+    this.showNewOperatorPassword = false;
+    this.showCreateModal         = true;
   }
 
   closeCreateModal(): void {
@@ -122,8 +148,8 @@ export class AdminUsersComponent implements OnInit {
     if (!first_name.trim()) { this.createError = 'El nombre es obligatorio.'; return; }
     if (!last_name.trim())  { this.createError = 'El apellido es obligatorio.'; return; }
     if (!dni.trim())        { this.createError = 'El DNI es obligatorio.'; return; }
-    if (!phone.trim())      { this.createError = 'El teléfono es obligatorio.'; return; }
-    if (!password.trim())   { this.createError = 'La contraseña es obligatoria.'; return; }
+    if (!phone.trim())      { this.createError = 'El telefono es obligatorio.'; return; }
+    if (!password.trim())   { this.createError = 'La contrasena es obligatoria.'; return; }
 
     const selectedSpecs = this.specialties.filter(s => this.newOperator.specialties[s]);
     if (selectedSpecs.length === 0) {
@@ -137,22 +163,132 @@ export class AdminUsersComponent implements OnInit {
     this.usersService.createOperator({
       dni, first_name, last_name, phone, password,
       specialties: selectedSpecs
-    }).subscribe({
+    }).pipe(
+      finalize(() => this.creating = false)
+    ).subscribe({
       next: () => {
-        this.creating = false;
         this.closeCreateModal();
         this.success = 'Operario creado exitosamente.';
-        this.loadData();
+        this.reloadOperators();
         setTimeout(() => this.success = null, 4000);
       },
       error: (err) => {
-        this.creating    = false;
-        this.createError = err?.error?.message || 'No se pudo crear el operario.';
+        this.createError = err?.name === 'TimeoutError'
+          ? 'La operacion tardo demasiado. Intenta nuevamente.'
+          : (err?.error?.message || 'No se pudo crear el operario.');
       }
     });
   }
 
-  // ── Eliminar operario ──────────────────────────────────────────
+  // -- Editar operario -----------------------------------------------
+  openEditModal(op: UserOperator): void {
+    this.editTarget = op;
+    this.editError  = '';
+
+    const specs: Record<Specialty, boolean> = {
+      LASER: false, PLOTTING: false, PRINTING_3D: false, MODEL: false
+    };
+    if (op.specialties) {
+      op.specialties.forEach((s: any) => {
+        const key = (typeof s === 'string' ? s : s?.specialty) as Specialty;
+        if (key && key in specs) specs[key] = true;
+      });
+    }
+
+    this.editOperator = {
+      first_name:  op.user?.first_name ?? '',
+      last_name:   op.user?.last_name  ?? '',
+      specialties: specs
+    };
+    this.showEditModal = true;
+  }
+
+  closeEditModal(): void {
+    this.showEditModal = false;
+    this.editTarget    = null;
+    this.editError     = '';
+    this.editing       = false;
+  }
+
+  submitEditOperator(): void {
+    const { first_name, last_name } = this.editOperator;
+    if (!first_name.trim()) { this.editError = 'El nombre es obligatorio.'; return; }
+    if (!last_name.trim())  { this.editError = 'El apellido es obligatorio.'; return; }
+
+    const selectedSpecs = this.specialties.filter(s => this.editOperator.specialties[s]);
+    if (selectedSpecs.length === 0) {
+      this.editError = 'Debes seleccionar al menos una especialidad.';
+      return;
+    }
+
+    if (!this.editTarget) return;
+
+    this.editing   = true;
+    this.editError = '';
+
+    const payload: UpdateOperatorPayload = {
+      first_name:  first_name.trim(),
+      last_name:   last_name.trim(),
+      specialties: selectedSpecs
+    };
+
+    const targetId = this.editTarget.id;
+
+    this.usersService.updateOperator(targetId, payload).pipe(
+      finalize(() => this.editing = false)
+    ).subscribe({
+      next: () => {
+        // Actualizar localmente sin recargar toda la lista
+        const idx = this.operators.findIndex(o => o.id === targetId);
+        if (idx !== -1 && this.operators[idx].user) {
+          this.operators[idx].user!.first_name = first_name.trim();
+          this.operators[idx].user!.last_name  = last_name.trim();
+          this.operators[idx].specialties      = selectedSpecs;
+          // Crear nueva referencia de array para que Angular detecte el cambio
+          this.operators = [...this.operators];
+        }
+        this.closeEditModal();
+        this.success = 'Operario actualizado exitosamente.';
+        setTimeout(() => this.success = null, 4000);
+      },
+      error: (err) => {
+        this.editError = err?.name === 'TimeoutError'
+          ? 'La operacion tardo demasiado. Intenta nuevamente.'
+          : (err?.error?.message || 'No se pudo actualizar el operario.');
+      }
+    });
+  }
+
+  // -- Toggle activo / inactivo (actualiza solo el item local) -------
+  toggleOperatorActive(op: UserOperator): void {
+    if (this.togglingId === op.id) return;
+    this.togglingId = op.id;
+
+    this.usersService.toggleOperatorActive(op.id).pipe(
+      finalize(() => this.togglingId = null)
+    ).subscribe({
+      next: (res) => {
+        const updatedActive = res?.data?.is_active ?? !op.is_active;
+        // Mutar solo el item afectado y crear nueva referencia de array
+        const idx = this.operators.findIndex(o => o.id === op.id);
+        if (idx !== -1) {
+          this.operators[idx] = { ...this.operators[idx], is_active: updatedActive };
+          this.operators = [...this.operators];
+        }
+        this.success = `Operario ${updatedActive ? 'activado' : 'desactivado'} correctamente.`;
+        setTimeout(() => this.success = null, 4000);
+      },
+      error: (err) => {
+        const msg = err?.name === 'TimeoutError'
+          ? 'La operacion tardo demasiado. Intenta nuevamente.'
+          : (err?.error?.message || 'No se pudo cambiar el estado del operario.');
+        this.error = msg;
+        setTimeout(() => this.error = null, 4000);
+      }
+    });
+  }
+
+  // -- Eliminar operario (elimina del array local) -------------------
   openDeleteModal(op: UserOperator): void {
     this.deleteTarget    = op;
     this.deleteError     = '';
@@ -171,22 +307,25 @@ export class AdminUsersComponent implements OnInit {
     this.deleting    = true;
     this.deleteError = '';
 
-    this.usersService.deleteOperator(op.id).subscribe({
+    this.usersService.deleteOperator(op.id).pipe(
+      finalize(() => this.deleting = false)
+    ).subscribe({
       next: () => {
-        this.deleting = false;
+        // Eliminar del array local sin recargar
+        this.operators = this.operators.filter(o => o.id !== op.id);
         this.closeDeleteModal();
         this.success = 'Operario eliminado exitosamente.';
-        this.loadData();
         setTimeout(() => this.success = null, 4000);
       },
       error: (err) => {
-        this.deleting    = false;
-        this.deleteError = err?.error?.message || 'No se pudo eliminar el operario.';
+        this.deleteError = err?.name === 'TimeoutError'
+          ? 'La operacion tardo demasiado. Intenta nuevamente.'
+          : (err?.error?.message || 'No se pudo eliminar el operario.');
       }
     });
   }
 
-  // ── Cliente frecuente ──────────────────────────────────────────
+  // -- Cliente frecuente ---------------------------------------------
   toggleFrequent(client: UserClient): void {
     const newValue = !client.is_frequent;
     this.usersService.toggleFrequentClient(client.id, newValue).subscribe({
@@ -202,9 +341,12 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  // ── Helpers ────────────────────────────────────────────────────
+  // -- Helpers -------------------------------------------------------
+  trackByOperatorId(_: number, op: UserOperator): string { return op.id; }
+  trackByClientId(_: number, c: UserClient): string      { return c.id; }
+
   getSpecialtiesLabel(specialties?: any[]): string {
-    if (!specialties || specialties.length === 0) return '—';
+    if (!specialties || specialties.length === 0) return '-';
     return specialties.map(s => {
       const key = (s.specialty || s) as Specialty;
       return SPECIALTY_LABELS[key] ?? key;
@@ -212,6 +354,6 @@ export class AdminUsersComponent implements OnInit {
   }
 
   operatorFullName(op: UserOperator): string {
-    return `${op.user?.first_name ?? ''} ${op.user?.last_name ?? ''}`.trim() || '—';
+    return `${op.user?.first_name ?? ''} ${op.user?.last_name ?? ''}`.trim() || '-';
   }
 }

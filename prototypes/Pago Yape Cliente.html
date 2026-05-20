@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>SIGEPED · Pago — #PED-0042</title>
+<meta name="viewport" content="width=1280" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --brand:        #3a8f8b;
+    --brand-dark:   #2e7874;
+    --brand-soft:   #c8d8d6;
+    --brand-mid:    #a8c0be;
+
+    --sidebar-bg:   rgba(30,75,72,0.92);
+    --navbar-bg:    rgba(42,100,97,0.95);
+
+    --surface-1:    rgba(255,255,255,0.75);
+    --surface-2:    rgba(255,255,255,0.55);
+    --surface-input:rgba(240,240,240,0.80);
+    --line:         #e0e0e0;
+    --line-soft:    rgba(224,224,224,0.65);
+
+    --ink:          #2c2c2c;
+    --ink-2:        #333;
+    --ink-mute:     #666;
+    --ink-dim:      #888;
+    --ink-faint:    #999;
+
+    --info-bg:      rgba(58,143,139,0.08);
+    --info-line:    rgba(58,143,139,0.20);
+    --info-strong:  rgba(58,143,139,0.30);
+
+    --warn-fg:      #b8860b;
+    --warn-bg:      #fff7e6;
+    --warn-line:    #f5d39a;
+
+    --error-bg:     #fff0f0;
+    --error-line:   #f5c6c6;
+    --error-fg:     #c0392b;
+
+    --ok:           #2f855a;
+    --ok-strong:    #48bb78;
+    --ok-bg:        rgba(72,187,120,0.14);
+    --ok-line:      rgba(47,133,90,0.30);
+
+    --yape:         #722f8e;
+    --yape-2:       #5b2374;
+
+    --shadow-sm: 0 1px 2px rgba(74,111,109,0.08);
+    --shadow-md: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;color:var(--ink);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+      linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+    background-attachment:fixed;min-height:100vh;
+  }
+  body::before, body::after{content:"";position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);opacity:.40;z-index:0}
+  body::before{width:360px;height:360px;background:#c8d8d6;top:-100px;right:-80px}
+  body::after{width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.30}
+
+  .mono{font-family:'Geist Mono',ui-monospace,monospace}
+  .tnum{font-variant-numeric:tabular-nums}
+
+  /* ===== Shell ===== */
+  .app{display:grid;grid-template-columns:200px 1fr;min-height:100vh;position:relative;z-index:1}
+
+  /* ===== Sidebar ===== */
+  .sidebar{background:var(--sidebar-bg);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);color:#e6f0ee;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;box-shadow:inset -1px 0 0 rgba(255,255,255,0.05)}
+  .brand{display:flex;align-items:center;gap:11px;padding:18px;height:64px;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .brand-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#3a8f8b 0%, #2e7874 100%);display:grid;place-items:center;box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -4px rgba(58,143,139,0.5)}
+  .brand-name{font-weight:600;letter-spacing:-0.01em;font-size:15px;color:#fff}
+  .brand-sub{font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px}
+
+  .nav-label{font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);text-transform:uppercase;padding:18px 18px 8px;font-weight:600}
+  .nav{display:flex;flex-direction:column;padding:0 8px;gap:2px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:13.5px;font-weight:500;border-left:3px solid transparent;transition:background .14s, color .14s}
+  .nav a:hover{background:rgba(255,255,255,0.06);color:#fff}
+  .nav a.active{background:rgba(58,143,139,0.22);color:#fff;border-left-color:var(--brand);border-radius:0 8px 8px 0;padding-left:14px;font-weight:600}
+  .nav .icon{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav .badge{margin-left:auto;font-size:11px;background:rgba(255,255,255,0.12);color:#fff;padding:1px 7px;border-radius:999px;font-weight:600;font-family:'Geist Mono',monospace}
+  .nav a.active .badge{background:var(--brand);color:#fff}
+  .nav .badge.alert{background:var(--ok-strong);color:#fff}
+
+  .side-foot{margin-top:auto;padding:18px;border-top:1px solid rgba(255,255,255,0.08)}
+  .help-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:11px;padding:13px}
+  .help-card .ttl{font-size:12.5px;font-weight:600;color:#fff;margin-bottom:3px}
+  .help-card .sub{font-size:11px;color:rgba(255,255,255,0.6);line-height:1.4;margin-bottom:9px}
+  .help-card .lnk{font-size:11.5px;color:#c8e8e5;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .help-card .lnk:hover{color:#fff}
+  .op-card{margin-top:14px;display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.05)}
+  .op-card .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2)}
+  .op-card .nm{font-size:12.5px;font-weight:600;color:#fff;line-height:1.2}
+  .op-card .rl{font-size:10.5px;color:rgba(255,255,255,0.55)}
+
+  /* ===== Navbar ===== */
+  .navbar{height:64px;background:var(--navbar-bg);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);color:#fff;display:flex;align-items:center;padding:0 28px;gap:24px;position:sticky;top:0;z-index:5;box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 20px -16px rgba(0,0,0,0.4)}
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.7)}
+  .crumbs .here{color:#fff;font-weight:600}
+  .crumbs .sep{color:rgba(255,255,255,0.4)}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .icon-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;color:#fff;cursor:pointer;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);position:relative}
+  .icon-btn:hover{background:rgba(255,255,255,0.14)}
+  .icon-btn .bell-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:var(--ok-strong);color:#fff;border-radius:999px;font-size:10.5px;font-weight:700;font-family:'Geist Mono',monospace;display:grid;place-items:center;box-shadow:0 0 0 2px rgba(42,100,97,1)}
+  .avatar-chip{display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.1);cursor:pointer;color:#fff}
+  .avatar-chip:hover{background:rgba(255,255,255,0.16)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25)}
+  .avatar-name{font-size:13px;font-weight:600;line-height:1.1}
+  .avatar-role{font-size:10.5px;color:rgba(255,255,255,0.65)}
+
+  /* ===== Page ===== */
+  .page{padding:24px 36px 56px;max-width:1280px;margin:0 auto}
+  .page-crumbs{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-mute);margin-bottom:14px;flex-wrap:wrap}
+  .page-crumbs a{color:var(--ink-mute);text-decoration:none}
+  .page-crumbs a:hover{color:var(--brand-dark)}
+  .page-crumbs .sep{color:var(--ink-faint)}
+  .page-crumbs .here{color:var(--ink);font-weight:600}
+
+  .page-head{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+  .title-icon{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(58,143,139,0.18),rgba(46,120,116,0.10));color:var(--brand-dark);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(58,143,139,0.28)}
+  .page-title{font-size:24px;font-weight:600;letter-spacing:-0.02em;color:var(--ink)}
+  .page-sub{font-size:13.5px;color:var(--ink-mute);margin-top:4px}
+
+  /* ===== Grid ===== */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  .col{display:flex;flex-direction:column;gap:18px}
+
+  /* ===== Card ===== */
+  .card{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);
+    border-radius:14px;padding:22px 24px;
+    box-shadow:var(--shadow-md);
+  }
+  .card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+  .card-title{font-size:15px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);display:flex;align-items:center;gap:9px}
+  .card-title svg{color:var(--brand-dark)}
+
+  /* ===== Resumen del pedido ===== */
+  .order-rows{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;font-size:13.5px;margin-bottom:14px}
+  .order-rows .k{color:var(--ink-mute);font-weight:500}
+  .order-rows .v{color:var(--ink);font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+  .order-rows .v.code{font-family:'Geist Mono',monospace;font-weight:600;color:var(--brand-dark)}
+
+  .total-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 0;border-top:1px solid var(--line-soft);
+    font-size:13.5px;color:var(--ink-mute);
+  }
+  .total-row .amount{font-family:'Geist Mono',monospace;font-size:15px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+
+  .pay-now-box{
+    background:linear-gradient(180deg, rgba(58,143,139,0.10), rgba(58,143,139,0.05));
+    border:1px solid var(--info-strong);
+    border-radius:12px;padding:18px 20px;
+    margin-top:10px;
+  }
+  .pay-now-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .pay-now-label{font-size:13px;color:var(--brand-dark);font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+  .pay-now-amount{font-family:'Geist Mono',monospace;font-size:34px;font-weight:700;letter-spacing:-0.02em;color:var(--brand-dark);font-variant-numeric:tabular-nums;line-height:1}
+  .pay-now-amount .cur{font-size:18px;font-weight:600;color:var(--brand-dark);opacity:.75;margin-right:5px;vertical-align:5px}
+  .pay-now-hint{font-size:11.5px;color:var(--ink-mute);margin-top:9px;display:flex;align-items:center;gap:6px}
+  .pay-now-hint svg{color:var(--brand-dark)}
+
+  .meta-row{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .badge-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11.5px;font-weight:600;
+    padding:4px 11px 4px 9px;border-radius:999px;
+    color:var(--brand-dark);background:var(--info-bg);
+    border:1px solid var(--info-strong);
+    text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .badge-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--brand)}
+
+  .warn-row{
+    display:flex;align-items:center;gap:10px;
+    background:var(--warn-bg);border:1px solid var(--warn-line);
+    border-radius:10px;padding:10px 14px;margin-top:14px;
+    font-size:13px;color:var(--warn-fg);font-weight:600;
+  }
+  .warn-row svg{flex-shrink:0}
+  .warn-row b{font-family:'Geist Mono',monospace}
+
+  /* ===== Instructions ===== */
+  .steps{display:flex;flex-direction:column;gap:14px;margin-top:4px}
+  .step{
+    display:grid;grid-template-columns:36px 1fr;gap:14px;align-items:start;
+  }
+  .step-num{
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    color:#fff;display:grid;place-items:center;
+    font-weight:700;font-size:13px;
+    box-shadow:0 6px 14px -6px rgba(58,143,139,0.5), inset 0 0 0 1px rgba(255,255,255,0.20);
+    flex-shrink:0;
+  }
+  .step-title{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.35}
+  .step-title b{font-family:'Geist Mono',monospace;color:var(--brand-dark)}
+  .step-sub{font-size:12.5px;color:var(--ink-mute);line-height:1.45;margin-top:3px}
+
+  .info-banner{
+    margin-top:16px;
+    background:var(--info-bg);border:1px solid var(--info-line);
+    border-radius:10px;padding:11px 14px;
+    display:flex;align-items:flex-start;gap:9px;
+    font-size:12.5px;color:var(--brand-dark);line-height:1.5;
+  }
+  .info-banner svg{flex:0 0 14px;margin-top:1px}
+
+  /* ===== Yape card ===== */
+  .yape-card{
+    background:linear-gradient(160deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
+    border:1px solid var(--line);border-radius:14px;
+    padding:22px 24px;box-shadow:var(--shadow-md);
+  }
+  .yape-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .yape-logo{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:6px 12px 6px 6px;
+    background:#fff;border:1px solid var(--line);border-radius:999px;
+    box-shadow:0 2px 4px rgba(0,0,0,0.04);
+  }
+  .yape-mark{
+    width:28px;height:28px;border-radius:8px;
+    background:linear-gradient(135deg,var(--yape),var(--yape-2));
+    color:#fff;font-weight:800;font-size:13px;
+    display:grid;place-items:center;letter-spacing:-0.02em;
+    box-shadow:0 4px 10px -4px rgba(114,47,142,0.5);
+  }
+  .yape-logo .ttl{font-size:13.5px;font-weight:700;color:var(--yape-2);letter-spacing:0.02em}
+  .yape-tag{font-size:11px;color:var(--ink-dim);font-weight:500;display:flex;align-items:center;gap:5px}
+  .yape-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--ok-strong)}
+
+  .qr-wrap{
+    width:220px;height:220px;margin:0 auto 16px;
+    background:#fff;border:2px dashed var(--brand-soft);
+    border-radius:14px;
+    display:grid;place-items:center;position:relative;
+    box-shadow:inset 0 0 0 8px #fff, 0 8px 20px -10px rgba(58,143,139,0.30);
+  }
+  .qr-inner{
+    width:170px;height:170px;
+    background-image:
+      linear-gradient(45deg, var(--line) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--line) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--line) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--line) 75%);
+    background-size:14px 14px;background-position:0 0, 0 7px, 7px -7px, -7px 0;
+    border-radius:6px;position:relative;
+    display:grid;place-items:center;
+  }
+  .qr-inner::before, .qr-inner::after{
+    content:"";position:absolute;width:38px;height:38px;background:#fff;
+    box-shadow:inset 0 0 0 3px var(--ink), inset 0 0 0 8px #fff, inset 0 0 0 12px var(--ink);
+    border-radius:4px;
+  }
+  .qr-inner::before{top:6px;left:6px}
+  .qr-inner::after{top:6px;right:6px}
+  .qr-center{
+    position:absolute;width:38px;height:38px;background:#fff;
+    bottom:6px;left:6px;box-shadow:inset 0 0 0 3px var(--ink), inset 0 0 0 8px #fff, inset 0 0 0 12px var(--ink);
+    border-radius:4px;
+  }
+  .qr-label{
+    position:relative;z-index:2;background:#fff;padding:3px 10px;border-radius:999px;
+    border:1px solid var(--line);font-size:11px;font-weight:700;color:var(--yape-2);letter-spacing:0.06em;text-transform:uppercase;
+    font-family:'Geist Mono',monospace;
+  }
+
+  .yape-info{
+    background:rgba(255,255,255,0.6);border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  }
+  .yape-info-row{display:flex;flex-direction:column;gap:3px}
+  .yape-info-row.full{grid-column:1 / -1}
+  .yi-k{font-size:11px;font-weight:600;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em}
+  .yi-v{font-size:14px;font-weight:600;color:var(--ink);font-family:'Geist Mono',monospace;letter-spacing:0.02em;display:flex;align-items:center;gap:7px}
+  .yi-v.name{font-family:'Geist',sans-serif;letter-spacing:-0.01em}
+  .copy-btn{
+    width:24px;height:24px;display:grid;place-items:center;
+    background:rgba(58,143,139,0.10);border:1px solid var(--info-strong);
+    color:var(--brand-dark);border-radius:6px;cursor:pointer;
+  }
+  .copy-btn:hover{background:rgba(58,143,139,0.18)}
+  .yi-amount{
+    background:linear-gradient(180deg, rgba(58,143,139,0.10), transparent);
+    border:1px solid var(--info-strong);border-radius:10px;
+    padding:10px 14px;margin-top:8px;grid-column:1 / -1;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .yi-amount-label{font-size:11.5px;font-weight:600;color:var(--brand-dark);text-transform:uppercase;letter-spacing:0.04em}
+  .yi-amount-val{font-family:'Geist Mono',monospace;font-size:22px;font-weight:700;color:var(--brand-dark);font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+  .yi-amount-val .cur{font-size:13px;font-weight:600;opacity:.75;margin-right:4px;vertical-align:3px}
+
+  /* ===== Upload card ===== */
+  .upload-zone{
+    border:2px dashed var(--brand-soft);
+    background:rgba(200,216,214,0.20);
+    border-radius:14px;
+    padding:26px 20px;text-align:center;
+    transition:background .14s, border-color .14s;
+    cursor:pointer;
+  }
+  .upload-zone:hover{background:rgba(200,216,214,0.35);border-color:var(--brand)}
+  .upload-icon{
+    width:48px;height:48px;border-radius:12px;margin:0 auto 12px;
+    background:rgba(58,143,139,0.12);
+    color:var(--brand-dark);
+    display:grid;place-items:center;
+    box-shadow:inset 0 0 0 1px rgba(58,143,139,0.20);
+  }
+  .upload-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px}
+  .upload-sub{font-size:12px;color:var(--ink-mute);margin-bottom:14px}
+  .upload-formats{font-size:11px;color:var(--ink-dim);margin-top:10px;font-family:'Geist Mono',monospace}
+
+  .uploaded-row{
+    display:flex;align-items:center;gap:12px;
+    background:rgba(72,187,120,0.10);
+    border:1px solid var(--ok-line);
+    border-radius:11px;padding:11px 14px;
+    margin-top:14px;
+  }
+  .uploaded-thumb{
+    width:42px;height:42px;border-radius:8px;
+    background:#fff;border:1px solid var(--ok-line);
+    display:grid;place-items:center;color:var(--ok);flex-shrink:0;
+    position:relative;overflow:hidden;
+  }
+  .uploaded-thumb::before{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(135deg, rgba(72,187,120,0.10), rgba(58,143,139,0.10));
+  }
+  .uploaded-thumb svg{position:relative;z-index:1}
+  .uploaded-meta{flex:1;min-width:0}
+  .uploaded-name{font-size:13px;font-weight:600;color:var(--ink);font-family:'Geist Mono',monospace;display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .uploaded-name svg{color:var(--ok);flex-shrink:0}
+  .uploaded-info{font-size:11.5px;color:var(--ink-mute);margin-top:2px;display:flex;align-items:center;gap:8px}
+  .uploaded-info .ok{color:var(--ok);font-weight:600;display:inline-flex;align-items:center;gap:4px}
+  .remove-btn{
+    width:30px;height:30px;display:grid;place-items:center;
+    background:rgba(192,57,43,0.08);border:1px solid var(--error-line);
+    color:var(--error-fg);border-radius:8px;cursor:pointer;flex-shrink:0;
+  }
+  .remove-btn:hover{background:rgba(192,57,43,0.16)}
+
+  /* ===== Buttons ===== */
+  .btn{
+    font-family:inherit;font-size:13.5px;font-weight:600;
+    padding:10px 18px;border-radius:10px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:1px solid transparent;
+    transition:background .14s, transform .08s, filter .14s, box-shadow .14s;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:linear-gradient(180deg,var(--brand) 0%, var(--brand-dark) 100%);color:#fff;border-color:var(--brand-dark);box-shadow:0 10px 22px -8px rgba(58,143,139,0.55), 0 0 0 1px rgba(255,255,255,0.15) inset}
+  .btn.primary:hover{filter:brightness(1.06)}
+  .btn.primary.lg{padding:14px 22px;font-size:14px;width:100%}
+  .btn.ghost{background:rgba(255,255,255,0.55);color:var(--ink-2);border-color:var(--line)}
+  .btn.ghost:hover{background:#fff;border-color:var(--brand-mid);color:var(--brand-dark)}
+
+  .send-foot{
+    margin-top:11px;text-align:center;font-size:12px;color:var(--ink-mute);
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .send-foot svg{color:var(--brand-dark)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/>
+          <path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">SIGEPED</div>
+        <div class="brand-sub">Cliente</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Mi cuenta</div>
+    <nav class="nav">
+      <a href="Dashboard Cliente.html">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        Inicio
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+        Nuevo pedido
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        Mis pedidos
+        <span class="badge">9</span>
+      </a>
+      <a class="active" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+        Pagos
+        <span class="badge">1</span>
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+        Notificaciones
+        <span class="badge alert">1</span>
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="help-card">
+        <div class="ttl">¿Problemas con el pago?</div>
+        <div class="sub">Escríbenos y te ayudamos a resolverlo</div>
+        <a class="lnk" href="#">Contactar soporte
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="op-card">
+        <div class="av">JP</div>
+        <div>
+          <div class="nm">Juan Pérez</div>
+          <div class="rl">Cliente</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ===== Navbar ===== -->
+    <header class="navbar">
+      <div class="crumbs">
+        <span>Mi cuenta</span>
+        <span class="sep">/</span>
+        <span class="here">Pago</span>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" title="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="bell-badge">1</span>
+        </button>
+        <div class="avatar-chip">
+          <div class="avatar">JP</div>
+          <div>
+            <div class="avatar-name">Juan Pérez</div>
+            <div class="avatar-role">Cliente</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Page ===== -->
+    <div class="page">
+
+      <nav class="page-crumbs">
+        <a href="Dashboard Cliente.html">Inicio</a>
+        <span class="sep">›</span>
+        <a href="#">Mis pedidos</a>
+        <span class="sep">›</span>
+        <a href="#">#PED-0042</a>
+        <span class="sep">›</span>
+        <span class="here">Pago</span>
+      </nav>
+
+      <div class="page-head">
+        <div class="title-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+        </div>
+        <div>
+          <div class="page-title">Realizar pago</div>
+          <div class="page-sub">Adelanto del 50% por Yape · Pedido #PED-0042</div>
+        </div>
+      </div>
+
+      <div class="grid">
+
+        <!-- ============ LEFT ============ -->
+        <div class="col">
+
+          <!-- Resumen del pedido -->
+          <section class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+                Resumen del pedido
+              </div>
+            </div>
+
+            <div class="order-rows">
+              <div class="k">Código</div>
+              <div class="v code">#PED-0042</div>
+              <div class="k">Servicio</div>
+              <div class="v">Corte láser</div>
+              <div class="k">Material</div>
+              <div class="v">MDF 3 mm — 25 unidades</div>
+            </div>
+
+            <div class="total-row">
+              <span>Total del pedido</span>
+              <span class="amount">S/ 137.50</span>
+            </div>
+
+            <div class="pay-now-box">
+              <div class="pay-now-row">
+                <div>
+                  <div class="pay-now-label">Monto a pagar ahora · 50%</div>
+                </div>
+                <div class="pay-now-amount"><span class="cur">S/</span>68.75</div>
+              </div>
+              <div class="pay-now-hint">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>
+                El 50% restante se paga al recoger tu pedido en tienda
+              </div>
+            </div>
+
+            <div class="meta-row">
+              <span class="badge-pill">Pago adelanto — cliente nuevo</span>
+            </div>
+
+            <div class="warn-row">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              Tu presupuesto vence en <b>18 horas</b>
+            </div>
+          </section>
+
+          <!-- Instrucciones de pago -->
+          <section class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
+                Instrucciones de pago
+              </div>
+            </div>
+
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">1</div>
+                <div>
+                  <div class="step-title">Transfiere <b>S/ 68.75</b> al Yape de la derecha</div>
+                  <div class="step-sub">Usa el QR escaneando desde tu app o ingresa el número de celular manualmente.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div>
+                  <div class="step-title">Toma captura de la transferencia</div>
+                  <div class="step-sub">Asegúrate de que se vea el monto, el destinatario y el código de operación.</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div>
+                  <div class="step-title">Súbela en el campo de abajo para confirmar</div>
+                  <div class="step-sub">Adjunta la captura como JPG o PNG y envíala desde el botón principal.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-banner">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>
+              <span>El administrador validará tu pago en <b>menos de 24 horas</b>. Te notificaremos cuando tu pedido pase a producción.</span>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ============ RIGHT ============ -->
+        <div class="col">
+
+          <!-- Yape data -->
+          <section class="yape-card">
+            <div class="yape-head">
+              <div class="yape-logo">
+                <span class="yape-mark">Y</span>
+                <span class="ttl">Yape</span>
+              </div>
+              <div class="yape-tag">
+                <span class="dot"></span>
+                Cuenta verificada
+              </div>
+            </div>
+
+            <div class="qr-wrap">
+              <div class="qr-inner">
+                <div class="qr-center"></div>
+                <span class="qr-label">QR Yape</span>
+              </div>
+            </div>
+
+            <div class="yape-info">
+              <div class="yape-info-row">
+                <div class="yi-k">Número Yape</div>
+                <div class="yi-v">
+                  987 654 321
+                  <button class="copy-btn" title="Copiar número">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="yape-info-row">
+                <div class="yi-k">A nombre de</div>
+                <div class="yi-v name">ESIAD Proyectos</div>
+              </div>
+
+              <div class="yi-amount">
+                <div>
+                  <div class="yi-amount-label">Monto exacto a transferir</div>
+                  <div style="font-size:11px;color:var(--ink-dim);margin-top:2px">No transfieras otro monto, sería rechazado</div>
+                </div>
+                <div class="yi-amount-val"><span class="cur">S/</span>68.75</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Subir captura -->
+          <section class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+                Subir captura de pago
+              </div>
+            </div>
+
+            <div class="upload-zone">
+              <div class="upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+              </div>
+              <div class="upload-title">Arrastra tu captura aquí</div>
+              <div class="upload-sub">o haz clic para seleccionar un archivo</div>
+              <button class="btn primary">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+                Seleccionar imagen
+              </button>
+              <div class="upload-formats">.jpg · .jpeg · .png · máx. 5 MB</div>
+            </div>
+
+            <!-- Archivo cargado -->
+            <div class="uploaded-row">
+              <div class="uploaded-thumb">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>
+              </div>
+              <div class="uploaded-meta">
+                <div class="uploaded-name">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                  captura_yape.jpg
+                </div>
+                <div class="uploaded-info">
+                  <span>1.2 MB</span>
+                  <span class="ok">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                    Carga completa
+                  </span>
+                </div>
+              </div>
+              <button class="remove-btn" title="Eliminar archivo">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg>
+              </button>
+            </div>
+
+            <button class="btn primary lg" style="margin-top:18px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+              Enviar comprobante
+            </button>
+
+            <div class="send-foot">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+              Tu pedido pasará a producción una vez validado el pago
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

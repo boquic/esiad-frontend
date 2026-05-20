@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>SIGEPED · Nuevo pedido</title>
+<meta name="viewport" content="width=1280" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.5.0/dist/tabler-icons.min.css">
+<template id="__bundler_thumbnail" data-bg-color="#5b8784">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#b8c4c2"/>
+        <stop offset="50%" stop-color="#6b8f8c"/>
+        <stop offset="100%" stop-color="#4a6f6d"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#bg)"/>
+    <!-- Card silhouette -->
+    <rect x="360" y="200" width="480" height="400" rx="36" fill="rgba(255,255,255,0.78)" stroke="#e0e0e0" stroke-width="2"/>
+    <!-- SIGEPED tile -->
+    <rect x="540" y="250" width="120" height="120" rx="28" fill="#2e7874"/>
+    <rect x="566" y="276" width="30" height="30" rx="4" fill="#fff" fill-opacity=".95"/>
+    <rect x="604" y="276" width="30" height="30" rx="4" fill="#fff" fill-opacity=".95"/>
+    <rect x="566" y="314" width="30" height="30" rx="4" fill="#fff" fill-opacity=".95"/>
+    <rect x="604" y="314" width="30" height="30" rx="4" fill="#fff" fill-opacity=".55"/>
+    <!-- Stepper dots -->
+    <circle cx="500" cy="420" r="14" fill="#3a8f8b"/>
+    <rect x="520" y="416" width="40" height="8" rx="4" fill="#3a8f8b"/>
+    <circle cx="580" cy="420" r="14" fill="#3a8f8b"/>
+    <rect x="600" y="416" width="40" height="8" rx="4" fill="#cccccc"/>
+    <circle cx="660" cy="420" r="14" fill="#e0e0e0"/>
+    <rect x="680" y="416" width="40" height="8" rx="4" fill="#cccccc"/>
+    <circle cx="740" cy="420" r="14" fill="#e0e0e0"/>
+    <!-- Form lines -->
+    <rect x="420" y="470" width="360" height="14" rx="7" fill="#e0e0e0"/>
+    <rect x="420" y="498" width="280" height="14" rx="7" fill="#e0e0e0"/>
+    <rect x="420" y="542" width="360" height="40" rx="10" fill="#3a8f8b"/>
+  </svg>
+</template>
+<style>
+  :root{
+    --brand:        #3a8f8b;
+    --brand-dark:   #2e7874;
+    --brand-soft:   #c8d8d6;
+    --brand-mid:    #a8c0be;
+
+    --sidebar-bg:   rgba(30,75,72,0.92);
+    --navbar-bg:    rgba(42,100,97,0.95);
+
+    --surface-1:    rgba(255,255,255,0.75);
+    --surface-2:    rgba(255,255,255,0.55);
+    --surface-input:rgba(240,240,240,0.80);
+    --line:         #e0e0e0;
+    --line-2:       #ccc;
+    --line-soft:    rgba(224,224,224,0.65);
+
+    --ink:          #2c2c2c;
+    --ink-2:        #333;
+    --ink-mute:     #666;
+    --ink-dim:      #888;
+    --ink-faint:    #999;
+
+    --info-bg:      rgba(58,143,139,0.08);
+    --info-line:    rgba(58,143,139,0.20);
+    --info-strong:  rgba(58,143,139,0.30);
+
+    --error-bg:     #fff0f0;
+    --error-line:   #f5c6c6;
+    --error-fg:     #c0392b;
+
+    --soft-warn-bg: #f9f9f9;
+    --soft-warn-line:#e0e0e0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;color:var(--ink);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+      linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+    background-attachment:fixed;min-height:100vh;
+  }
+  body::before, body::after{content:"";position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);opacity:.40;z-index:0}
+  body::before{width:360px;height:360px;background:#c8d8d6;top:-100px;right:-80px}
+  body::after{width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.30}
+
+  .mono{font-family:'Geist Mono',ui-monospace,monospace}
+  .tnum{font-variant-numeric:tabular-nums}
+  .ti{font-size:1em;line-height:1;vertical-align:-2px}
+
+  /* ===== Shell ===== */
+  .app{display:grid;grid-template-columns:200px 1fr;min-height:100vh;position:relative;z-index:1}
+
+  /* ===== Sidebar ===== */
+  .sidebar{background:var(--sidebar-bg);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);color:#e6f0ee;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;box-shadow:inset -1px 0 0 rgba(255,255,255,0.05)}
+  .brand{display:flex;align-items:center;gap:11px;padding:18px;height:64px;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .brand-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;color:#fff;font-size:16px;box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -4px rgba(58,143,139,0.5)}
+  .brand-name{font-weight:600;letter-spacing:-0.01em;font-size:15px;color:#fff}
+  .brand-sub{font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px}
+
+  .nav-label{font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);text-transform:uppercase;padding:18px 18px 8px;font-weight:600}
+  .nav{display:flex;flex-direction:column;padding:0 8px;gap:2px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:13.5px;font-weight:500;border-left:3px solid transparent;transition:background .14s, color .14s}
+  .nav a:hover{background:rgba(255,255,255,0.06);color:#fff}
+  .nav a.active{background:rgba(58,143,139,0.35);color:#fff;border-left-color:var(--brand);border-radius:0 8px 8px 0;padding-left:14px;font-weight:600}
+  .nav .ti{font-size:17px;opacity:.85;width:18px;text-align:center}
+
+  .side-foot{margin-top:auto;padding:18px;border-top:1px solid rgba(255,255,255,0.08)}
+  .op-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.05)}
+  .op-card .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2)}
+  .op-card .nm{font-size:12.5px;font-weight:600;color:#fff;line-height:1.2}
+  .op-card .rl{font-size:10.5px;color:rgba(255,255,255,0.55)}
+
+  /* ===== Navbar ===== */
+  .navbar{height:64px;background:var(--navbar-bg);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);color:#fff;display:flex;align-items:center;padding:0 28px;gap:24px;position:sticky;top:0;z-index:5;box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 20px -16px rgba(0,0,0,0.4)}
+  .navbar-brand{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;letter-spacing:-0.01em}
+  .navbar-brand .ti{font-size:18px;color:#cce8e6}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .icon-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;color:#fff;cursor:pointer;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);font-size:18px}
+  .icon-btn:hover{background:rgba(255,255,255,0.14)}
+  .avatar-chip{display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.1);cursor:pointer;color:#fff}
+  .avatar-chip:hover{background:rgba(255,255,255,0.16)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25)}
+  .avatar-name{font-size:13px;font-weight:600;line-height:1.1}
+  .avatar-role{font-size:10.5px;color:rgba(255,255,255,0.65)}
+
+  /* ===== Page ===== */
+  .page{padding:22px 32px 56px;max-width:1280px;margin:0 auto}
+
+  .page-crumbs{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-mute);margin-bottom:18px}
+  .page-crumbs a{color:var(--ink-mute);text-decoration:none}
+  .page-crumbs a:hover{color:var(--brand-dark)}
+  .page-crumbs .sep{color:var(--ink-faint)}
+  .page-crumbs .here{color:var(--ink);font-weight:600}
+
+  /* ===== Stepper ===== */
+  .stepper{
+    display:flex;align-items:center;justify-content:center;gap:0;
+    margin:0 auto 26px;max-width:760px;padding:18px 22px;
+    background:var(--surface-1);
+    border:1px solid var(--line);
+    border-radius:12px;
+  }
+  .stp{display:flex;align-items:center;gap:10px}
+  .stp .num{
+    width:30px;height:30px;border-radius:50%;
+    background:var(--line);color:var(--ink-dim);
+    display:grid;place-items:center;font-weight:700;font-size:13px;
+    transition:all .14s;flex-shrink:0;
+  }
+  .stp.active .num{background:var(--brand);color:#fff;box-shadow:0 0 0 4px rgba(58,143,139,0.16)}
+  .stp .label{font-size:13px;color:var(--ink-dim);font-weight:600;letter-spacing:-0.005em}
+  .stp.active .label{color:var(--brand-dark)}
+  .stp .line{
+    width:80px;height:2px;background:var(--line-2);
+    margin:0 14px;border-radius:2px;
+  }
+  .stp.active + .stp .line, .stp .line.done{background:var(--brand)}
+
+  /* ===== Grid ===== */
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+  .col{display:flex;flex-direction:column;gap:20px}
+
+  /* ===== Card baseline ===== */
+  .card{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:22px 24px;
+  }
+  .card-title{
+    font-size:15px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);
+    display:flex;align-items:center;gap:9px;margin-bottom:16px;
+  }
+  .card-title .ti{font-size:19px;color:var(--brand)}
+  .card-sub{font-size:12.5px;color:var(--ink-mute);margin-top:-10px;margin-bottom:14px}
+
+  /* ===== Tarjeta A: tipo de servicio ===== */
+  .svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .svc-card{
+    background:rgba(255,255,255,0.6);
+    border:1px solid var(--line);
+    border-radius:11px;padding:18px 18px;
+    display:flex;flex-direction:column;gap:6px;
+    cursor:pointer;transition:border-color .12s, background .12s, transform .08s;
+    position:relative;
+  }
+  .svc-card:hover{border-color:var(--brand-mid)}
+  .svc-card .icn{font-size:26px;color:var(--ink-dim);margin-bottom:2px}
+  .svc-card .nm{font-size:14.5px;font-weight:600;color:var(--ink);letter-spacing:-0.005em}
+  .svc-card .sub{font-size:12px;color:var(--ink-mute)}
+  .svc-card.on{
+    border:2px solid var(--brand);
+    background:var(--info-bg);
+    padding:17px 17px;
+  }
+  .svc-card.on .icn{color:var(--brand-dark)}
+  .svc-card.on::after{
+    content:"\ea5e"; /* ti-check */
+    font-family:'tabler-icons';
+    position:absolute;top:10px;right:10px;
+    width:22px;height:22px;border-radius:50%;
+    background:var(--brand);color:#fff;
+    display:grid;place-items:center;font-size:14px;font-weight:700;
+  }
+
+  /* ===== Tarjeta B: especificaciones ===== */
+  .field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  .field-label{font-size:12.5px;font-weight:600;color:var(--ink-2);display:flex;align-items:center;gap:5px}
+  .field-label .req{color:var(--brand-dark)}
+  .field-helper{font-size:11.5px;color:var(--ink-dim);margin-left:2px;display:flex;align-items:center;gap:5px}
+  .field-helper.error{color:var(--error-fg);font-weight:600}
+
+  .input-wrap{
+    display:flex;align-items:center;gap:0;
+    background:var(--surface-input);border:1px solid var(--line);
+    border-radius:9px;padding:0 12px;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  .input-wrap:focus-within{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(58,143,139,0.18)}
+  .input-wrap.has-error{border-color:var(--error-line);background:#fff;box-shadow:0 0 0 3px rgba(192,57,43,0.10)}
+  .input-wrap .ti{font-size:16px;color:var(--ink-dim);margin-right:9px;flex-shrink:0}
+  .input-wrap:focus-within .ti{color:var(--brand-dark)}
+  .input-wrap.has-error .ti{color:var(--error-fg)}
+  .input-wrap input{
+    flex:1;min-width:0;background:transparent;border:0;outline:0;
+    color:var(--ink);font-family:inherit;font-size:14px;font-weight:500;
+    padding:11px 0;letter-spacing:0.01em;
+  }
+  .input-wrap input::placeholder{color:var(--ink-faint);font-weight:400}
+
+  .select-wrap{
+    position:relative;
+    background:var(--surface-input);border:1px solid var(--line);
+    border-radius:9px;padding:0 12px;display:flex;align-items:center;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  .select-wrap:focus-within{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px rgba(58,143,139,0.18)}
+  .select-wrap .ti.lead{font-size:16px;color:var(--ink-dim);margin-right:9px}
+  .select-wrap select{
+    appearance:none;-webkit-appearance:none;
+    flex:1;background:transparent;border:0;outline:0;
+    color:var(--ink);font-family:inherit;font-size:14px;font-weight:500;
+    padding:11px 0;padding-right:24px;cursor:pointer;
+  }
+  .select-wrap .ti.chev{position:absolute;right:12px;font-size:16px;color:var(--ink-mute);pointer-events:none}
+
+  /* ===== Tarjeta C: upload ===== */
+  .upload-area{
+    background:rgba(58,143,139,0.05);
+    border:1.5px solid var(--brand);
+    border-radius:12px;padding:18px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .upload-file-icon{
+    width:48px;height:48px;border-radius:11px;
+    background:rgba(58,143,139,0.10);
+    color:var(--brand);
+    display:grid;place-items:center;font-size:26px;flex-shrink:0;
+    border:1px solid var(--info-strong);
+  }
+  .upload-meta{flex:1;min-width:0}
+  .upload-name{font-size:14px;font-weight:600;color:var(--ink);font-family:'Geist Mono',monospace;letter-spacing:-0.01em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .upload-info{font-size:12px;color:var(--ink-mute);margin-top:3px;display:flex;align-items:center;gap:10px}
+  .upload-info .dot{width:3px;height:3px;border-radius:50%;background:var(--ink-faint)}
+  .file-ready-badge{
+    display:inline-flex;align-items:center;gap:4px;
+    background:rgba(58,143,139,0.12);
+    color:var(--brand-dark);
+    padding:2px 9px;border-radius:999px;
+    font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.04em;
+    border:1px solid var(--info-strong);
+  }
+  .file-ready-badge .ti{font-size:13px}
+
+  .change-file{
+    border:1px solid var(--line);background:rgba(255,255,255,0.7);
+    color:var(--ink-mute);font-family:inherit;font-size:12px;font-weight:500;
+    padding:7px 13px;border-radius:8px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
+  }
+  .change-file:hover{background:#fff;border-color:var(--brand-mid);color:var(--brand-dark)}
+
+  .error-banner-ref{
+    margin-top:12px;
+    background:var(--error-bg);border:1px solid var(--error-line);
+    border-radius:9px;padding:10px 14px;
+    display:flex;align-items:center;gap:9px;
+    font-size:12.5px;color:var(--error-fg);font-weight:500;
+    opacity:0.5;
+  }
+  .error-banner-ref .ti{font-size:16px;color:var(--error-fg);flex-shrink:0}
+  .error-banner-ref .ref-tag{
+    margin-left:auto;font-size:10px;font-family:'Geist Mono',monospace;
+    color:var(--ink-dim);background:rgba(255,255,255,0.7);
+    padding:2px 6px;border-radius:4px;font-weight:600;letter-spacing:0.04em;
+    text-transform:uppercase;
+  }
+
+  /* ===== Tarjeta D: presupuesto ===== */
+  .breakdown{display:flex;flex-direction:column;gap:9px}
+  .bk-row{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+  .bk-row .k{color:var(--ink-mute);font-weight:500}
+  .bk-row .v{color:var(--ink);font-weight:600;font-family:'Geist Mono',monospace}
+  .bk-row .v.text{font-family:'Geist',sans-serif;font-weight:500}
+  .bk-sep{height:1px;background:var(--line-soft);margin:12px 0}
+  .total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .total-label{font-size:13.5px;color:var(--ink);font-weight:600}
+  .total-val{font-family:'Geist Mono',monospace;font-size:24px;font-weight:700;color:var(--brand-dark);letter-spacing:-0.02em;line-height:1}
+  .total-val .cur{font-size:14px;font-weight:600;opacity:.75;margin-right:4px;vertical-align:3px}
+
+  .info-block{
+    background:var(--info-bg);
+    border:1px solid var(--info-line);
+    border-radius:8px;padding:11px 12px;
+    display:flex;align-items:flex-start;gap:9px;
+    font-size:12.5px;color:var(--brand-dark);line-height:1.45;
+    margin-bottom:10px;
+  }
+  .info-block .ti{font-size:16px;color:var(--brand);flex-shrink:0;margin-top:1px}
+  .info-block b{font-family:'Geist Mono',monospace;font-weight:700}
+
+  .validity-block{
+    background:var(--soft-warn-bg);
+    border:1px solid var(--soft-warn-line);
+    border-radius:8px;padding:9px 12px;
+    display:flex;align-items:center;gap:9px;
+    font-size:12px;color:var(--ink-dim);line-height:1.45;
+    margin-bottom:14px;
+  }
+  .validity-block .ti{font-size:14px;color:var(--ink-dim);flex-shrink:0}
+  .validity-block b{color:var(--ink-mute);font-weight:600}
+
+  .btn{
+    font-family:inherit;font-size:13.5px;font-weight:600;
+    padding:11px 16px;border-radius:10px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    border:1px solid transparent;width:100%;
+    transition:background .14s, transform .08s, filter .14s, color .14s, border-color .14s;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn .ti{font-size:16px}
+  .btn.primary{background:var(--brand);color:#fff;border-color:var(--brand-dark)}
+  .btn.primary:hover{background:var(--brand-dark)}
+  .btn.secondary{background:transparent;color:var(--ink-dim);border-color:var(--line)}
+  .btn.secondary:hover{background:rgba(255,255,255,0.6);border-color:var(--brand-mid);color:var(--brand-dark)}
+  .actions{display:flex;flex-direction:column;gap:10px}
+
+  /* ===== Tarjeta E: condiciones ===== */
+  .conditions{display:flex;flex-direction:column;gap:10px}
+  .cond{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--ink-2);line-height:1.45}
+  .cond .ti{font-size:15px;color:var(--brand);flex-shrink:0;margin-top:2px}
+  .cond b{color:var(--ink);font-weight:600}
+
+  /* ===== Reference states (corner) ===== */
+  .ref-corner{
+    margin-top:16px;
+    background:rgba(255,255,255,0.4);
+    border:1px dashed var(--line-2);
+    border-radius:10px;padding:14px 16px;
+    position:relative;
+  }
+  .ref-corner-label{
+    position:absolute;top:-10px;left:14px;
+    background:#fff;border:1px solid var(--line);
+    padding:2px 9px;border-radius:999px;
+    font-size:10.5px;font-weight:700;letter-spacing:0.06em;
+    text-transform:uppercase;color:var(--ink-mute);
+  }
+  .ref-disabled-wrap{display:flex;align-items:center;gap:14px}
+  .btn.disabled{opacity:0.5;cursor:not-allowed;pointer-events:none}
+  .ref-floating{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--soft-warn-bg);border:1px solid var(--line);
+    padding:6px 11px;border-radius:8px;
+    font-size:11.5px;color:var(--ink-mute);
+  }
+  .ref-floating .ti{font-size:13px;color:var(--ink-dim)}
+
+  /* tabler check icon class for selection mark */
+  @font-face {
+    font-family: 'tabler-icons-fallback';
+    src: local('Arial');
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <i class="ti ti-stack-2"></i>
+      </div>
+      <div>
+        <div class="brand-name">SIGEPED</div>
+        <div class="brand-sub">Cliente</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Mi cuenta</div>
+    <nav class="nav">
+      <a href="Dashboard Cliente.html">
+        <i class="ti ti-home"></i>
+        Inicio
+      </a>
+      <a class="active" href="#">
+        <i class="ti ti-circle-plus"></i>
+        Nuevo pedido
+      </a>
+      <a href="#">
+        <i class="ti ti-file-text"></i>
+        Mis pedidos
+      </a>
+      <a href="Pago Yape Cliente.html">
+        <i class="ti ti-credit-card"></i>
+        Pagos
+      </a>
+      <a href="#">
+        <i class="ti ti-bell"></i>
+        Notificaciones
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="op-card">
+        <div class="av">JP</div>
+        <div>
+          <div class="nm">Juan Pérez</div>
+          <div class="rl">Cliente</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ===== Navbar ===== -->
+    <header class="navbar">
+      <div class="navbar-brand">
+        <i class="ti ti-stack-2"></i>
+        SIGEPED
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" title="Notificaciones">
+          <i class="ti ti-bell"></i>
+        </button>
+        <div class="avatar-chip">
+          <div class="avatar">JP</div>
+          <div>
+            <div class="avatar-name">Juan Pérez</div>
+            <div class="avatar-role">Cliente</div>
+          </div>
+          <i class="ti ti-chevron-down" style="opacity:.7;font-size:14px"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Page ===== -->
+    <div class="page">
+
+      <nav class="page-crumbs">
+        <a href="Dashboard Cliente.html">Inicio</a>
+        <span class="sep">›</span>
+        <span class="here">Nuevo pedido</span>
+      </nav>
+
+      <!-- Stepper -->
+      <div class="stepper">
+        <div class="stp active">
+          <div class="num">1</div>
+          <div class="label">Servicio</div>
+        </div>
+        <div class="line done" style="height:2px;width:80px;background:var(--brand);margin:0 14px;border-radius:2px"></div>
+        <div class="stp active">
+          <div class="num">2</div>
+          <div class="label">Especificaciones</div>
+        </div>
+        <div style="height:2px;width:80px;background:var(--line-2);margin:0 14px;border-radius:2px"></div>
+        <div class="stp">
+          <div class="num">3</div>
+          <div class="label">Plano</div>
+        </div>
+        <div style="height:2px;width:80px;background:var(--line-2);margin:0 14px;border-radius:2px"></div>
+        <div class="stp">
+          <div class="num">4</div>
+          <div class="label">Confirmar</div>
+        </div>
+      </div>
+
+      <!-- Grid 2 cols -->
+      <div class="grid">
+
+        <!-- ============= LEFT COLUMN ============= -->
+        <div class="col">
+
+          <!-- A · Tipo de servicio -->
+          <section class="card">
+            <div class="card-title">
+              <i class="ti ti-tools"></i>
+              Tipo de servicio
+            </div>
+
+            <div class="svc-grid">
+              <div class="svc-card on">
+                <i class="ti ti-cut icn"></i>
+                <div class="nm">Corte láser</div>
+                <div class="sub">Por unidad</div>
+              </div>
+              <div class="svc-card">
+                <i class="ti ti-printer icn"></i>
+                <div class="nm">Ploteo</div>
+                <div class="sub">Por m²</div>
+              </div>
+              <div class="svc-card">
+                <i class="ti ti-cube icn"></i>
+                <div class="nm">Impresión 3D</div>
+                <div class="sub">Por volumen cm³</div>
+              </div>
+              <div class="svc-card">
+                <i class="ti ti-building icn"></i>
+                <div class="nm">Maqueta</div>
+                <div class="sub">Precio fijo</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- B · Especificaciones -->
+          <section class="card">
+            <div class="card-title">
+              <i class="ti ti-adjustments"></i>
+              Especificaciones
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="material">Material <span class="req">*</span></label>
+              <div class="select-wrap">
+                <i class="ti ti-layers-intersect lead"></i>
+                <select id="material">
+                  <option selected>MDF 3 mm</option>
+                  <option>MDF 6 mm</option>
+                  <option>Acrílico transparente 3 mm</option>
+                  <option>Cartón gris</option>
+                </select>
+                <i class="ti ti-chevron-down chev"></i>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="qty">Cantidad (unidades) <span class="req">*</span></label>
+              <div class="input-wrap">
+                <i class="ti ti-stack-2"></i>
+                <input id="qty" type="number" value="10" min="1" />
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="date">Fecha requerida <span class="req">*</span></label>
+              <div class="input-wrap">
+                <i class="ti ti-calendar-event"></i>
+                <input id="date" type="text" value="26/05/2025" />
+              </div>
+            </div>
+          </section>
+
+          <!-- C · Plano técnico -->
+          <section class="card">
+            <div class="card-title">
+              <i class="ti ti-upload"></i>
+              Plano técnico
+            </div>
+            <div class="card-sub">Formatos aceptados: .dwg, .dxf, .pdf — Máx. 20 MB</div>
+
+            <div class="upload-area">
+              <div class="upload-file-icon">
+                <i class="ti ti-file-check"></i>
+              </div>
+              <div class="upload-meta">
+                <div class="upload-name">
+                  plano_proyecto_corte.pdf
+                  <span class="file-ready-badge">
+                    <i class="ti ti-check"></i>
+                    Archivo listo
+                  </span>
+                </div>
+                <div class="upload-info">
+                  <span>2.1 MB</span>
+                  <span class="dot"></span>
+                  <span>Subido ahora</span>
+                </div>
+              </div>
+              <button class="change-file">
+                <i class="ti ti-refresh"></i>
+                Cambiar archivo
+              </button>
+            </div>
+
+            <div class="error-banner-ref">
+              <i class="ti ti-alert-circle"></i>
+              <span>Solo se aceptan archivos .dwg, .dxf o .pdf</span>
+              <span class="ref-tag">Ref. estado</span>
+            </div>
+          </section>
+
+          <!-- Reference: estado de error en cantidad -->
+          <div class="ref-corner">
+            <span class="ref-corner-label">Referencia · estado de error</span>
+            <div class="field" style="margin-bottom:0">
+              <label class="field-label">Cantidad (unidades) <span class="req">*</span></label>
+              <div class="input-wrap has-error">
+                <i class="ti ti-stack-2"></i>
+                <input type="number" value="0" />
+              </div>
+              <div class="field-helper error">
+                <i class="ti ti-alert-circle" style="font-size:13px"></i>
+                La cantidad debe ser mayor a 0
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ============= RIGHT COLUMN ============= -->
+        <div class="col">
+
+          <!-- D · Presupuesto -->
+          <section class="card">
+            <div class="card-title">
+              <i class="ti ti-receipt"></i>
+              Presupuesto estimado
+            </div>
+
+            <div class="breakdown">
+              <div class="bk-row"><span class="k">Servicio</span><span class="v text">Corte láser</span></div>
+              <div class="bk-row"><span class="k">Material</span><span class="v text">MDF 3 mm</span></div>
+              <div class="bk-row"><span class="k">Cantidad</span><span class="v">10 unidades</span></div>
+              <div class="bk-row"><span class="k">Precio unitario</span><span class="v">S/ 5.50</span></div>
+            </div>
+
+            <div class="bk-sep"></div>
+
+            <div class="total-row">
+              <span class="total-label">Total estimado</span>
+              <span class="total-val"><span class="cur">S/</span>55.00</span>
+            </div>
+
+            <div class="info-block">
+              <i class="ti ti-info-circle"></i>
+              <span>Como cliente nuevo debes abonar el <b>50%</b> antes de iniciar la producción: <b>S/ 27.50</b></span>
+            </div>
+
+            <div class="validity-block">
+              <i class="ti ti-clock"></i>
+              <span>Este presupuesto vence en <b>24 horas</b></span>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary">
+                <i class="ti ti-check"></i>
+                Confirmar pedido
+              </button>
+              <button class="btn secondary">Cancelar</button>
+            </div>
+          </section>
+
+          <!-- E · Condiciones -->
+          <section class="card">
+            <div class="card-title">
+              <i class="ti ti-shield-check"></i>
+              Condiciones
+            </div>
+
+            <div class="conditions">
+              <div class="cond">
+                <i class="ti ti-check"></i>
+                <span><b>Recojo exclusivo en tienda</b>, sin delivery</span>
+              </div>
+              <div class="cond">
+                <i class="ti ti-check"></i>
+                <span>Recibirás notificación cuando esté listo</span>
+              </div>
+              <div class="cond">
+                <i class="ti ti-check"></i>
+                <span>Un pedido activo por tipo de servicio</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Reference: estado de botón deshabilitado -->
+          <div class="ref-corner">
+            <span class="ref-corner-label">Referencia · botón deshabilitado</span>
+            <div class="ref-disabled-wrap" style="flex-direction:column;align-items:stretch;gap:9px">
+              <button class="btn primary disabled">
+                <i class="ti ti-check"></i>
+                Confirmar pedido
+              </button>
+              <span class="ref-floating">
+                <i class="ti ti-info-circle"></i>
+                Completa todos los campos para continuar
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

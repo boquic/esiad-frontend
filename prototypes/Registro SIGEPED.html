@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>SIGEPED · Crea tu cuenta</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --brand:        #3a8f8b;
+    --brand-dark:   #2e7874;
+    --brand-soft:   #c8d8d6;
+    --brand-mid:    #a8c0be;
+
+    --surface:      rgba(255,255,255,0.75);
+    --surface-soft: rgba(255,255,255,0.55);
+    --surface-input:rgba(240,240,240,0.80);
+    --line:         #e0e0e0;
+    --line-soft:    rgba(224,224,224,0.65);
+
+    --ink:          #2c2c2c;
+    --ink-2:        #333;
+    --ink-mute:     #666;
+    --ink-dim:      #888;
+    --ink-faint:    #999;
+
+    --error-bg:     #fff0f0;
+    --error-line:   #f5c6c6;
+    --error-fg:     #c0392b;
+    --error-strong: #e74c3c;
+
+    --ok:           #3a8f8b;
+    --ok-dark:      #2e7874;
+    --ok-bg:        rgba(58,143,139,0.10);
+
+    --shadow-card: 0 30px 80px -30px rgba(46,120,116,0.45),
+                   0 14px 36px -16px rgba(46,120,116,0.30),
+                   0 0 0 1px rgba(255,255,255,0.45) inset;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;min-height:100vh}
+  body{
+    font-family:'Geist',ui-sans-serif,system-ui,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+      linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    display:grid;place-items:center;
+    padding:32px 16px;
+    position:relative;overflow-x:hidden;
+  }
+
+  .blur{position:fixed;border-radius:50%;pointer-events:none;filter:blur(90px);z-index:0}
+  .blur.a{width:420px;height:420px;background:#c8d8d6;top:-120px;right:-90px;opacity:.55}
+  .blur.b{width:520px;height:520px;background:#3d8c89;bottom:-180px;left:-160px;opacity:.40}
+  .blur.c{width:300px;height:300px;background:#a8c0be;top:40%;left:8%;opacity:.30}
+  .blur.d{width:260px;height:260px;background:#c8d8d6;bottom:14%;right:6%;opacity:.35}
+
+  .grid-overlay{
+    position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.08;
+    background-image:
+      linear-gradient(45deg, rgba(255,255,255,0.6) 1px, transparent 1px),
+      linear-gradient(-45deg, rgba(255,255,255,0.4) 1px, transparent 1px);
+    background-size:42px 42px;
+  }
+
+  .stack{
+    position:relative;z-index:1;
+    display:flex;flex-direction:column;align-items:center;gap:18px;
+    width:100%;max-width:460px;
+  }
+
+  /* ===== Card ===== */
+  .card{
+    width:100%;
+    background:var(--surface);
+    backdrop-filter:blur(24px) saturate(160%);
+    -webkit-backdrop-filter:blur(24px) saturate(160%);
+    border:1px solid rgba(255,255,255,0.55);
+    border-radius:20px;
+    padding:34px 36px 26px;
+    box-shadow:var(--shadow-card);
+  }
+
+  /* ===== Brand header ===== */
+  .brand{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:20px}
+  .brand-mark{
+    width:54px;height:54px;border-radius:14px;
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    display:grid;place-items:center;position:relative;
+    box-shadow:
+      0 14px 30px -10px rgba(58,143,139,0.55),
+      0 0 0 1px rgba(255,255,255,0.4) inset,
+      0 -2px 8px rgba(0,0,0,0.12) inset;
+  }
+  .brand-mark::after{
+    content:"";position:absolute;inset:5px;border-radius:10px;
+    background:linear-gradient(180deg,rgba(255,255,255,0.18),transparent 55%);
+    pointer-events:none;
+  }
+  .brand-name{font-size:14px;font-weight:600;letter-spacing:0.14em;color:var(--brand-dark);text-transform:uppercase;text-align:center}
+  .page-title{font-size:22px;font-weight:700;letter-spacing:-0.02em;color:var(--ink);text-align:center;line-height:1.15;margin-top:2px}
+  .subtitle{
+    text-align:center;font-size:13px;color:var(--ink-mute);
+    line-height:1.5;margin-top:8px;max-width:360px;margin-left:auto;margin-right:auto;
+  }
+
+  /* ===== Form ===== */
+  .form{display:flex;flex-direction:column;gap:14px}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field-label{
+    font-size:12.5px;font-weight:600;color:var(--ink-2);
+    display:flex;align-items:center;gap:5px;
+  }
+  .field-label .req{color:var(--brand-dark)}
+
+  .input-wrap{
+    display:flex;align-items:center;gap:0;
+    background:var(--surface-input);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:0 12px;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+    position:relative;
+  }
+  .input-wrap:focus-within{
+    border-color:var(--brand);
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(58,143,139,0.18);
+  }
+  .input-wrap.ok{
+    border-color:rgba(58,143,139,0.55);
+    background:#fff;
+  }
+  .input-wrap.has-error{
+    border-color:var(--error-line);
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(192,57,43,0.10);
+  }
+  .input-icon{
+    color:var(--ink-dim);flex-shrink:0;
+    display:grid;place-items:center;width:18px;height:18px;
+    margin-right:10px;
+  }
+  .input-wrap:focus-within .input-icon, .input-wrap.ok .input-icon{color:var(--brand-dark)}
+  .input-wrap.has-error .input-icon{color:var(--error-fg)}
+  .input-wrap input{
+    flex:1;min-width:0;
+    background:transparent;border:0;outline:0;
+    color:var(--ink);font-family:inherit;font-size:14px;font-weight:500;
+    padding:12px 0;letter-spacing:0.01em;
+  }
+  .input-wrap input::placeholder{color:var(--ink-faint);font-weight:400}
+  .input-wrap input.mono{font-family:'Geist Mono',monospace;letter-spacing:0.04em;font-weight:500}
+
+  /* Suffix icons (check / eye) */
+  .check-ok{
+    width:22px;height:22px;border-radius:50%;
+    background:var(--ok);color:#fff;
+    display:grid;place-items:center;flex-shrink:0;margin-left:8px;
+    box-shadow:0 0 0 3px rgba(58,143,139,0.18);
+  }
+  .digit-counter{
+    font-family:'Geist Mono',monospace;font-size:11.5px;color:var(--ink-dim);
+    flex-shrink:0;margin-left:8px;font-weight:500;
+  }
+  .digit-counter b{color:var(--ink-mute);font-weight:600}
+
+  .eye-btn{
+    background:transparent;border:0;cursor:pointer;color:var(--ink-dim);
+    width:28px;height:28px;display:grid;place-items:center;border-radius:6px;
+    margin-left:6px;flex-shrink:0;
+  }
+  .eye-btn:hover{color:var(--brand-dark);background:rgba(58,143,139,0.08)}
+
+  .prefix-flag{
+    display:flex;align-items:center;gap:5px;
+    color:var(--ink-2);font-size:13px;font-weight:600;
+    padding-right:10px;margin-right:10px;
+    border-right:1px solid var(--line);
+    font-family:'Geist Mono',monospace;
+    flex-shrink:0;
+  }
+  .prefix-flag .pe{
+    width:18px;height:13px;border-radius:2px;
+    background:linear-gradient(90deg,#d91023 33%, #fff 33%, #fff 66%, #d91023 66%);
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,0.08);
+    margin-right:3px;
+  }
+
+  /* Helper lines */
+  .field-helper{font-size:11.5px;color:var(--ink-dim);margin-left:2px;display:flex;align-items:center;gap:5px}
+  .field-helper.success{color:var(--ok-dark);font-weight:600}
+  .field-helper.error{color:var(--error-fg);font-weight:600}
+
+  /* Password strength */
+  .pwd-meter{
+    display:flex;gap:4px;margin-top:6px;
+  }
+  .pwd-meter span{
+    flex:1;height:4px;border-radius:2px;background:#e6e6e6;transition:background .2s;
+  }
+  .pwd-meter.s1 span:nth-child(1){background:#e74c3c}
+  .pwd-meter.s2 span:nth-child(-n+2){background:#d4a04a}
+  .pwd-meter.s3 span:nth-child(-n+3){background:#3a8f8b}
+  .pwd-meter.s4 span{background:#2f855a}
+
+  .pwd-strength-label{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:11.5px;color:var(--ink-dim);margin-top:6px;
+  }
+  .pwd-strength-label .level{font-weight:600;color:var(--ok-dark)}
+
+  /* Submit */
+  .submit{
+    width:100%;
+    font-family:inherit;font-size:14px;font-weight:600;
+    color:#fff;
+    background:linear-gradient(180deg,var(--brand) 0%, var(--brand-dark) 100%);
+    border:1px solid var(--brand-dark);
+    border-radius:10px;
+    padding:13px 18px;
+    cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    box-shadow:
+      0 10px 22px -8px rgba(58,143,139,0.65),
+      0 0 0 1px rgba(255,255,255,0.18) inset;
+    transition:transform .08s, box-shadow .14s, filter .14s;
+    margin-top:10px;
+    letter-spacing:0.005em;
+  }
+  .submit:hover{filter:brightness(1.05);box-shadow:0 14px 26px -8px rgba(58,143,139,0.7), 0 0 0 1px rgba(255,255,255,0.18) inset}
+  .submit:active{transform:translateY(1px)}
+
+  /* Terms */
+  .terms{
+    display:flex;gap:9px;align-items:flex-start;
+    font-size:12px;color:var(--ink-mute);line-height:1.45;margin-top:4px;
+    user-select:none;cursor:pointer;
+  }
+  .terms input{
+    appearance:none;-webkit-appearance:none;
+    width:16px;height:16px;border-radius:4px;
+    border:1.5px solid var(--line);background:#fff;
+    cursor:pointer;display:grid;place-items:center;
+    transition:background .12s, border-color .12s;
+    flex-shrink:0;margin-top:1px;
+  }
+  .terms input:checked{background:var(--brand);border-color:var(--brand-dark)}
+  .terms input:checked::after{
+    content:"";width:9px;height:5px;border:2px solid #fff;
+    border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px);
+  }
+  .terms a{color:var(--brand-dark);font-weight:600;text-decoration:none;border-bottom:1px solid transparent}
+  .terms a:hover{border-bottom-color:var(--brand)}
+
+  /* Divider + login link */
+  .divider{
+    display:flex;align-items:center;gap:12px;
+    margin:18px 0 12px;
+    font-size:11.5px;color:var(--ink-dim);font-weight:500;
+    letter-spacing:0.08em;text-transform:uppercase;
+  }
+  .divider::before, .divider::after{
+    content:"";flex:1;height:1px;
+    background:linear-gradient(90deg, transparent, var(--line), transparent);
+  }
+  .login-line{text-align:center;font-size:13.5px;color:var(--ink-mute)}
+  .login-line a{
+    color:var(--brand-dark);font-weight:600;text-decoration:none;
+    padding-bottom:1px;border-bottom:1px solid transparent;
+  }
+  .login-line a:hover{border-bottom-color:var(--brand)}
+
+  /* Foot caption */
+  .legal{
+    text-align:center;font-size:11.5px;color:rgba(255,255,255,0.75);
+    line-height:1.55;max-width:400px;
+    text-shadow:0 1px 2px rgba(0,0,0,0.20);
+  }
+  .legal a{color:#fff;text-decoration:underline;text-underline-offset:2px}
+  .lock-row{
+    display:inline-flex;align-items:center;gap:6px;
+    color:rgba(255,255,255,0.85);font-size:11.5px;font-weight:500;
+    background:rgba(255,255,255,0.10);
+    border:1px solid rgba(255,255,255,0.18);
+    backdrop-filter:blur(8px);
+    padding:5px 11px;border-radius:999px;
+    text-shadow:none;
+  }
+  .back-link{
+    position:fixed;top:18px;left:24px;z-index:2;
+    display:inline-flex;align-items:center;gap:6px;
+    color:rgba(255,255,255,0.9);font-size:12.5px;font-weight:500;text-decoration:none;
+    background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.18);
+    backdrop-filter:blur(8px);padding:7px 12px;border-radius:999px;
+  }
+  .back-link:hover{background:rgba(255,255,255,0.18)}
+</style>
+</head>
+<body>
+
+  <div class="blur a"></div>
+  <div class="blur b"></div>
+  <div class="blur c"></div>
+  <div class="blur d"></div>
+  <div class="grid-overlay"></div>
+
+  <a class="back-link" href="Login SIGEPED.html">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    Volver a iniciar sesión
+  </a>
+
+  <div class="stack">
+
+    <main class="card" role="main" aria-label="Crea tu cuenta">
+
+      <!-- Brand -->
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="white" fill-opacity=".96"/>
+            <path d="M14 14h6v6h-6z" fill="white" fill-opacity=".55"/>
+          </svg>
+        </div>
+        <div class="brand-name">SIGEPED</div>
+        <h1 class="page-title">Crea tu cuenta</h1>
+        <p class="subtitle">Solo necesitas registrarte una vez. Tu DNI es tu credencial.</p>
+      </div>
+
+      <form class="form" onsubmit="return false">
+
+        <!-- Nombre + Apellido -->
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label" for="nombre">Nombre <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+              </span>
+              <input id="nombre" type="text" placeholder="Ej: Ana" value="Ana" autocomplete="given-name" />
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label" for="apellido">Apellido <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+              </span>
+              <input id="apellido" type="text" placeholder="Ej: Torres" value="Torres" autocomplete="family-name" />
+            </div>
+          </div>
+        </div>
+
+        <!-- DNI con validación en tiempo real -->
+        <div class="field">
+          <label class="field-label" for="dni">DNI <span class="req">*</span></label>
+          <div class="input-wrap ok" id="dniWrap">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.2"/><path d="M14 10h5M14 13h4M14 16h3"/></svg>
+            </span>
+            <input id="dni" class="mono" type="text" placeholder="8 dígitos" maxlength="8" inputmode="numeric" value="45128973" />
+            <span class="digit-counter" id="dniCount"><b>8</b>/8</span>
+            <span class="check-ok" id="dniCheck" title="DNI válido">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+            </span>
+          </div>
+          <div class="field-helper success" id="dniHelper">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+            DNI válido · 8 dígitos
+          </div>
+        </div>
+
+        <!-- Celular -->
+        <div class="field">
+          <label class="field-label" for="cel">Número de celular <span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
+            </span>
+            <span class="prefix-flag" title="Perú">
+              <span class="pe"></span>+51
+            </span>
+            <input id="cel" class="mono" type="tel" placeholder="9 dígitos" maxlength="9" inputmode="numeric" value="987 654 321" autocomplete="tel-national" />
+          </div>
+          <div class="field-helper">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>
+            Te enviaremos notificaciones cuando tu pedido esté listo
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="field">
+          <label class="field-label" for="pwd">Contraseña <span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </span>
+            <input id="pwd" type="password" placeholder="Mínimo 8 caracteres" value="MiClave2026" autocomplete="new-password" />
+            <button class="eye-btn" type="button" data-eye="pwd" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="pwd-meter s3"><span></span><span></span><span></span><span></span></div>
+          <div class="pwd-strength-label">
+            <span>Mínimo 8 caracteres, una mayúscula y un número</span>
+            <span class="level">Fuerte</span>
+          </div>
+        </div>
+
+        <!-- Confirmar contraseña (con error de no coincidencia) -->
+        <div class="field">
+          <label class="field-label" for="pwd2">Confirmar contraseña <span class="req">*</span></label>
+          <div class="input-wrap has-error">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </span>
+            <input id="pwd2" type="password" placeholder="Repite tu contraseña" value="MiClave2025" autocomplete="new-password" />
+            <button class="eye-btn" type="button" data-eye="pwd2" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="field-helper error">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.01"/></svg>
+            Las contraseñas no coinciden
+          </div>
+        </div>
+
+        <!-- Términos -->
+        <label class="terms">
+          <input type="checkbox" checked />
+          <span>Acepto los <a href="#">Términos y condiciones</a> y la <a href="#">Política de privacidad</a> de SIGEPED.</span>
+        </label>
+
+        <button class="submit" type="submit">
+          Crear cuenta
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <div class="divider">o</div>
+
+      <div class="login-line">
+        ¿Ya tienes cuenta? <a href="Login SIGEPED.html">Inicia sesión</a>
+      </div>
+    </main>
+
+    <div class="legal">
+      <span class="lock-row">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        Tus datos están protegidos · cifrado de extremo a extremo
+      </span>
+      <div style="margin-top:10px">SIGEPED v2.4.1 · © 2026 · <a href="#">Términos</a> · <a href="#">Privacidad</a></div>
+    </div>
+
+  </div>
+
+<script>
+  // Eye toggles (work for both password fields)
+  var EYE_OPEN  = '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';
+  var EYE_CLOSED= '<path d="M3 3l18 18"/><path d="M10.6 6.2A10 10 0 0 1 12 6c6 0 10 6 10 6s-1.3 2-3.6 3.7"/><path d="M6.6 7.8C3.5 9.6 2 12 2 12s4 6 10 6c1.6 0 3-.3 4.2-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>';
+  document.querySelectorAll('.eye-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var target = document.getElementById(btn.dataset.eye);
+      var icon = btn.querySelector('svg');
+      var showing = target.type === 'text';
+      target.type = showing ? 'password' : 'text';
+      icon.innerHTML = showing ? EYE_OPEN : EYE_CLOSED;
+      btn.setAttribute('aria-label', showing ? 'Mostrar contraseña' : 'Ocultar contraseña');
+    });
+  });
+
+  // DNI live validation (8 digits)
+  var dni = document.getElementById('dni');
+  var dniWrap = document.getElementById('dniWrap');
+  var dniCheck = document.getElementById('dniCheck');
+  var dniCount = document.getElementById('dniCount');
+  var dniHelper = document.getElementById('dniHelper');
+  function syncDni(){
+    var v = dni.value.replace(/\D/g,'').slice(0,8);
+    if (dni.value !== v) dni.value = v;
+    dniCount.innerHTML = '<b>'+v.length+'</b>/8';
+    if (v.length === 8){
+      dniWrap.classList.remove('has-error');
+      dniWrap.classList.add('ok');
+      dniCheck.style.display = 'grid';
+      dniHelper.classList.add('success');
+      dniHelper.classList.remove('error');
+      dniHelper.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>DNI válido · 8 dígitos';
+    } else {
+      dniWrap.classList.remove('ok');
+      dniCheck.style.display = 'none';
+      dniHelper.classList.remove('success');
+      if (v.length === 0){
+        dniHelper.classList.remove('error');
+        dniHelper.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>Ingresa los 8 dígitos de tu DNI';
+      } else {
+        dniHelper.classList.add('error');
+        dniHelper.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.01"/></svg>Faltan '+(8-v.length)+' dígitos';
+      }
+    }
+  }
+  dni.addEventListener('input', syncDni);
+  syncDni();
+
+  // Password match live check
+  var p1 = document.getElementById('pwd');
+  var p2 = document.getElementById('pwd2');
+  var p2wrap = p2.closest('.input-wrap');
+  var p2helper = p2wrap.parentElement.querySelector('.field-helper');
+  function syncMatch(){
+    if (p2.value === ''){
+      p2wrap.classList.remove('has-error','ok');
+      p2helper.style.display = 'none';
+      return;
+    }
+    p2helper.style.display = 'flex';
+    if (p1.value === p2.value){
+      p2wrap.classList.remove('has-error');
+      p2wrap.classList.add('ok');
+      p2helper.classList.remove('error');
+      p2helper.classList.add('success');
+      p2helper.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>Las contraseñas coinciden';
+    } else {
+      p2wrap.classList.remove('ok');
+      p2wrap.classList.add('has-error');
+      p2helper.classList.remove('success');
+      p2helper.classList.add('error');
+      p2helper.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.01"/></svg>Las contraseñas no coinciden';
+    }
+  }
+  p1.addEventListener('input', syncMatch);
+  p2.addEventListener('input', syncMatch);
+</script>
+</body>
+</html>

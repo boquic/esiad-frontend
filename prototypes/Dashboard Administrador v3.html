@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>SIGEPED · Dashboard Administrador</title>
+<meta name="viewport" content="width=1280" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --brand:        #3a8f8b;
+    --brand-dark:   #2e7874;
+    --brand-soft:   #c8d8d6;
+    --brand-mid:    #a8c0be;
+
+    --sidebar-bg:   rgba(30,75,72,0.92);
+    --navbar-bg:    rgba(42,100,97,0.95);
+
+    --surface-1:    rgba(255,255,255,0.75);
+    --surface-2:    rgba(255,255,255,0.55);
+    --surface-input:rgba(240,240,240,0.80);
+    --line:         #e0e0e0;
+    --line-soft:    rgba(224,224,224,0.65);
+
+    --ink:          #2c2c2c;
+    --ink-2:        #333;
+    --ink-mute:     #666;
+    --ink-dim:      #888;
+    --ink-faint:    #999;
+
+    --ok:           #2f855a;
+    --ok-strong:    #48bb78;
+    --ok-bg:        rgba(72,187,120,0.14);
+    --ok-line:      rgba(47,133,90,0.30);
+
+    --warn-fg:      #b8860b;
+    --warn-strong:  #d4a04a;
+    --warn-bg:      #fff7e6;
+    --warn-line:    #f5d39a;
+
+    --error-bg:     #fff0f0;
+    --error-line:   #f5c6c6;
+    --error-fg:     #c0392b;
+    --error-strong: #e74c3c;
+
+    --info-bg:      rgba(58,143,139,0.10);
+    --info-line:    rgba(58,143,139,0.30);
+
+    --shadow-sm: 0 1px 2px rgba(74,111,109,0.08);
+    --shadow-md: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;color:var(--ink);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+      linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+    background-attachment:fixed;min-height:100vh;
+  }
+  body::before, body::after{content:"";position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);opacity:.40;z-index:0}
+  body::before{width:360px;height:360px;background:#c8d8d6;top:-100px;right:-80px}
+  body::after{width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.30}
+
+  .mono{font-family:'Geist Mono',ui-monospace,monospace}
+  .tnum{font-variant-numeric:tabular-nums}
+
+  /* ===== Shell ===== */
+  .app{display:grid;grid-template-columns:200px 1fr;min-height:100vh;position:relative;z-index:1}
+
+  /* ===== Sidebar ===== */
+  .sidebar{background:var(--sidebar-bg);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);color:#e6f0ee;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;box-shadow:inset -1px 0 0 rgba(255,255,255,0.05)}
+  .brand{display:flex;align-items:center;gap:11px;padding:18px;height:64px;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .brand-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#3a8f8b 0%, #2e7874 100%);display:grid;place-items:center;box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -4px rgba(58,143,139,0.5)}
+  .brand-name{font-weight:600;letter-spacing:-0.01em;font-size:15px;color:#fff}
+  .brand-sub{font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px}
+
+  .nav-label{font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);text-transform:uppercase;padding:18px 18px 8px;font-weight:600}
+  .nav{display:flex;flex-direction:column;padding:0 8px;gap:2px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:13.5px;font-weight:500;border-left:3px solid transparent;transition:background .14s, color .14s}
+  .nav a:hover{background:rgba(255,255,255,0.06);color:#fff}
+  .nav a.active{background:rgba(58,143,139,0.22);color:#fff;border-left-color:var(--brand);border-radius:0 8px 8px 0;padding-left:14px;font-weight:600}
+  .nav .icon{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav .badge{margin-left:auto;font-size:11px;background:rgba(255,255,255,0.12);color:#fff;padding:1px 7px;border-radius:999px;font-weight:600;font-family:'Geist Mono',monospace}
+  .nav a.active .badge{background:var(--brand);color:#fff}
+  .nav .badge.warn{background:var(--warn-strong);color:#fff}
+
+  .side-foot{margin-top:auto;padding:18px;border-top:1px solid rgba(255,255,255,0.08)}
+  .health-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:11px;padding:13px}
+  .health-card .row{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:rgba(255,255,255,0.75);margin-bottom:6px}
+  .health-card .row:last-child{margin-bottom:0}
+  .health-card .row .v{color:#fff;font-weight:600;font-family:'Geist Mono',monospace}
+  .health-card .row .v.ok{color:#a7e3da}
+  .health-card .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--ok-strong);box-shadow:0 0 0 3px rgba(72,187,120,0.20);margin-right:6px;vertical-align:middle}
+  .op-card{margin-top:14px;display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.05)}
+  .op-card .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2)}
+  .op-card .nm{font-size:12.5px;font-weight:600;color:#fff;line-height:1.2}
+  .op-card .rl{font-size:10.5px;color:rgba(255,255,255,0.55)}
+
+  /* ===== Navbar ===== */
+  .navbar{height:64px;background:var(--navbar-bg);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);color:#fff;display:flex;align-items:center;padding:0 28px;gap:24px;position:sticky;top:0;z-index:5;box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 20px -16px rgba(0,0,0,0.4)}
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.7)}
+  .crumbs .here{color:#fff;font-weight:600}
+  .crumbs .sep{color:rgba(255,255,255,0.4)}
+  .nav-search{flex:0 1 320px;margin-left:18px;display:flex;align-items:center;gap:9px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.10);padding:7px 12px;border-radius:9px;color:rgba(255,255,255,0.85);font-size:13px}
+  .nav-search input{background:transparent;border:0;outline:0;color:#fff;font-family:inherit;font-size:13px;width:100%}
+  .nav-search input::placeholder{color:rgba(255,255,255,0.55)}
+  .nav-search .kbd{margin-left:auto;font-family:'Geist Mono',monospace;font-size:10.5px;color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.15);padding:1px 5px;border-radius:4px}
+
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .icon-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;color:#fff;cursor:pointer;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);position:relative}
+  .icon-btn:hover{background:rgba(255,255,255,0.14)}
+  .icon-btn .bell-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:var(--error-strong);color:#fff;border-radius:999px;font-size:10.5px;font-weight:700;font-family:'Geist Mono',monospace;display:grid;place-items:center;box-shadow:0 0 0 2px rgba(42,100,97,1)}
+  .avatar-chip{display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.1);cursor:pointer;color:#fff}
+  .avatar-chip:hover{background:rgba(255,255,255,0.16)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25)}
+  .avatar-name{font-size:13px;font-weight:600;line-height:1.1}
+  .avatar-role{font-size:10.5px;color:rgba(255,255,255,0.65)}
+
+  /* ===== Page ===== */
+  .page{padding:26px 32px 56px;max-width:1280px;margin:0 auto}
+
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px;flex-wrap:wrap}
+  .page-title{font-size:24px;font-weight:600;letter-spacing:-0.02em;color:var(--ink);line-height:1.1}
+  .page-sub{font-size:13.5px;color:var(--ink-mute);margin-top:6px}
+
+  .range{
+    display:inline-flex;background:var(--surface-1);border:1px solid rgba(255,255,255,0.6);
+    border-radius:10px;padding:3px;font-size:12.5px;box-shadow:var(--shadow-sm);
+  }
+  .range button{background:transparent;border:0;color:var(--ink-mute);padding:7px 14px;border-radius:7px;font-family:inherit;font-weight:500;cursor:pointer}
+  .range button.on{background:#fff;color:var(--brand-dark);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
+
+  /* ===== KPI ===== */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .kpi{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);
+    border-radius:14px;padding:20px;
+    box-shadow:var(--shadow-md);
+    position:relative;overflow:hidden;
+  }
+  .kpi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+  .kpi-label{font-size:12.5px;color:var(--ink-mute);font-weight:500}
+  .kpi-icon{
+    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    color:#fff;box-shadow:0 6px 14px -6px rgba(58,143,139,0.5);
+  }
+  .kpi-icon.ok{background:linear-gradient(135deg,#48bb78,#2f855a);box-shadow:0 6px 14px -6px rgba(72,187,120,0.5)}
+  .kpi-icon.warn{background:linear-gradient(135deg,#d4a04a,#b8860b);box-shadow:0 6px 14px -6px rgba(212,160,74,0.5)}
+  .kpi-icon.alt{background:rgba(255,255,255,0.8);color:var(--brand-dark);box-shadow:inset 0 0 0 1px var(--brand-soft)}
+  .kpi-value{font-size:30px;font-weight:600;letter-spacing:-0.025em;line-height:1.05;color:var(--ink)}
+  .kpi-value .cur{color:var(--ink-mute);font-weight:500;font-size:17px;margin-right:5px;vertical-align:3px}
+  .kpi-value .dec{color:var(--ink-mute);font-weight:500;font-size:17px}
+  .kpi-foot{margin-top:10px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-mute)}
+  .delta{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px;font-family:'Geist Mono',monospace;font-size:11px;font-weight:600}
+  .delta.up{background:rgba(72,187,120,0.14);color:var(--ok)}
+  .delta.flat{background:rgba(154,163,182,0.10);color:var(--ink-mute);font-weight:500}
+
+  .kpi.featured-ok{background:linear-gradient(180deg, rgba(72,187,120,0.10) 0%, rgba(255,255,255,0.75) 60%);border-color:var(--ok-line)}
+  .kpi.featured-ok::after{content:"";position:absolute;top:0;right:0;width:110px;height:110px;background:radial-gradient(circle at 100% 0%, rgba(72,187,120,0.25), transparent 60%);pointer-events:none}
+  .kpi.featured-warn{background:linear-gradient(180deg, rgba(212,160,74,0.14) 0%, rgba(255,255,255,0.75) 60%);border-color:var(--warn-line)}
+  .kpi.featured-warn::after{content:"";position:absolute;top:0;right:0;width:110px;height:110px;background:radial-gradient(circle at 100% 0%, rgba(212,160,74,0.30), transparent 60%);pointer-events:none}
+
+  .pill-link{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11.5px;font-weight:600;color:var(--brand-dark);
+    text-decoration:none;
+  }
+  .pill-link:hover{color:var(--brand)}
+  .pill-link.warn{color:var(--warn-fg)}
+
+  /* ===== Card ===== */
+  .card{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);
+    border-radius:14px;padding:22px 24px;
+    box-shadow:var(--shadow-md);
+  }
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:18px}
+  .card-title{font-size:15px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);display:flex;align-items:center;gap:9px}
+  .card-title svg{color:var(--brand-dark)}
+  .card-sub{font-size:12px;color:var(--ink-dim);margin-top:3px}
+
+  /* ===== Charts row ===== */
+  .charts{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:18px}
+
+  /* Bars */
+  .bars{display:flex;flex-direction:column;gap:18px;padding:4px 0}
+  .bar-row{display:grid;grid-template-columns:140px 1fr 80px;gap:14px;align-items:center}
+  .bar-label{font-size:13px;color:var(--ink);display:flex;align-items:center;gap:8px;font-weight:500}
+  .bar-label .sw{width:9px;height:9px;border-radius:2px}
+  .bar-track{height:12px;background:rgba(255,255,255,0.6);border-radius:6px;overflow:hidden;position:relative;box-shadow:inset 0 0 0 1px var(--line-soft)}
+  .bar-fill{height:100%;border-radius:6px;background:var(--brand);position:relative}
+  .bar-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.20),transparent 60%);border-radius:6px}
+  .bar-val{text-align:right;font-family:'Geist Mono',monospace;font-size:12.5px;color:var(--ink-mute);font-variant-numeric:tabular-nums}
+  .bar-val b{color:var(--ink);font-weight:600}
+
+  /* Line */
+  .chart-wrap{position:relative;height:220px}
+  .chart-wrap svg{width:100%;height:100%;display:block;overflow:visible}
+  .axis-y{font-family:'Geist Mono',monospace;font-size:10.5px;fill:var(--ink-dim)}
+  .axis-x{font-family:'Geist',sans-serif;font-size:11px;fill:var(--ink-dim)}
+  .grid{stroke:rgba(74,111,109,0.15);stroke-width:1;stroke-dasharray:3 4}
+
+  .chart-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:8px;padding-top:12px;border-top:1px solid var(--line-soft);
+    font-size:12px;color:var(--ink-mute);
+  }
+  .chart-foot .total{color:var(--ink);font-weight:600;font-family:'Geist Mono',monospace}
+
+  /* ===== Table ===== */
+  .table-card{
+    background:var(--surface-1);backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-md);overflow:hidden;margin-bottom:18px;
+  }
+  .table-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 12px}
+  .table-actions{display:flex;gap:8px}
+  .btn{
+    font-family:inherit;font-size:12.5px;font-weight:600;
+    padding:8px 14px;border-radius:8px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    border:1px solid transparent;
+    transition:background .14s, transform .08s, filter .14s, box-shadow .14s, color .14s, border-color .14s;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:linear-gradient(180deg,var(--brand),var(--brand-dark));color:#fff;border-color:var(--brand-dark);box-shadow:0 6px 14px -6px rgba(58,143,139,0.55)}
+  .btn.primary:hover{filter:brightness(1.06)}
+  .btn.ghost{background:rgba(255,255,255,0.6);color:var(--ink-2);border-color:var(--line)}
+  .btn.ghost:hover{background:#fff;border-color:var(--brand-mid);color:var(--brand-dark)}
+  .btn.ok{background:linear-gradient(180deg,#48bb78,#2f855a);color:#fff;border-color:#2f855a;box-shadow:0 6px 14px -6px rgba(72,187,120,0.55)}
+  .btn.ok:hover{filter:brightness(1.06)}
+  .btn.danger{background:rgba(192,57,43,0.06);color:var(--error-fg);border-color:var(--error-line)}
+  .btn.danger:hover{background:rgba(192,57,43,0.12)}
+  .btn.sm{padding:6px 12px;font-size:12px;border-radius:7px}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{
+    text-align:left;font-weight:600;font-size:11.5px;letter-spacing:0.06em;
+    text-transform:uppercase;color:var(--ink-dim);
+    padding:11px 22px;background:rgba(255,255,255,0.45);
+    border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);
+  }
+  tbody td{padding:13px 22px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:rgba(255,255,255,0.4)}
+  tbody tr.warn-row{background:rgba(255,247,230,0.6)}
+  tbody tr.warn-row:hover{background:rgba(255,247,230,0.85)}
+  tbody tr.warn-row td{border-bottom-color:rgba(245,211,154,0.45)}
+
+  .order-code{font-family:'Geist Mono',monospace;font-size:12.5px;color:var(--ink);font-weight:600}
+  .client{display:flex;align-items:center;gap:9px}
+  .client-av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:600;background:rgba(255,255,255,0.7);color:var(--brand-dark);box-shadow:inset 0 0 0 1px var(--line)}
+  .client-name{font-size:13px;font-weight:600;color:var(--ink)}
+  .client-doc{font-size:11px;color:var(--ink-dim);font-family:'Geist Mono',monospace}
+
+  .svc{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+  .svc .sw{width:9px;height:9px;border-radius:2px}
+
+  .status{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:4px 10px 4px 9px;border-radius:999px;border:1px solid transparent;text-transform:uppercase;letter-spacing:0.04em}
+  .status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .status.listo{color:var(--ok);background:var(--ok-bg);border-color:var(--ok-line)}
+  .status.proceso{color:var(--brand-dark);background:var(--info-bg);border-color:var(--info-line)}
+  .status.cola{color:var(--ink-mute);background:rgba(136,136,136,0.10);border-color:rgba(136,136,136,0.20)}
+  .status.pago{color:var(--warn-fg);background:var(--warn-bg);border-color:var(--warn-line)}
+  .status.entregado{color:var(--ink-mute);background:rgba(136,136,136,0.10);border-color:rgba(136,136,136,0.20)}
+
+  .amount{font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+  .when{font-family:'Geist Mono',monospace;font-size:12px;color:var(--ink-mute)}
+  .actions-cell{display:flex;gap:6px;justify-content:flex-end}
+
+  /* ===== Pagos por validar ===== */
+  .validate-section{margin-bottom:18px}
+  .validate-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px}
+  .pay-card{
+    background:var(--surface-1);backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);border-radius:14px;
+    padding:18px;
+    box-shadow:var(--shadow-md);
+    display:flex;gap:14px;
+    position:relative;overflow:hidden;
+  }
+  .pay-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(180deg,var(--warn-strong),var(--warn-fg))}
+  .pay-thumb{
+    width:96px;height:120px;border-radius:10px;flex-shrink:0;
+    background:#fff;border:1px solid var(--line);
+    box-shadow:inset 0 0 0 4px #fff;
+    position:relative;overflow:hidden;
+    display:flex;align-items:flex-end;justify-content:center;
+  }
+  .pay-thumb::before{
+    content:"";position:absolute;inset:0;
+    background:
+      linear-gradient(180deg, #722f8e 0%, #5b2374 28%, #fff 28%, #fff 100%),
+      linear-gradient(180deg, transparent 0%, transparent 28%, rgba(0,0,0,0.04) 100%);
+  }
+  .pay-thumb .yape-glyph{
+    position:absolute;top:8px;left:0;right:0;text-align:center;
+    color:#fff;font-weight:800;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;
+    text-shadow:0 1px 2px rgba(0,0,0,0.2);font-family:'Geist Mono',monospace;
+  }
+  .pay-thumb .yape-amount{
+    position:absolute;top:32px;left:0;right:0;text-align:center;
+    color:#fff;font-weight:700;font-size:14px;font-family:'Geist Mono',monospace;
+  }
+  .pay-thumb .yape-lines{
+    position:absolute;bottom:8px;left:8px;right:8px;
+    display:flex;flex-direction:column;gap:4px;z-index:1;
+  }
+  .pay-thumb .yape-lines span{
+    height:5px;background:#ecedf0;border-radius:2px;
+  }
+  .pay-thumb .yape-lines span.short{width:60%}
+  .pay-thumb .yape-lines span.mid{width:80%}
+  .pay-thumb-zoom{
+    position:absolute;bottom:6px;right:6px;
+    width:22px;height:22px;border-radius:6px;
+    background:rgba(255,255,255,0.95);color:var(--ink-mute);
+    display:grid;place-items:center;border:1px solid var(--line);
+    box-shadow:0 1px 2px rgba(0,0,0,0.06);
+    cursor:pointer;z-index:2;
+  }
+
+  .pay-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+  .pay-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .pay-code{font-family:'Geist Mono',monospace;font-size:13.5px;font-weight:700;color:var(--ink)}
+  .pay-pill{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:10.5px;font-weight:600;
+    padding:3px 8px;border-radius:999px;
+    color:var(--warn-fg);background:var(--warn-bg);border:1px solid var(--warn-line);
+    text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .pay-pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+  .pay-client{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-mute)}
+  .pay-client svg{color:var(--ink-dim)}
+  .pay-client b{color:var(--ink);font-weight:600}
+  .pay-amount-row{display:flex;align-items:baseline;gap:6px;margin-top:2px}
+  .pay-amount-label{font-size:11px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:0.06em;font-weight:600}
+  .pay-amount-val{font-family:'Geist Mono',monospace;font-size:18px;font-weight:700;color:var(--brand-dark);letter-spacing:-0.01em}
+  .pay-amount-val .cur{font-size:12px;font-weight:600;opacity:.75;margin-right:3px;vertical-align:2px}
+  .pay-meta{font-size:11px;color:var(--ink-dim);font-family:'Geist Mono',monospace}
+  .pay-actions{display:flex;gap:8px;margin-top:auto;padding-top:6px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/>
+          <path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">SIGEPED</div>
+        <div class="brand-sub">Admin</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Gestión</div>
+    <nav class="nav">
+      <a class="active" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM3 21h8v-6H3v6zM13 3v6h8V3h-8z"/></svg>
+        Dashboard
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        Pedidos
+        <span class="badge">12</span>
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+        Pagos pendientes
+        <span class="badge warn">4</span>
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/><circle cx="17" cy="6" r="3"/><path d="M22 18c0-2.5-2-4.5-4.5-4.5"/></svg>
+        Usuarios
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/></svg>
+        Servicios
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/></svg>
+        Reportes
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="health-card">
+        <div class="row"><span><span class="dot"></span>Sistema</span><span class="v ok">Operativo</span></div>
+        <div class="row"><span>Pedidos hoy</span><span class="v">12</span></div>
+        <div class="row"><span>Versión</span><span class="v">v2.4.1</span></div>
+      </div>
+      <div class="op-card">
+        <div class="av">JR</div>
+        <div>
+          <div class="nm">Jonatan Ruiz</div>
+          <div class="rl">Administrador</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ===== Navbar ===== -->
+    <header class="navbar">
+      <div class="crumbs">
+        <span>Admin</span>
+        <span class="sep">/</span>
+        <span class="here">Dashboard</span>
+      </div>
+
+      <div class="nav-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input placeholder="Buscar pedido, cliente, operario…" />
+        <span class="kbd">⌘K</span>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" title="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="bell-badge">3</span>
+        </button>
+        <div class="avatar-chip">
+          <div class="avatar">JR</div>
+          <div>
+            <div class="avatar-name">Jonatan Ruiz</div>
+            <div class="avatar-role">Administrador</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Page ===== -->
+    <div class="page">
+
+      <!-- Header -->
+      <div class="page-head">
+        <div>
+          <div class="page-title">Resumen general</div>
+          <div class="page-sub">Martes, 19 de mayo · Periodo: mayo 2026</div>
+        </div>
+        <div class="range">
+          <button>Hoy</button>
+          <button>7 días</button>
+          <button class="on">Mes</button>
+          <button>Trimestre</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <section class="kpis">
+        <div class="kpi">
+          <div class="kpi-head">
+            <div class="kpi-label">Ventas del mes</div>
+            <div class="kpi-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum"><span class="cur">S/</span>4,320<span class="dec">.00</span></div>
+          <div class="kpi-foot">
+            <span class="delta up">↑ 12%</span>
+            <span>vs. mes anterior</span>
+          </div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi-head">
+            <div class="kpi-label">Pedidos activos</div>
+            <div class="kpi-icon alt">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18l-2 13H5L3 6z"/><path d="M8 6V4a4 4 0 0 1 8 0v2"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum">12</div>
+          <div class="kpi-foot">
+            <span class="delta flat">5 en proceso · 4 en cola</span>
+          </div>
+        </div>
+
+        <div class="kpi featured-ok">
+          <div class="kpi-head">
+            <div class="kpi-label">Listos para recoger</div>
+            <div class="kpi-icon ok">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum">3</div>
+          <div class="kpi-foot">
+            <a class="pill-link" href="#">Notificar a clientes
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="kpi featured-warn">
+          <div class="kpi-head">
+            <div class="kpi-label">Pagos por validar</div>
+            <div class="kpi-icon warn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M9 16h2"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum">4</div>
+          <div class="kpi-foot">
+            <a class="pill-link warn" href="#validate">Requiere acción
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts -->
+      <section class="charts">
+
+        <!-- Bars -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/></svg>
+                Servicios más solicitados
+              </div>
+              <div class="card-sub">Mayo 2025 · 92 pedidos en total</div>
+            </div>
+          </div>
+
+          <div class="bars">
+            <div class="bar-row">
+              <div class="bar-label"><span class="sw" style="background:#2e7874"></span>Corte láser</div>
+              <div class="bar-track"><div class="bar-fill" style="width:100%;background:#2e7874"></div></div>
+              <div class="bar-val"><b>38</b> <span>·41%</span></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label"><span class="sw" style="background:#3a8f8b"></span>Ploteo</div>
+              <div class="bar-track"><div class="bar-fill" style="width:71%;background:#3a8f8b"></div></div>
+              <div class="bar-val"><b>27</b> <span>·29%</span></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label"><span class="sw" style="background:#6bb0ad"></span>Impresión 3D</div>
+              <div class="bar-track"><div class="bar-fill" style="width:47%;background:#6bb0ad"></div></div>
+              <div class="bar-val"><b>18</b> <span>·20%</span></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label"><span class="sw" style="background:#a8c0be"></span>Maqueta</div>
+              <div class="bar-track"><div class="bar-fill" style="width:24%;background:#a8c0be"></div></div>
+              <div class="bar-val"><b>9</b> <span>·10%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Line chart: 420, 380, 510, 290, 640, 480, 600 -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
+                Ventas últimos 7 días
+              </div>
+              <div class="card-sub">Total S/ 3,320 · prom. S/ 474/día</div>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <!-- max = 700 for scaling. y range 0..700, plot area 20..200 (h=180) -->
+            <svg viewBox="0 0 480 220" preserveAspectRatio="none">
+              <line class="grid" x1="36" y1="30"  x2="480" y2="30"/>
+              <line class="grid" x1="36" y1="75"  x2="480" y2="75"/>
+              <line class="grid" x1="36" y1="120" x2="480" y2="120"/>
+              <line class="grid" x1="36" y1="165" x2="480" y2="165"/>
+
+              <text class="axis-y" x="0"  y="33">700</text>
+              <text class="axis-y" x="0"  y="78">525</text>
+              <text class="axis-y" x="0"  y="123">350</text>
+              <text class="axis-y" x="0"  y="168">175</text>
+              <text class="axis-y" x="10" y="201">0</text>
+
+              <defs>
+                <linearGradient id="areaFill" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%"  stop-color="#3a8f8b" stop-opacity=".28"/>
+                  <stop offset="100%" stop-color="#3a8f8b" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+
+              <!-- 7 points evenly spaced from 56 to 460 (step ~67.3)
+                   y = 195 - (value/700)*165
+                   420 → 195 - 99 = 96.0
+                   380 → 195 - 89.6 = 105.4
+                   510 → 195 - 120.2 = 74.8
+                   290 → 195 - 68.4 = 126.6
+                   640 → 195 - 150.9 = 44.1
+                   480 → 195 - 113.1 = 81.9
+                   600 → 195 - 141.4 = 53.6
+              -->
+              <path d="M56,96 L123,105 L191,75 L258,127 L325,44 L393,82 L460,54 L460,195 L56,195 Z" fill="url(#areaFill)"/>
+
+              <polyline
+                fill="none" stroke="#3a8f8b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"
+                points="56,96 123,105 191,75 258,127 325,44 393,82 460,54" />
+
+              <g fill="#fff" stroke="#2e7874" stroke-width="2">
+                <circle cx="56"  cy="96"  r="3.5"/>
+                <circle cx="123" cy="105" r="3.5"/>
+                <circle cx="191" cy="75"  r="3.5"/>
+                <circle cx="258" cy="127" r="3.5"/>
+                <circle cx="325" cy="44"  r="3.5"/>
+                <circle cx="393" cy="82"  r="3.5"/>
+                <circle cx="460" cy="54"  r="4.5" fill="#2e7874"/>
+              </g>
+
+              <!-- tooltip on last -->
+              <g transform="translate(460,54)" style="pointer-events:none">
+                <line x1="0" y1="0" x2="0" y2="141" stroke="#2e7874" stroke-opacity=".35" stroke-dasharray="3 3"/>
+                <rect x="-62" y="-44" width="64" height="32" rx="6" fill="#ffffff" stroke="#a8c0be"/>
+                <text x="-54" y="-29" font-family="Geist Mono" font-size="9.5" fill="#666">Lun · hoy</text>
+                <text x="-54" y="-16" font-family="Geist Mono" font-size="11" fill="#2c2c2c" font-weight="700">S/ 600</text>
+              </g>
+
+              <text class="axis-x" x="56"  y="213" text-anchor="middle">Mar 13</text>
+              <text class="axis-x" x="123" y="213" text-anchor="middle">Mié 14</text>
+              <text class="axis-x" x="191" y="213" text-anchor="middle">Jue 15</text>
+              <text class="axis-x" x="258" y="213" text-anchor="middle">Vie 16</text>
+              <text class="axis-x" x="325" y="213" text-anchor="middle">Sáb 17</text>
+              <text class="axis-x" x="393" y="213" text-anchor="middle">Dom 18</text>
+              <text class="axis-x" x="460" y="213" text-anchor="middle" fill="#2e7874" font-weight="700">Lun 19</text>
+            </svg>
+          </div>
+
+          <div class="chart-foot">
+            <span>Día más alto: <b style="color:var(--ink);font-weight:600">Sáb · S/ 640</b></span>
+            <span class="total">↑ Tendencia positiva</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Últimos pedidos -->
+      <section class="table-card">
+        <div class="table-head">
+          <div>
+            <div class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+              Últimos pedidos
+            </div>
+            <div class="card-sub" style="margin-left:27px">Mostrando 5 más recientes de 92 totales</div>
+          </div>
+          <div class="table-actions">
+            <button class="btn ghost">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+              Filtros
+            </button>
+            <button class="btn ghost">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+              Exportar
+            </button>
+            <button class="btn primary">Ver todos</button>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:110px">Código</th>
+              <th style="width:220px">Cliente</th>
+              <th>Servicio</th>
+              <th style="width:160px">Estado</th>
+              <th style="width:110px">Monto</th>
+              <th style="width:110px">Fecha</th>
+              <th style="width:140px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="order-code">#PED-0042</span></td>
+              <td>
+                <div class="client">
+                  <div class="client-av">AT</div>
+                  <div>
+                    <div class="client-name">Ana Torres</div>
+                    <div class="client-doc">DNI 45128973</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#2e7874"></span>Corte láser · MDF 3mm</span></td>
+              <td><span class="status proceso">En proceso</span></td>
+              <td class="amount">S/ 137.50</td>
+              <td><span class="when">Hoy · 16:00</span></td>
+              <td><div class="actions-cell"><button class="btn ghost sm">Ver</button><button class="btn primary sm">Gestionar</button></div></td>
+            </tr>
+
+            <tr class="warn-row">
+              <td><span class="order-code">#PED-0041</span></td>
+              <td>
+                <div class="client">
+                  <div class="client-av">JR</div>
+                  <div>
+                    <div class="client-name">Joaquín Rivera</div>
+                    <div class="client-doc">DNI 70921384</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#a8c0be"></span>Maqueta · cartón pluma 1:100</span></td>
+              <td><span class="status pago">Pendiente de pago</span></td>
+              <td class="amount">S/ 1,250.00</td>
+              <td><span class="when">21/05</span></td>
+              <td><div class="actions-cell"><button class="btn ghost sm">Ver</button><button class="btn primary sm">Gestionar</button></div></td>
+            </tr>
+
+            <tr>
+              <td><span class="order-code">#PED-0040</span></td>
+              <td>
+                <div class="client">
+                  <div class="client-av">CV</div>
+                  <div>
+                    <div class="client-name">Carolina Vega</div>
+                    <div class="client-doc">DNI 48392714</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#3a8f8b"></span>Ploteo · 4 láminas A1</span></td>
+              <td><span class="status listo">Listo p/ recoger</span></td>
+              <td class="amount">S/ 96.00</td>
+              <td><span class="when">Hoy</span></td>
+              <td><div class="actions-cell"><button class="btn ghost sm">Ver</button><button class="btn primary sm">Gestionar</button></div></td>
+            </tr>
+
+            <tr>
+              <td><span class="order-code">#PED-0039</span></td>
+              <td>
+                <div class="client">
+                  <div class="client-av">MA</div>
+                  <div>
+                    <div class="client-name">Estudio Alvarez</div>
+                    <div class="client-doc">RUC 20587391022</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#6bb0ad"></span>Impresión 3D · PLA blanco</span></td>
+              <td><span class="status cola">En cola</span></td>
+              <td class="amount">S/ 215.00</td>
+              <td><span class="when">22/05</span></td>
+              <td><div class="actions-cell"><button class="btn ghost sm">Ver</button><button class="btn primary sm">Gestionar</button></div></td>
+            </tr>
+
+            <tr>
+              <td><span class="order-code">#PED-0038</span></td>
+              <td>
+                <div class="client">
+                  <div class="client-av">RH</div>
+                  <div>
+                    <div class="client-name">Rubén Huamán</div>
+                    <div class="client-doc">DNI 71029384</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#2e7874"></span>Corte láser · acrílico 5mm</span></td>
+              <td><span class="status entregado">Entregado</span></td>
+              <td class="amount">S/ 340.00</td>
+              <td><span class="when">17/05</span></td>
+              <td><div class="actions-cell"><button class="btn ghost sm">Ver</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Pagos por validar -->
+      <section class="validate-section" id="validate">
+        <div class="card-head" style="margin-bottom:0">
+          <div>
+            <div class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>
+              Pagos por validar
+              <span style="margin-left:6px;font-size:12px;font-weight:600;color:var(--warn-fg);background:var(--warn-bg);border:1px solid var(--warn-line);padding:2px 9px;border-radius:999px">4 pendientes</span>
+            </div>
+            <div class="card-sub" style="margin-left:27px">Captura recibida vía Yape · validación &lt; 24h</div>
+          </div>
+          <a class="pill-link" href="#" style="font-size:12.5px">Ver todos
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <div class="validate-grid">
+
+          <!-- Card 1 -->
+          <div class="pay-card">
+            <div class="pay-thumb">
+              <div class="yape-glyph">Yape</div>
+              <div class="yape-amount">S/ 68.75</div>
+              <div class="yape-lines">
+                <span></span><span class="mid"></span><span class="short"></span><span></span><span class="short"></span>
+              </div>
+              <button class="pay-thumb-zoom" title="Ver captura completa">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6M11 8v6"/></svg>
+              </button>
+            </div>
+            <div class="pay-body">
+              <div class="pay-top">
+                <span class="pay-code">#PED-0042</span>
+                <span class="pay-pill">Adelanto 50%</span>
+              </div>
+              <div class="pay-client">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                <span><b>Ana Torres</b> · DNI 45128973</span>
+              </div>
+              <div class="pay-amount-row">
+                <span class="pay-amount-label">Monto declarado:</span>
+                <span class="pay-amount-val"><span class="cur">S/</span>68.75</span>
+              </div>
+              <div class="pay-meta">Recibido hace 12 min · captura_yape.jpg · 1.2 MB</div>
+              <div class="pay-actions">
+                <button class="btn ok sm" style="flex:1">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                  Aprobar
+                </button>
+                <button class="btn danger sm" style="flex:1">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg>
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="pay-card">
+            <div class="pay-thumb">
+              <div class="yape-glyph">Yape</div>
+              <div class="yape-amount">S/ 625.00</div>
+              <div class="yape-lines">
+                <span class="mid"></span><span></span><span class="short"></span><span class="mid"></span><span class="short"></span>
+              </div>
+              <button class="pay-thumb-zoom" title="Ver captura completa">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6M11 8v6"/></svg>
+              </button>
+            </div>
+            <div class="pay-body">
+              <div class="pay-top">
+                <span class="pay-code">#PED-0041</span>
+                <span class="pay-pill">Adelanto 50%</span>
+              </div>
+              <div class="pay-client">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                <span><b>Joaquín Rivera</b> · DNI 70921384</span>
+              </div>
+              <div class="pay-amount-row">
+                <span class="pay-amount-label">Monto declarado:</span>
+                <span class="pay-amount-val"><span class="cur">S/</span>625.00</span>
+              </div>
+              <div class="pay-meta">Recibido hace 38 min · yape_001.png · 0.9 MB</div>
+              <div class="pay-actions">
+                <button class="btn ok sm" style="flex:1">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                  Aprobar
+                </button>
+                <button class="btn danger sm" style="flex:1">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg>
+                  Rechazar
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>SIGEPED · Mi cola de trabajo</title>
+<meta name="viewport" content="width=1280" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* Paleta Register */
+    --brand:        #3a8f8b;
+    --brand-dark:   #2e7874;
+    --brand-soft:   #c8d8d6;
+    --brand-mid:    #a8c0be;
+
+    --sidebar-bg:   rgba(30,75,72,0.92);
+    --navbar-bg:    rgba(42,100,97,0.95);
+
+    --surface-1:    rgba(255,255,255,0.75);
+    --surface-2:    rgba(255,255,255,0.55);
+    --surface-3:    rgba(255,255,255,0.40);
+    --surface-input:rgba(240,240,240,0.80);
+    --line:         #e0e0e0;
+    --line-soft:    rgba(224,224,224,0.65);
+
+    --ink:          #2c2c2c;
+    --ink-2:        #333;
+    --ink-mute:     #666;
+    --ink-dim:      #888;
+    --ink-faint:    #999;
+
+    --error-bg:     #fff0f0;
+    --error-line:   #f5c6c6;
+    --error-fg:     #c0392b;
+    --error-strong: #e74c3c;
+
+    --status-pend:  #666;
+    --status-pend-bg: rgba(102,102,102,0.10);
+    --status-proc:  #2e7874;
+    --status-proc-bg: rgba(58,143,139,0.14);
+    --status-done:  #2f855a;
+    --status-done-bg: rgba(72,187,120,0.14);
+
+    --shadow-sm: 0 1px 2px rgba(74,111,109,0.08);
+    --shadow-md: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;color:var(--ink);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+      linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+  }
+  body::before, body::after{
+    content:"";position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);opacity:.45;z-index:0;
+  }
+  body::before{width:360px;height:360px;background:#c8d8d6;top:-100px;right:-80px}
+  body::after{width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.30}
+
+  .tnum{font-variant-numeric:tabular-nums}
+  .mono{font-family:'Geist Mono',ui-monospace,monospace}
+
+  /* ===== Shell ===== */
+  .app{display:grid;grid-template-columns:200px 1fr;min-height:100vh;position:relative;z-index:1}
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    background:var(--sidebar-bg);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    color:#e6f0ee;
+    display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;
+    box-shadow:inset -1px 0 0 rgba(255,255,255,0.05);
+  }
+  .brand{
+    display:flex;align-items:center;gap:11px;
+    padding:18px 18px;height:64px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .brand-mark{
+    width:30px;height:30px;border-radius:8px;
+    background:linear-gradient(135deg,#3a8f8b 0%, #2e7874 100%);
+    display:grid;place-items:center;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -4px rgba(58,143,139,0.5);
+  }
+  .brand-name{font-weight:600;letter-spacing:-0.01em;font-size:15px;color:#fff}
+  .brand-sub{font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px}
+
+  .nav-label{
+    font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);
+    text-transform:uppercase;padding:18px 18px 8px;font-weight:600;
+  }
+  .nav{display:flex;flex-direction:column;padding:0 8px;gap:2px}
+  .nav a{
+    display:flex;align-items:center;gap:11px;
+    padding:10px 12px;border-radius:8px;
+    color:rgba(255,255,255,0.75);text-decoration:none;
+    font-size:13.5px;font-weight:500;
+    position:relative;
+    border-left:3px solid transparent;
+    transition:background .14s ease, color .14s ease;
+  }
+  .nav a:hover{background:rgba(255,255,255,0.06);color:#fff}
+  .nav a.active{
+    background:rgba(58,143,139,0.22);
+    color:#fff;
+    border-left-color:var(--brand);
+    border-radius:0 8px 8px 0;
+    padding-left:14px;
+    font-weight:600;
+  }
+  .nav .icon{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav .badge{
+    margin-left:auto;font-size:11px;background:rgba(255,255,255,0.12);
+    color:#fff;padding:1px 7px;border-radius:999px;font-weight:600;
+    font-family:'Geist Mono',monospace;
+  }
+  .nav a.active .badge{background:var(--brand);color:#fff}
+
+  .side-foot{
+    margin-top:auto;padding:18px 18px;
+    border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .specs-label{
+    font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);
+    text-transform:uppercase;font-weight:600;margin-bottom:8px;
+  }
+  .specs{display:flex;flex-wrap:wrap;gap:6px}
+  .spec-chip{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11.5px;font-weight:500;
+    padding:4px 10px;border-radius:999px;
+    background:rgba(58,143,139,0.28);
+    color:#cce8e6;
+    border:1px solid rgba(58,143,139,0.45);
+  }
+  .spec-chip::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--brand);
+  }
+
+  .op-card{
+    margin-top:14px;display:flex;align-items:center;gap:10px;
+    padding:10px;border-radius:10px;background:rgba(255,255,255,0.05);
+  }
+  .op-card .av{
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,#3a8f8b,#2e7874);
+    display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2);
+  }
+  .op-card .nm{font-size:12.5px;font-weight:600;color:#fff;line-height:1.2}
+  .op-card .rl{font-size:10.5px;color:rgba(255,255,255,0.55)}
+
+  /* ===== Navbar ===== */
+  .navbar{
+    height:64px;
+    background:var(--navbar-bg);
+    backdrop-filter:blur(16px) saturate(140%);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    color:#fff;
+    display:flex;align-items:center;
+    padding:0 28px;gap:24px;
+    position:sticky;top:0;z-index:5;
+    box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 20px -16px rgba(0,0,0,0.4);
+  }
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.7)}
+  .crumbs .sep{color:rgba(255,255,255,0.4)}
+  .crumbs .here{color:#fff;font-weight:600}
+
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .icon-btn{
+    width:38px;height:38px;display:grid;place-items:center;
+    border-radius:10px;color:#fff;cursor:pointer;background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.08);position:relative;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,0.14)}
+  .icon-btn .bell-badge{
+    position:absolute;top:-5px;right:-5px;
+    min-width:18px;height:18px;padding:0 5px;
+    background:var(--error-strong);color:#fff;
+    border-radius:999px;font-size:10.5px;font-weight:700;font-family:'Geist Mono',monospace;
+    display:grid;place-items:center;
+    box-shadow:0 0 0 2px rgba(42,100,97,1);
+  }
+
+  .avatar-chip{
+    display:flex;align-items:center;gap:10px;
+    padding:4px 14px 4px 4px;border-radius:999px;
+    background:rgba(255,255,255,0.10);
+    border:1px solid rgba(255,255,255,0.1);
+    cursor:pointer;color:#fff;
+  }
+  .avatar-chip:hover{background:rgba(255,255,255,0.16)}
+  .avatar{
+    width:32px;height:32px;border-radius:50%;
+    background:linear-gradient(135deg,#3a8f8b,#2e7874);
+    display:grid;place-items:center;
+    font-size:12px;font-weight:700;color:#fff;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25);
+  }
+  .avatar-name{font-size:13px;font-weight:600;line-height:1.1}
+  .avatar-role{font-size:10.5px;color:rgba(255,255,255,0.65)}
+
+  /* ===== Page ===== */
+  .page{padding:28px 36px 56px}
+
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;gap:24px}
+  .page-title-row{display:flex;align-items:center;gap:14px}
+  .page-title{font-size:24px;font-weight:600;letter-spacing:-0.02em;color:var(--ink)}
+  .count-badge{
+    display:inline-flex;align-items:center;gap:7px;
+    background:rgba(255,255,255,0.75);
+    border:1px solid var(--line);
+    padding:5px 12px;border-radius:999px;
+    font-size:12.5px;font-weight:600;color:var(--brand-dark);
+    box-shadow:var(--shadow-sm);
+  }
+  .count-badge::before{
+    content:"";width:7px;height:7px;border-radius:50%;background:var(--brand);
+    box-shadow:0 0 0 3px rgba(58,143,139,0.18);
+  }
+  .page-sub{font-size:13px;color:var(--ink-mute);margin-top:6px}
+
+  .greeting{
+    background:rgba(255,255,255,0.40);
+    border:1px solid rgba(255,255,255,0.55);
+    border-radius:12px;padding:10px 16px;
+    font-size:13px;color:var(--ink-2);
+    backdrop-filter:blur(12px);
+  }
+  .greeting b{color:var(--brand-dark)}
+
+  /* ===== Filters ===== */
+  .filters{
+    display:flex;align-items:center;gap:12px;
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid rgba(255,255,255,0.6);
+    border-radius:12px;
+    padding:12px 16px;
+    box-shadow:var(--shadow-sm);
+    margin-bottom:18px;
+  }
+  .filters-label{font-size:12px;color:var(--ink-mute);font-weight:500;display:flex;align-items:center;gap:6px}
+  .filter-group{display:flex;align-items:center;gap:8px}
+  .filter-group label{font-size:12px;color:var(--ink-mute);font-weight:500}
+  .select{
+    appearance:none;-webkit-appearance:none;
+    background:var(--surface-input);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-family:inherit;font-size:13px;font-weight:500;
+    padding:8px 32px 8px 12px;border-radius:8px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 10px center;
+    cursor:pointer;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .select:focus{
+    outline:0;border-color:var(--brand);
+    box-shadow:0 0 0 3px rgba(58,143,139,0.18);
+    background-color:#fff;
+  }
+  .filters-divider{width:1px;height:22px;background:var(--line)}
+  .filters-info{margin-left:auto;font-size:12px;color:var(--ink-dim);display:flex;align-items:center;gap:6px}
+  .filters-info svg{color:var(--brand)}
+
+  /* ===== Order Cards ===== */
+  .orders{display:flex;flex-direction:column;gap:14px}
+  .order{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow-md);
+    display:grid;
+    grid-template-columns:6px 1fr auto;
+    overflow:hidden;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .order:hover{transform:translateY(-1px);box-shadow:0 14px 32px -12px rgba(46,120,116,0.25), 0 1px 2px rgba(74,111,109,0.08)}
+
+  .urgency-bar{background:transparent}
+  .order.urgent .urgency-bar{
+    background:linear-gradient(180deg,#e74c3c,#c0392b);
+  }
+  .order.urgent{border-color:#f5c6c6}
+
+  .order-body{padding:18px 22px;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start}
+
+  .svc-icon{
+    width:48px;height:48px;border-radius:11px;
+    background:linear-gradient(135deg,rgba(58,143,139,0.16),rgba(46,120,116,0.10));
+    color:var(--brand-dark);
+    display:grid;place-items:center;
+    box-shadow:inset 0 0 0 1px rgba(58,143,139,0.25);
+    flex-shrink:0;
+  }
+
+  .order-main{display:flex;flex-direction:column;gap:8px;min-width:0}
+  .order-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .order-code{font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-0.01em}
+  .svc-type{font-size:13px;color:var(--ink-mute);font-weight:500}
+  .svc-type .sep{margin:0 8px;color:var(--ink-faint)}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:600;
+    padding:3px 9px 3px 8px;border-radius:999px;
+    border:1px solid transparent;
+    text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .badge.pendiente{color:var(--status-pend);background:var(--status-pend-bg);border-color:rgba(102,102,102,0.20)}
+  .badge.proceso{color:var(--status-proc);background:var(--status-proc-bg);border-color:rgba(58,143,139,0.30)}
+  .badge.listo{color:var(--status-done);background:var(--status-done-bg);border-color:rgba(47,133,90,0.30)}
+  .badge.urgent{
+    color:var(--error-fg);background:var(--error-bg);border-color:var(--error-line);
+    text-transform:uppercase;letter-spacing:0.06em;
+  }
+  .badge.urgent::before{background:var(--error-strong);box-shadow:0 0 0 3px rgba(231,76,60,0.18)}
+
+  .order-detail{
+    display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:18px;
+    margin-top:4px;
+    padding-top:10px;border-top:1px dashed var(--line);
+  }
+  .detail-block{display:flex;flex-direction:column;gap:3px;min-width:0}
+  .detail-label{
+    font-size:10.5px;font-weight:600;color:var(--ink-faint);
+    text-transform:uppercase;letter-spacing:0.06em;
+  }
+  .detail-value{font-size:13px;color:var(--ink);font-weight:500;display:flex;align-items:center;gap:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .detail-value svg{color:var(--ink-mute);flex-shrink:0}
+  .detail-value.urgent-text{color:var(--error-fg);font-weight:600}
+  .detail-value.urgent-text svg{color:var(--error-fg)}
+
+  /* Actions column */
+  .order-actions{
+    display:flex;flex-direction:column;justify-content:center;
+    gap:8px;padding:18px 22px 18px 4px;
+    border-left:1px solid var(--line-soft);
+    background:rgba(255,255,255,0.25);
+    min-width:200px;
+  }
+  .btn{
+    font-family:inherit;font-size:13px;font-weight:600;
+    padding:9px 16px;border-radius:8px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    transition:background .14s, border-color .14s, color .14s, transform .08s;
+    border:1px solid transparent;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{
+    background:var(--brand);color:#fff;border-color:var(--brand-dark);
+    box-shadow:0 6px 14px -6px rgba(58,143,139,0.55);
+  }
+  .btn.primary:hover{background:var(--brand-dark)}
+  .btn.success{
+    background:#48bb78;color:#fff;border-color:#2f855a;
+    box-shadow:0 6px 14px -6px rgba(72,187,120,0.55);
+  }
+  .btn.success:hover{background:#2f855a}
+  .btn.ghost{
+    background:transparent;color:var(--ink-2);border-color:var(--line);
+  }
+  .btn.ghost:hover{background:rgba(255,255,255,0.6);border-color:var(--brand-mid);color:var(--brand-dark)}
+
+  /* Status hint under actions */
+  .ready-hint{
+    font-size:11px;color:var(--status-done);font-weight:600;
+    display:flex;align-items:center;gap:6px;justify-content:center;
+    margin-top:2px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/>
+          <path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">SIGEPED</div>
+        <div class="brand-sub">Operario</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Trabajo</div>
+    <nav class="nav">
+      <a class="active" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
+        Mi cola de trabajo
+        <span class="badge">4</span>
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        Historial
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        Mi perfil
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="specs-label">Mis especialidades</div>
+      <div class="specs">
+        <span class="spec-chip">Láser</span>
+        <span class="spec-chip">Ploteo</span>
+      </div>
+
+      <div class="op-card">
+        <div class="av">CR</div>
+        <div>
+          <div class="nm">Carlos Ríos</div>
+          <div class="rl">Operario · turno mañana</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ===== Navbar ===== -->
+    <header class="navbar">
+      <div class="crumbs">
+        <span>Operario</span>
+        <span class="sep">/</span>
+        <span class="here">Mi cola de trabajo</span>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" title="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="bell-badge">2</span>
+        </button>
+        <div class="avatar-chip">
+          <div class="avatar">CR</div>
+          <div>
+            <div class="avatar-name">Carlos Ríos</div>
+            <div class="avatar-role">Operario</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Page ===== -->
+    <div class="page">
+
+      <div class="page-head">
+        <div>
+          <div class="page-title-row">
+            <div class="page-title">Mi cola de trabajo</div>
+            <span class="count-badge">4 pedidos asignados</span>
+          </div>
+          <div class="page-sub">Ordenados por fecha estimada · El más próximo a vencer aparece primero</div>
+        </div>
+        <div class="greeting">Buenos días, <b>Carlos</b> · Hoy es martes 19 de mayo</div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters">
+        <div class="filters-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+          Filtrar
+        </div>
+
+        <div class="filter-group">
+          <label>Estado</label>
+          <select class="select">
+            <option>Todos</option>
+            <option>Pendiente</option>
+            <option>En proceso</option>
+          </select>
+        </div>
+
+        <div class="filters-divider"></div>
+
+        <div class="filter-group">
+          <label>Especialidad</label>
+          <select class="select">
+            <option>Todas</option>
+            <option>Láser</option>
+            <option>Ploteo</option>
+          </select>
+        </div>
+
+        <div class="filters-info">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>
+          Solo verás pedidos de tus especialidades (Láser · Ploteo)
+        </div>
+      </div>
+
+      <!-- Lista de pedidos -->
+      <section class="orders">
+
+        <!-- ===== 1 · URGENTE — Pendiente — Láser ===== -->
+        <article class="order urgent">
+          <div class="urgency-bar"></div>
+          <div class="order-body">
+            <div class="svc-icon" title="Corte láser">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2v6"/>
+                <path d="M9 8h6l-1 4h-4z"/>
+                <path d="M10 12v8"/><path d="M14 12v8"/>
+                <circle cx="12" cy="20" r="1.5" fill="currentColor"/>
+              </svg>
+            </div>
+
+            <div class="order-main">
+              <div class="order-top">
+                <span class="order-code">#PED-0042</span>
+                <span class="badge pendiente">Pendiente</span>
+                <span class="badge urgent">Urgente</span>
+              </div>
+              <div class="svc-type">Corte Láser <span class="sep">·</span> Acrílico transparente 5 mm</div>
+
+              <div class="order-detail">
+                <div class="detail-block">
+                  <div class="detail-label">Especificación</div>
+                  <div class="detail-value" title="12 piezas · 40 × 60 cm · grabado vectorial">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+                    12 piezas · 40 × 60 cm · grabado vectorial
+                  </div>
+                </div>
+                <div class="detail-block">
+                  <div class="detail-label">Cliente</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                    Joaquín Rivera
+                  </div>
+                </div>
+                <div class="detail-block">
+                  <div class="detail-label">Entrega estimada</div>
+                  <div class="detail-value urgent-text">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                    Hoy · 16:00 (en 4 h)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-actions">
+            <button class="btn primary">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
+              Iniciar
+            </button>
+            <button class="btn ghost">Ver detalle</button>
+          </div>
+        </article>
+
+        <!-- ===== 2 — En proceso — Láser ===== -->
+        <article class="order">
+          <div class="urgency-bar"></div>
+          <div class="order-body">
+            <div class="svc-icon" title="Corte láser">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 2v6"/>
+                <path d="M9 8h6l-1 4h-4z"/>
+                <path d="M10 12v8"/><path d="M14 12v8"/>
+                <circle cx="12" cy="20" r="1.5" fill="currentColor"/>
+              </svg>
+            </div>
+
+            <div class="order-main">
+              <div class="order-top">
+                <span class="order-code">#PED-0041</span>
+                <span class="badge proceso">En proceso</span>
+              </div>
+              <div class="svc-type">Corte Láser <span class="sep">·</span> MDF 3 mm</div>
+
+              <div class="order-detail">
+                <div class="detail-block">
+                  <div class="detail-label">Especificación</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+                    8 piezas · planos vectoriales A2
+                  </div>
+                </div>
+                <div class="detail-block">
+                  <div class="detail-label">Cliente</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                    Estudio Alvarez
+                  </div>
+                </div>
+                <div class="detail-block">
+                  <div class="detail-label">Entrega estimada</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                    Hoy · 18:30
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-actions">
+            <button class="btn success">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+              Marcar como listo
+            </button>
+            <button class="btn ghost">Ver detalle</button>
+          </div>
+        </article>
+
+        <!-- ===== 3 — Pendiente — Ploteo ===== -->
+        <article class="order">
+          <div class="urgency-bar"></div>
+          <div class="order-body">
+            <div class="svc-icon" title="Ploteo">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="6" width="18" height="9" rx="1"/>
+                <path d="M6 15v4M18 15v4"/>
+                <path d="M7 10h10M7 12h7"/>
+              </svg>
+            </div>
+
+            <div class="order-main">
+              <div class="order-top">
+                <span class="order-code">#PED-0044</span>
+                <span class="badge pendiente">Pendiente</span>
+              </div>
+              <div class="svc-type">Ploteo <span class="sep">·</span> Papel bond 90 g</div>
+
+              <div class="order-detail">
+                <div class="detail-block">
+                  <div class="detail-label">Especificación</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+                    6 láminas A1 · plano arquitectónico color
+                  </div>
+                </div>
+                <div class="detail-block">
+                  <div class="detail-label">Cliente</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                    Lucía Paredes
+                  </div>
+                </div>
+                <div class="detail-block">
+                  <div class="detail-label">Entrega estimada</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                    Mañana · 11:00
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-actions">
+            <button class="btn primary">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
+              Iniciar
+            </button>
+            <button class="btn ghost">Ver detalle</button>
+          </div>
+        </article>
+
+        <!-- ===== 4 — Listo — Ploteo ===== -->
+        <article class="order">
+          <div class="urgency-bar"></div>
+          <div class="order-body">
+            <div class="svc-icon" title="Ploteo">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect x="3" y="6" width="18" height="9" rx="1"/>
+                <path d="M6 15v4M18 15v4"/>
+                <path d="M7 10h10M7 12h7"/>
+              </svg>
+            </div>
+
+            <div class="order-main">
+              <div class="order-top">
+                <span class="order-code">#PED-0040</span>
+                <span class="badge listo">Listo</span>
+              </div>
+              <div class="svc-type">Ploteo <span class="sep">·</span> Papel couché 120 g</div>
+
+              <div class="order-detail">
+                <div class="detail-block">
+                  <div class="detail-label">Especificación</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+                    3 láminas A0 · render perspectiva
+                  </div>
+                </div>
+                <div class="detail-block">
+                  <div class="detail-label">Cliente</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                    Carolina Vega
+                  </div>
+                </div>
+                <div class="detail-block">
+                  <div class="detail-label">Entrega estimada</div>
+                  <div class="detail-value">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                    Mañana · 15:30
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="order-actions">
+            <button class="btn ghost">Ver detalle</button>
+            <div class="ready-hint">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+              Listo · esperando recojo
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

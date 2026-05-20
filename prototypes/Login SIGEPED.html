@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>SIGEPED · Iniciar sesión</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --brand:        #3a8f8b;
+    --brand-dark:   #2e7874;
+    --brand-soft:   #c8d8d6;
+    --brand-mid:    #a8c0be;
+
+    --surface:      rgba(255,255,255,0.75);
+    --surface-soft: rgba(255,255,255,0.55);
+    --surface-input:rgba(240,240,240,0.80);
+    --line:         #e0e0e0;
+    --line-soft:    rgba(224,224,224,0.65);
+
+    --ink:          #2c2c2c;
+    --ink-2:        #333;
+    --ink-mute:     #666;
+    --ink-dim:      #888;
+    --ink-faint:    #999;
+
+    --error-bg:     #fff0f0;
+    --error-line:   #f5c6c6;
+    --error-fg:     #c0392b;
+    --error-strong: #e74c3c;
+
+    --shadow-card: 0 30px 80px -30px rgba(46,120,116,0.45),
+                   0 14px 36px -16px rgba(46,120,116,0.30),
+                   0 0 0 1px rgba(255,255,255,0.45) inset;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;min-height:100vh}
+  body{
+    font-family:'Geist',ui-sans-serif,system-ui,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+      linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    display:grid;place-items:center;
+    padding:32px 16px;
+    position:relative;overflow-x:hidden;
+  }
+
+  /* Decorative blurs */
+  .blur{position:fixed;border-radius:50%;pointer-events:none;filter:blur(90px);z-index:0}
+  .blur.a{width:420px;height:420px;background:#c8d8d6;top:-120px;right:-90px;opacity:.55}
+  .blur.b{width:520px;height:520px;background:#3d8c89;bottom:-180px;left:-160px;opacity:.40}
+  .blur.c{width:300px;height:300px;background:#a8c0be;top:40%;left:8%;opacity:.30}
+  .blur.d{width:260px;height:260px;background:#c8d8d6;bottom:14%;right:6%;opacity:.35}
+
+  /* Floating diagonal stripes for subtle architectural texture */
+  .grid-overlay{
+    position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.08;
+    background-image:
+      linear-gradient(45deg, rgba(255,255,255,0.6) 1px, transparent 1px),
+      linear-gradient(-45deg, rgba(255,255,255,0.4) 1px, transparent 1px);
+    background-size:42px 42px;
+  }
+
+  .stack{
+    position:relative;z-index:1;
+    display:flex;flex-direction:column;align-items:center;gap:18px;
+    width:100%;max-width:420px;
+  }
+
+  /* ===== Card ===== */
+  .card{
+    width:100%;
+    background:var(--surface);
+    backdrop-filter:blur(24px) saturate(160%);
+    -webkit-backdrop-filter:blur(24px) saturate(160%);
+    border:1px solid rgba(255,255,255,0.55);
+    border-radius:20px;
+    padding:36px 36px 28px;
+    box-shadow:var(--shadow-card);
+  }
+
+  /* ===== Brand header ===== */
+  .brand{display:flex;flex-direction:column;align-items:center;gap:14px;margin-bottom:24px}
+  .brand-mark{
+    width:62px;height:62px;border-radius:16px;
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    display:grid;place-items:center;
+    box-shadow:
+      0 14px 30px -10px rgba(58,143,139,0.55),
+      0 0 0 1px rgba(255,255,255,0.4) inset,
+      0 -2px 8px rgba(0,0,0,0.12) inset;
+    position:relative;
+  }
+  .brand-mark::after{
+    content:"";position:absolute;inset:6px;border-radius:11px;
+    background:linear-gradient(180deg,rgba(255,255,255,0.18),transparent 55%);
+    pointer-events:none;
+  }
+  .brand-name{font-size:24px;font-weight:700;letter-spacing:-0.025em;color:var(--ink);line-height:1}
+  .brand-sub{font-size:11.5px;letter-spacing:0.18em;color:var(--brand-dark);text-transform:uppercase;font-weight:600;margin-top:6px}
+  .subtitle{
+    text-align:center;font-size:13.5px;color:var(--ink-mute);
+    line-height:1.5;margin-top:4px;
+  }
+
+  /* ===== Error banner ===== */
+  .error{
+    display:flex;align-items:flex-start;gap:11px;
+    background:var(--error-bg);
+    border:1px solid var(--error-line);
+    color:var(--error-fg);
+    padding:12px 14px;
+    border-radius:10px;
+    margin-bottom:18px;
+    font-size:13px;line-height:1.45;
+  }
+  .error-icon{
+    width:20px;height:20px;border-radius:50%;
+    background:var(--error-strong);color:#fff;
+    display:grid;place-items:center;flex-shrink:0;
+    font-weight:700;font-size:13px;
+    margin-top:1px;
+  }
+  .error-title{font-weight:600;color:var(--error-fg);margin-bottom:1px}
+  .error-msg{color:#a93226;font-size:12.5px}
+
+  /* ===== Form ===== */
+  .form{display:flex;flex-direction:column;gap:16px}
+  .field{display:flex;flex-direction:column;gap:7px}
+  .field-label{
+    font-size:12.5px;font-weight:600;color:var(--ink-2);
+    display:flex;align-items:center;gap:5px;
+  }
+  .field-label .req{color:var(--brand-dark)}
+
+  .input-wrap{
+    display:flex;align-items:center;gap:0;
+    background:var(--surface-input);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:0 12px 0 12px;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+    position:relative;
+  }
+  .input-wrap:focus-within{
+    border-color:var(--brand);
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(58,143,139,0.18);
+  }
+  .input-wrap.has-error{
+    border-color:var(--error-line);
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(192,57,43,0.12);
+  }
+  .input-icon{
+    color:var(--ink-dim);flex-shrink:0;
+    display:grid;place-items:center;width:18px;height:18px;
+    margin-right:10px;
+  }
+  .input-wrap:focus-within .input-icon{color:var(--brand-dark)}
+  .input-wrap input{
+    flex:1;min-width:0;
+    background:transparent;border:0;outline:0;
+    color:var(--ink);font-family:inherit;font-size:14px;font-weight:500;
+    padding:13px 0;
+    letter-spacing:0.01em;
+  }
+  .input-wrap input::placeholder{color:var(--ink-faint);font-weight:400}
+  .eye-btn{
+    background:transparent;border:0;cursor:pointer;
+    color:var(--ink-dim);
+    width:28px;height:28px;display:grid;place-items:center;border-radius:6px;
+    margin-left:6px;flex-shrink:0;
+  }
+  .eye-btn:hover{color:var(--brand-dark);background:rgba(58,143,139,0.08)}
+
+  .field-helper{font-size:11.5px;color:var(--ink-dim);margin-left:2px}
+  .field-helper.error-text{color:var(--error-fg);font-weight:500}
+
+  .row-between{display:flex;align-items:center;justify-content:space-between;margin-top:-4px}
+  .remember{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-mute);cursor:pointer;user-select:none}
+  .remember input{
+    appearance:none;-webkit-appearance:none;
+    width:16px;height:16px;border-radius:4px;
+    border:1.5px solid var(--line);background:#fff;
+    cursor:pointer;display:grid;place-items:center;
+    transition:background .12s, border-color .12s;
+  }
+  .remember input:checked{
+    background:var(--brand);border-color:var(--brand-dark);
+  }
+  .remember input:checked::after{
+    content:"";width:9px;height:5px;border:2px solid #fff;
+    border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px);
+  }
+  .forgot{color:var(--brand-dark);font-size:12.5px;font-weight:600;text-decoration:none}
+  .forgot:hover{color:var(--brand);text-decoration:underline}
+
+  /* ===== Submit ===== */
+  .submit{
+    width:100%;
+    font-family:inherit;font-size:14px;font-weight:600;
+    color:#fff;
+    background:linear-gradient(180deg,var(--brand) 0%, var(--brand-dark) 100%);
+    border:1px solid var(--brand-dark);
+    border-radius:10px;
+    padding:14px 18px;
+    cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    box-shadow:
+      0 10px 22px -8px rgba(58,143,139,0.65),
+      0 0 0 1px rgba(255,255,255,0.18) inset;
+    transition:transform .08s, box-shadow .14s, filter .14s;
+    margin-top:6px;
+    letter-spacing:0.005em;
+  }
+  .submit:hover{filter:brightness(1.05);box-shadow:0 14px 26px -8px rgba(58,143,139,0.7), 0 0 0 1px rgba(255,255,255,0.18) inset}
+  .submit:active{transform:translateY(1px)}
+
+  /* ===== Divider + register ===== */
+  .divider{
+    display:flex;align-items:center;gap:12px;
+    margin:22px 0 14px;
+    font-size:11.5px;color:var(--ink-dim);font-weight:500;
+    letter-spacing:0.08em;text-transform:uppercase;
+  }
+  .divider::before, .divider::after{
+    content:"";flex:1;height:1px;
+    background:linear-gradient(90deg, transparent, var(--line), transparent);
+  }
+  .register-line{
+    text-align:center;font-size:13.5px;color:var(--ink-mute);
+  }
+  .register-line a{
+    color:var(--brand-dark);font-weight:600;text-decoration:none;
+    padding-bottom:1px;border-bottom:1px solid transparent;
+  }
+  .register-line a:hover{border-bottom-color:var(--brand)}
+
+  /* ===== Foot caption ===== */
+  .legal{
+    text-align:center;font-size:11.5px;color:rgba(255,255,255,0.75);
+    line-height:1.55;max-width:380px;
+    text-shadow:0 1px 2px rgba(0,0,0,0.20);
+  }
+  .legal a{color:#fff;text-decoration:underline;text-underline-offset:2px}
+  .lock-row{
+    display:inline-flex;align-items:center;gap:6px;
+    color:rgba(255,255,255,0.85);font-size:11.5px;font-weight:500;
+    background:rgba(255,255,255,0.10);
+    border:1px solid rgba(255,255,255,0.18);
+    backdrop-filter:blur(8px);
+    padding:5px 11px;border-radius:999px;
+    text-shadow:none;
+  }
+
+  /* Top-right tiny support link */
+  .support{
+    position:fixed;top:18px;right:24px;z-index:2;
+    display:inline-flex;align-items:center;gap:6px;
+    color:rgba(255,255,255,0.9);font-size:12.5px;font-weight:500;
+    text-decoration:none;
+    background:rgba(255,255,255,0.10);
+    border:1px solid rgba(255,255,255,0.18);
+    backdrop-filter:blur(8px);
+    padding:7px 12px;border-radius:999px;
+  }
+  .support:hover{background:rgba(255,255,255,0.18)}
+</style>
+</head>
+<body>
+
+  <div class="blur a"></div>
+  <div class="blur b"></div>
+  <div class="blur c"></div>
+  <div class="blur d"></div>
+  <div class="grid-overlay"></div>
+
+  <a class="support" href="#">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1 1-1 1.7"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg>
+    ¿Necesitas ayuda?
+  </a>
+
+  <div class="stack">
+
+    <!-- ===== Card ===== -->
+    <main class="card" role="main" aria-label="Iniciar sesión">
+
+      <!-- Brand -->
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M5 5h7v7H5zM16 5h7v7h-7zM5 16h7v7H5z" fill="white" fill-opacity=".96"/>
+            <path d="M16 16h7v7h-7z" fill="white" fill-opacity=".55"/>
+          </svg>
+        </div>
+        <div style="text-align:center">
+          <div class="brand-name">SIGEPED</div>
+          <div class="brand-sub">Gestión de pedidos</div>
+        </div>
+        <p class="subtitle">Ingresa con tu DNI o número de celular</p>
+      </div>
+
+      <!-- Error banner -->
+      <div class="error" role="alert">
+        <div class="error-icon">!</div>
+        <div>
+          <div class="error-title">Credenciales incorrectas</div>
+          <div class="error-msg">Verifica tu DNI y contraseña, luego vuelve a intentarlo.</div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form class="form" onsubmit="return false">
+        <div class="field">
+          <label class="field-label" for="user">DNI o celular <span class="req">*</span></label>
+          <div class="input-wrap has-error">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+            </span>
+            <input id="user" type="text" placeholder="Ej: 71029384  o  987 654 321" autocomplete="username" value="71029384" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-label" for="pwd">Contraseña <span class="req">*</span></label>
+          <div class="input-wrap has-error">
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            </span>
+            <input id="pwd" type="password" placeholder="Ingresa tu contraseña" autocomplete="current-password" value="••••••••" />
+            <button class="eye-btn" type="button" id="eyeBtn" aria-label="Mostrar contraseña" title="Mostrar contraseña">
+              <svg id="eyeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="row-between">
+          <label class="remember">
+            <input type="checkbox" />
+            Recordar mi sesión
+          </label>
+          <a href="#" class="forgot">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <button class="submit" type="submit">
+          Iniciar sesión
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+
+      <div class="divider">o</div>
+
+      <div class="register-line">
+        ¿Primera vez? <a href="#">Regístrate aquí</a>
+      </div>
+    </main>
+
+    <!-- Foot -->
+    <div class="legal">
+      <span class="lock-row">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        Conexión segura · datos cifrados
+      </span>
+      <div style="margin-top:10px">SIGEPED v2.4.1 · © 2026 · <a href="#">Términos</a> · <a href="#">Privacidad</a></div>
+    </div>
+
+  </div>
+
+<script>
+  // Toggle password visibility
+  (function(){
+    var btn = document.getElementById('eyeBtn');
+    var pwd = document.getElementById('pwd');
+    var icon = document.getElementById('eyeIcon');
+    var EYE_OPEN  = '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';
+    var EYE_CLOSED= '<path d="M3 3l18 18"/><path d="M10.6 6.2A10 10 0 0 1 12 6c6 0 10 6 10 6s-1.3 2-3.6 3.7"/><path d="M6.6 7.8C3.5 9.6 2 12 2 12s4 6 10 6c1.6 0 3-.3 4.2-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>';
+    btn.addEventListener('click', function(){
+      var showing = pwd.type === 'text';
+      pwd.type = showing ? 'password' : 'text';
+      icon.innerHTML = showing ? EYE_OPEN : EYE_CLOSED;
+      btn.setAttribute('aria-label', showing ? 'Mostrar contraseña' : 'Ocultar contraseña');
+      btn.title = showing ? 'Mostrar contraseña' : 'Ocultar contraseña';
+    });
+  })();
+</script>
+</body>
+</html>

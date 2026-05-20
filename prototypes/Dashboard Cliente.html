@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>SIGEPED · Mi inicio</title>
+<meta name="viewport" content="width=1280" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --brand:        #3a8f8b;
+    --brand-dark:   #2e7874;
+    --brand-soft:   #c8d8d6;
+    --brand-mid:    #a8c0be;
+
+    --sidebar-bg:   rgba(30,75,72,0.92);
+    --navbar-bg:    rgba(42,100,97,0.95);
+
+    --surface-1:    rgba(255,255,255,0.75);
+    --surface-2:    rgba(255,255,255,0.55);
+    --surface-input:rgba(240,240,240,0.80);
+    --line:         #e0e0e0;
+    --line-soft:    rgba(224,224,224,0.65);
+
+    --ink:          #2c2c2c;
+    --ink-2:        #333;
+    --ink-mute:     #666;
+    --ink-dim:      #888;
+    --ink-faint:    #999;
+
+    --ok:           #2f855a;
+    --ok-strong:    #48bb78;
+    --ok-bg:        rgba(72,187,120,0.14);
+    --ok-line:      rgba(47,133,90,0.30);
+    --ok-soft-bg:   rgba(72,187,120,0.08);
+
+    --warn-fg:      #b8860b;
+    --warn-bg:      #fff7e6;
+    --warn-line:    #f5d39a;
+
+    --info-bg:      rgba(58,143,139,0.10);
+    --info-line:    rgba(58,143,139,0.30);
+
+    --shadow-sm: 0 1px 2px rgba(74,111,109,0.08);
+    --shadow-md: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;color:var(--ink);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+      linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+  }
+  body::before, body::after{
+    content:"";position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);opacity:.40;z-index:0;
+  }
+  body::before{width:360px;height:360px;background:#c8d8d6;top:-100px;right:-80px}
+  body::after{width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.30}
+
+  .tnum{font-variant-numeric:tabular-nums}
+  .mono{font-family:'Geist Mono',ui-monospace,monospace}
+
+  /* ===== Shell ===== */
+  .app{display:grid;grid-template-columns:200px 1fr;min-height:100vh;position:relative;z-index:1}
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    background:var(--sidebar-bg);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    color:#e6f0ee;display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;
+    box-shadow:inset -1px 0 0 rgba(255,255,255,0.05);
+  }
+  .brand{display:flex;align-items:center;gap:11px;padding:18px;height:64px;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .brand-mark{
+    width:30px;height:30px;border-radius:8px;
+    background:linear-gradient(135deg,#3a8f8b 0%, #2e7874 100%);
+    display:grid;place-items:center;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -4px rgba(58,143,139,0.5);
+  }
+  .brand-name{font-weight:600;letter-spacing:-0.01em;font-size:15px;color:#fff}
+  .brand-sub{font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px}
+
+  .nav-label{font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);text-transform:uppercase;padding:18px 18px 8px;font-weight:600}
+  .nav{display:flex;flex-direction:column;padding:0 8px;gap:2px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:13.5px;font-weight:500;border-left:3px solid transparent;transition:background .14s, color .14s}
+  .nav a:hover{background:rgba(255,255,255,0.06);color:#fff}
+  .nav a.active{background:rgba(58,143,139,0.22);color:#fff;border-left-color:var(--brand);border-radius:0 8px 8px 0;padding-left:14px;font-weight:600}
+  .nav .icon{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav .badge{margin-left:auto;font-size:11px;background:rgba(255,255,255,0.12);color:#fff;padding:1px 7px;border-radius:999px;font-weight:600;font-family:'Geist Mono',monospace}
+  .nav a.active .badge{background:var(--brand);color:#fff}
+  .nav .badge.alert{background:var(--ok-strong);color:#fff}
+
+  .side-foot{margin-top:auto;padding:18px;border-top:1px solid rgba(255,255,255,0.08)}
+  .help-card{
+    background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);
+    border-radius:11px;padding:13px;
+  }
+  .help-card .ttl{font-size:12.5px;font-weight:600;color:#fff;margin-bottom:3px}
+  .help-card .sub{font-size:11px;color:rgba(255,255,255,0.6);line-height:1.4;margin-bottom:9px}
+  .help-card .lnk{font-size:11.5px;color:#c8e8e5;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .help-card .lnk:hover{color:#fff}
+
+  .op-card{margin-top:14px;display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.05)}
+  .op-card .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2)}
+  .op-card .nm{font-size:12.5px;font-weight:600;color:#fff;line-height:1.2}
+  .op-card .rl{font-size:10.5px;color:rgba(255,255,255,0.55)}
+
+  /* ===== Navbar ===== */
+  .navbar{
+    height:64px;background:var(--navbar-bg);
+    backdrop-filter:blur(16px) saturate(140%);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    color:#fff;display:flex;align-items:center;
+    padding:0 28px;gap:24px;position:sticky;top:0;z-index:5;
+    box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 20px -16px rgba(0,0,0,0.4);
+  }
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.7)}
+  .crumbs .here{color:#fff;font-weight:600}
+  .crumbs .sep{color:rgba(255,255,255,0.4)}
+
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .icon-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;color:#fff;cursor:pointer;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);position:relative}
+  .icon-btn:hover{background:rgba(255,255,255,0.14)}
+  .icon-btn .bell-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:var(--ok-strong);color:#fff;border-radius:999px;font-size:10.5px;font-weight:700;font-family:'Geist Mono',monospace;display:grid;place-items:center;box-shadow:0 0 0 2px rgba(42,100,97,1)}
+
+  .avatar-chip{display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.1);cursor:pointer;color:#fff}
+  .avatar-chip:hover{background:rgba(255,255,255,0.16)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25)}
+  .avatar-name{font-size:13px;font-weight:600;line-height:1.1}
+  .avatar-role{font-size:10.5px;color:rgba(255,255,255,0.65)}
+
+  /* ===== Page ===== */
+  .page{padding:28px 36px 56px;max-width:1280px;margin:0 auto}
+
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:22px;flex-wrap:wrap}
+  .greet-title{font-size:26px;font-weight:600;letter-spacing:-0.025em;color:var(--ink);line-height:1.1}
+  .greet-title .wave{font-size:24px;margin-left:2px;display:inline-block;transform:translateY(-2px)}
+  .greet-sub{font-size:13.5px;color:var(--ink-mute);margin-top:6px}
+
+  .btn{
+    font-family:inherit;font-size:13.5px;font-weight:600;
+    padding:11px 18px;border-radius:10px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:1px solid transparent;
+    transition:background .14s, transform .08s, box-shadow .14s, filter .14s;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{
+    background:linear-gradient(180deg,var(--brand) 0%, var(--brand-dark) 100%);
+    color:#fff;border-color:var(--brand-dark);
+    box-shadow:0 10px 22px -8px rgba(58,143,139,0.55), 0 0 0 1px rgba(255,255,255,0.15) inset;
+  }
+  .btn.primary:hover{filter:brightness(1.06)}
+  .btn.primary.lg{padding:13px 22px;font-size:14px}
+  .btn.primary .plus{
+    width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.20);
+    display:grid;place-items:center;font-weight:700;font-size:14px;line-height:1;
+  }
+  .btn.ghost{background:transparent;color:var(--ink-2);border-color:var(--line);background:rgba(255,255,255,0.55)}
+  .btn.ghost:hover{background:#fff;border-color:var(--brand-mid);color:var(--brand-dark)}
+  .btn.sm{padding:7px 13px;font-size:12.5px;border-radius:8px}
+
+  /* ===== KPIs ===== */
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+  .kpi{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);
+    border-radius:14px;padding:22px;
+    box-shadow:var(--shadow-md);
+    position:relative;overflow:hidden;
+  }
+  .kpi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .kpi-label{font-size:13px;color:var(--ink-mute);font-weight:500}
+  .kpi-icon{
+    width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    color:#fff;box-shadow:0 6px 14px -6px rgba(58,143,139,0.5);
+  }
+  .kpi-icon.ok{background:linear-gradient(135deg,#48bb78,#2f855a);box-shadow:0 6px 14px -6px rgba(72,187,120,0.55)}
+  .kpi-icon.alt{background:rgba(255,255,255,0.8);color:var(--brand-dark);box-shadow:inset 0 0 0 1px var(--brand-soft)}
+  .kpi-value{font-size:34px;font-weight:600;letter-spacing:-0.025em;line-height:1;color:var(--ink)}
+  .kpi-foot{margin-top:10px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-mute)}
+  .kpi-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;
+    text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .kpi-badge.teal{color:var(--brand-dark);background:var(--info-bg);border:1px solid var(--info-line)}
+  .kpi-badge.green{color:var(--ok);background:var(--ok-bg);border:1px solid var(--ok-line)}
+  .kpi-badge.gray{color:var(--ink-mute);background:rgba(136,136,136,0.10);border:1px solid rgba(136,136,136,0.2)}
+  .kpi-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+
+  /* "Listo" KPI special */
+  .kpi.featured{
+    background:linear-gradient(180deg, rgba(72,187,120,0.10) 0%, rgba(255,255,255,0.75) 60%);
+    border-color:var(--ok-line);
+  }
+  .kpi.featured::after{
+    content:"";position:absolute;top:0;right:0;width:120px;height:120px;
+    background:radial-gradient(circle at 100% 0%, rgba(72,187,120,0.30), transparent 60%);
+    pointer-events:none;
+  }
+
+  /* ===== Sections ===== */
+  .section{margin-bottom:22px}
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .section-title{font-size:16px;font-weight:600;letter-spacing:-0.005em;color:var(--ink);display:flex;align-items:center;gap:8px}
+  .section-title .count{font-size:12px;color:var(--ink-mute);font-weight:500;background:rgba(255,255,255,0.5);padding:2px 9px;border-radius:999px;border:1px solid var(--line)}
+  .section-link{color:var(--brand-dark);font-size:12.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  .section-link:hover{color:var(--brand)}
+
+  /* ===== Table ===== */
+  .table-card{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow-md);overflow:hidden;
+  }
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{
+    text-align:left;font-weight:600;font-size:11.5px;letter-spacing:0.06em;
+    text-transform:uppercase;color:var(--ink-dim);
+    padding:13px 20px;background:rgba(255,255,255,0.45);
+    border-bottom:1px solid var(--line-soft);
+  }
+  tbody td{padding:14px 20px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:rgba(255,255,255,0.4)}
+  tbody tr.featured-row{background:rgba(72,187,120,0.10)}
+  tbody tr.featured-row:hover{background:rgba(72,187,120,0.14)}
+  tbody tr.featured-row td{border-bottom-color:rgba(47,133,90,0.18)}
+
+  .order-code{font-family:'Geist Mono',monospace;font-size:13px;color:var(--ink);font-weight:600}
+  .svc{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);font-weight:500}
+  .svc-sw{width:9px;height:9px;border-radius:2px}
+  .material{font-size:12.5px;color:var(--ink-mute)}
+  .when{font-family:'Geist Mono',monospace;font-size:12.5px;color:var(--ink-mute)}
+  .when b{color:var(--ink);font-weight:500}
+
+  .status{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11.5px;font-weight:600;
+    padding:4px 10px 4px 9px;border-radius:999px;
+    border:1px solid transparent;text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .status.listo{color:var(--ok);background:var(--ok-bg);border-color:var(--ok-line)}
+  .status.proceso{color:var(--brand-dark);background:var(--info-bg);border-color:var(--info-line)}
+  .status.pago{color:var(--warn-fg);background:var(--warn-bg);border-color:var(--warn-line)}
+  .status.entregado{color:var(--ink-mute);background:rgba(136,136,136,0.10);border-color:rgba(136,136,136,0.20)}
+
+  .ready-msg{
+    font-size:11.5px;color:var(--ok);font-weight:600;margin-top:5px;
+    display:flex;align-items:center;gap:5px;
+  }
+
+  /* ===== Notification card ===== */
+  .notif-card{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;
+    display:flex;gap:14px;align-items:flex-start;
+    box-shadow:var(--shadow-md);
+    position:relative;overflow:hidden;
+  }
+  .notif-card::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+    background:linear-gradient(180deg,var(--brand),var(--brand-dark));
+  }
+  .notif-icon{
+    width:42px;height:42px;border-radius:11px;flex-shrink:0;
+    background:linear-gradient(135deg,#48bb78,#2f855a);
+    color:#fff;display:grid;place-items:center;
+    box-shadow:0 6px 14px -6px rgba(72,187,120,0.55);
+    position:relative;
+  }
+  .notif-icon::after{
+    content:"";position:absolute;top:-3px;right:-3px;
+    width:11px;height:11px;background:#fff;border-radius:50%;
+    border:2px solid var(--ok-strong);
+  }
+  .notif-body{flex:1}
+  .notif-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px;letter-spacing:-0.005em}
+  .notif-title b{color:var(--brand-dark);font-family:'Geist Mono',monospace;font-weight:700}
+  .notif-msg{font-size:13px;color:var(--ink-mute);line-height:1.5}
+  .notif-meta{display:flex;align-items:center;gap:14px;margin-top:8px;font-size:11.5px;color:var(--ink-dim)}
+  .notif-meta .when-ago{display:inline-flex;align-items:center;gap:5px}
+  .notif-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--ink-faint)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/>
+          <path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">SIGEPED</div>
+        <div class="brand-sub">Cliente</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Mi cuenta</div>
+    <nav class="nav">
+      <a class="active" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        Inicio
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+        Nuevo pedido
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        Mis pedidos
+        <span class="badge">9</span>
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+        Pagos
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+        Notificaciones
+        <span class="badge alert">1</span>
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="help-card">
+        <div class="ttl">¿Tienes dudas?</div>
+        <div class="sub">Te ayudamos con tu pedido en tienda</div>
+        <a class="lnk" href="#">Contactar soporte
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="op-card">
+        <div class="av">JP</div>
+        <div>
+          <div class="nm">Juan Pérez</div>
+          <div class="rl">Cliente</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ===== Navbar ===== -->
+    <header class="navbar">
+      <div class="crumbs">
+        <span>Mi cuenta</span>
+        <span class="sep">/</span>
+        <span class="here">Inicio</span>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" title="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="bell-badge">1</span>
+        </button>
+        <div class="avatar-chip">
+          <div class="avatar">JP</div>
+          <div>
+            <div class="avatar-name">Juan Pérez</div>
+            <div class="avatar-role">Cliente</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Page ===== -->
+    <div class="page">
+
+      <!-- Header -->
+      <div class="page-head">
+        <div>
+          <div class="greet-title">Bienvenido, Juan <span class="wave">👋</span></div>
+          <div class="greet-sub">Martes, 19 de mayo · Esto es lo que pasa con tus pedidos hoy</div>
+        </div>
+        <button class="btn primary lg">
+          <span class="plus">+</span>
+          Nuevo pedido
+        </button>
+      </div>
+
+      <!-- KPIs -->
+      <section class="kpis">
+        <div class="kpi">
+          <div class="kpi-head">
+            <div class="kpi-label">Pedidos activos</div>
+            <div class="kpi-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18l-2 13H5L3 6z"/><path d="M8 6V4a4 4 0 0 1 8 0v2"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum">2</div>
+          <div class="kpi-foot">
+            <span class="kpi-badge teal">En curso</span>
+            <span>1 en proceso · 1 pago pendiente</span>
+          </div>
+        </div>
+
+        <div class="kpi featured">
+          <div class="kpi-head">
+            <div class="kpi-label">Listos para recoger</div>
+            <div class="kpi-icon ok">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum">1</div>
+          <div class="kpi-foot">
+            <span class="kpi-badge green">¡Urgente!</span>
+            <span>Recógelo en tienda</span>
+          </div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi-head">
+            <div class="kpi-label">Pedidos completados</div>
+            <div class="kpi-icon alt">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum">7</div>
+          <div class="kpi-foot">
+            <span class="kpi-badge gray">Historial</span>
+            <span>desde febrero 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notificación reciente -->
+      <section class="section">
+        <div class="section-head">
+          <div class="section-title">Notificación reciente</div>
+          <a class="section-link" href="#">Ver todas
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <div class="notif-card">
+          <div class="notif-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          </div>
+          <div class="notif-body">
+            <div class="notif-title">Tu pedido <b>#PED-0038</b> está listo para recoger en tienda</div>
+            <div class="notif-msg">Acércate a nuestra tienda con tu DNI para retirarlo. Horario de atención: lunes a sábado de 9:00 a 19:00.</div>
+            <div class="notif-meta">
+              <span class="when-ago">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                Hace 2 horas
+              </span>
+              <span class="dot"></span>
+              <span>Notificación de tienda</span>
+            </div>
+          </div>
+          <button class="btn primary sm">Ver pedido</button>
+        </div>
+      </section>
+
+      <!-- Pedidos recientes -->
+      <section class="section">
+        <div class="section-head">
+          <div class="section-title">
+            Pedidos recientes
+            <span class="count">Últimos 4</span>
+          </div>
+          <a class="section-link" href="#">Ver todos
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:120px">Código</th>
+                <th>Servicio</th>
+                <th>Material</th>
+                <th style="width:170px">Estado</th>
+                <th style="width:170px">Fecha estimada</th>
+                <th style="width:130px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Featured: Listo para recoger -->
+              <tr class="featured-row">
+                <td>
+                  <span class="order-code">#PED-0038</span>
+                </td>
+                <td>
+                  <span class="svc"><span class="svc-sw" style="background:#2e7874"></span>Corte láser</span>
+                </td>
+                <td><span class="material">Acrílico 5 mm · 6 piezas</span></td>
+                <td>
+                  <span class="status listo">Listo para recoger</span>
+                  <div class="ready-msg">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                    ¡Tu pedido está listo! Recógelo en tienda.
+                  </div>
+                </td>
+                <td><span class="when">Disponible <b>desde hoy</b></span></td>
+                <td><button class="btn ghost sm">Ver detalle</button></td>
+              </tr>
+
+              <!-- En proceso -->
+              <tr>
+                <td><span class="order-code">#PED-0041</span></td>
+                <td>
+                  <span class="svc"><span class="svc-sw" style="background:#3a8f8b"></span>Ploteo</span>
+                </td>
+                <td><span class="material">Papel bond A1 · 4 láminas</span></td>
+                <td><span class="status proceso">En proceso</span></td>
+                <td><span class="when"><b>Mañana</b> · 11:00</span></td>
+                <td><button class="btn ghost sm">Ver detalle</button></td>
+              </tr>
+
+              <!-- Pendiente de pago -->
+              <tr>
+                <td><span class="order-code">#PED-0042</span></td>
+                <td>
+                  <span class="svc"><span class="svc-sw" style="background:#a8c0be"></span>Impresión 3D</span>
+                </td>
+                <td><span class="material">PLA blanco · pieza 14 cm</span></td>
+                <td><span class="status pago">Pendiente de pago</span></td>
+                <td><span class="when"><b>21/05</b> · estimado</span></td>
+                <td><button class="btn primary sm">Pagar ahora</button></td>
+              </tr>
+
+              <!-- Entregado -->
+              <tr>
+                <td><span class="order-code">#PED-0034</span></td>
+                <td>
+                  <span class="svc"><span class="svc-sw" style="background:#6b8f8c"></span>Maqueta</span>
+                </td>
+                <td><span class="material">Cartón pluma · escala 1:100</span></td>
+                <td><span class="status entregado">Entregado</span></td>
+                <td><span class="when"><b>12/05</b> · 16:30</span></td>
+                <td><button class="btn ghost sm">Ver detalle</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

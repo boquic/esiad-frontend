@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>SIGEPED · Pagos por validar</title>
+<meta name="viewport" content="width=1280" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --brand:        #3a8f8b;
+    --brand-dark:   #2e7874;
+    --brand-soft:   #c8d8d6;
+    --brand-mid:    #a8c0be;
+
+    --sidebar-bg:   rgba(30,75,72,0.92);
+    --navbar-bg:    rgba(42,100,97,0.95);
+
+    --surface-1:    rgba(255,255,255,0.75);
+    --surface-2:    rgba(255,255,255,0.55);
+    --surface-input:rgba(240,240,240,0.80);
+    --line:         #e0e0e0;
+    --line-soft:    rgba(224,224,224,0.65);
+
+    --ink:          #2c2c2c;
+    --ink-2:        #333;
+    --ink-mute:     #666;
+    --ink-dim:      #888;
+    --ink-faint:    #999;
+
+    /* Estados específicos */
+    --approved-bg:   #f0faf5;
+    --approved-line: #3a8f8b;
+    --approved-fg:   #2e7874;
+    --approved-soft: rgba(58,143,139,0.18);
+
+    --rejected-bg:   #fff0f0;
+    --rejected-line: #f5c6c6;
+    --rejected-fg:   #c0392b;
+    --rejected-strong:#e74c3c;
+
+    --pending-bg:    #fffbf0;
+    --pending-line:  #f5e0a0;
+    --pending-fg:    #b7860a;
+    --pending-strong:#d4a04a;
+
+    --info-bg:      rgba(58,143,139,0.10);
+    --info-line:    rgba(58,143,139,0.30);
+
+    --yape:         #722f8e;
+    --yape-2:       #5b2374;
+
+    --shadow-sm: 0 1px 2px rgba(74,111,109,0.08);
+    --shadow-md: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;color:var(--ink);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+      linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+    background-attachment:fixed;min-height:100vh;
+  }
+  body::before, body::after{content:"";position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);opacity:.40;z-index:0}
+  body::before{width:360px;height:360px;background:#c8d8d6;top:-100px;right:-80px}
+  body::after{width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.30}
+
+  .mono{font-family:'Geist Mono',ui-monospace,monospace}
+  .tnum{font-variant-numeric:tabular-nums}
+
+  /* ===== Shell ===== */
+  .app{display:grid;grid-template-columns:200px 1fr;min-height:100vh;position:relative;z-index:1}
+
+  /* ===== Sidebar ===== */
+  .sidebar{background:var(--sidebar-bg);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);color:#e6f0ee;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;box-shadow:inset -1px 0 0 rgba(255,255,255,0.05)}
+  .brand{display:flex;align-items:center;gap:11px;padding:18px;height:64px;border-bottom:1px solid rgba(255,255,255,0.08)}
+  .brand-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#3a8f8b 0%, #2e7874 100%);display:grid;place-items:center;box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -4px rgba(58,143,139,0.5)}
+  .brand-name{font-weight:600;letter-spacing:-0.01em;font-size:15px;color:#fff}
+  .brand-sub{font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px}
+
+  .nav-label{font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);text-transform:uppercase;padding:18px 18px 8px;font-weight:600}
+  .nav{display:flex;flex-direction:column;padding:0 8px;gap:2px}
+  .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:13.5px;font-weight:500;border-left:3px solid transparent;transition:background .14s, color .14s}
+  .nav a:hover{background:rgba(255,255,255,0.06);color:#fff}
+  .nav a.active{background:rgba(58,143,139,0.22);color:#fff;border-left-color:var(--brand);border-radius:0 8px 8px 0;padding-left:14px;font-weight:600}
+  .nav .icon{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav .badge{margin-left:auto;font-size:11px;background:rgba(255,255,255,0.12);color:#fff;padding:1px 7px;border-radius:999px;font-weight:600;font-family:'Geist Mono',monospace}
+  .nav a.active .badge{background:var(--pending-strong);color:#fff}
+  .nav .badge.warn{background:var(--pending-strong);color:#fff}
+
+  .side-foot{margin-top:auto;padding:18px;border-top:1px solid rgba(255,255,255,0.08)}
+  .health-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:11px;padding:13px}
+  .health-card .row{display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:rgba(255,255,255,0.75);margin-bottom:6px}
+  .health-card .row:last-child{margin-bottom:0}
+  .health-card .row .v{color:#fff;font-weight:600;font-family:'Geist Mono',monospace}
+  .health-card .row .v.ok{color:#a7e3da}
+  .health-card .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#48bb78;box-shadow:0 0 0 3px rgba(72,187,120,0.20);margin-right:6px;vertical-align:middle}
+  .op-card{margin-top:14px;display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.05)}
+  .op-card .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2)}
+  .op-card .nm{font-size:12.5px;font-weight:600;color:#fff;line-height:1.2}
+  .op-card .rl{font-size:10.5px;color:rgba(255,255,255,0.55)}
+
+  /* ===== Navbar ===== */
+  .navbar{height:64px;background:var(--navbar-bg);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);color:#fff;display:flex;align-items:center;padding:0 28px;gap:24px;position:sticky;top:0;z-index:5;box-shadow:0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 20px -16px rgba(0,0,0,0.4)}
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.7)}
+  .crumbs .here{color:#fff;font-weight:600}
+  .crumbs .sep{color:rgba(255,255,255,0.4)}
+  .nav-search{flex:0 1 320px;margin-left:18px;display:flex;align-items:center;gap:9px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.10);padding:7px 12px;border-radius:9px;color:rgba(255,255,255,0.85);font-size:13px}
+  .nav-search input{background:transparent;border:0;outline:0;color:#fff;font-family:inherit;font-size:13px;width:100%}
+  .nav-search input::placeholder{color:rgba(255,255,255,0.55)}
+  .nav-search .kbd{margin-left:auto;font-family:'Geist Mono',monospace;font-size:10.5px;color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.15);padding:1px 5px;border-radius:4px}
+
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .icon-btn{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;color:#fff;cursor:pointer;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);position:relative}
+  .icon-btn:hover{background:rgba(255,255,255,0.14)}
+  .icon-btn .bell-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:var(--rejected-strong);color:#fff;border-radius:999px;font-size:10.5px;font-weight:700;font-family:'Geist Mono',monospace;display:grid;place-items:center;box-shadow:0 0 0 2px rgba(42,100,97,1)}
+  .avatar-chip{display:flex;align-items:center;gap:10px;padding:4px 14px 4px 4px;border-radius:999px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.1);cursor:pointer;color:#fff}
+  .avatar-chip:hover{background:rgba(255,255,255,0.16)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3a8f8b,#2e7874);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25)}
+  .avatar-name{font-size:13px;font-weight:600;line-height:1.1}
+  .avatar-role{font-size:10.5px;color:rgba(255,255,255,0.65)}
+
+  /* ===== Page ===== */
+  .page{padding:26px 32px 56px;max-width:1280px;margin:0 auto}
+
+  .page-crumbs{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-mute);margin-bottom:14px;flex-wrap:wrap}
+  .page-crumbs a{color:var(--ink-mute);text-decoration:none}
+  .page-crumbs a:hover{color:var(--brand-dark)}
+  .page-crumbs .sep{color:var(--ink-faint)}
+  .page-crumbs .here{color:var(--ink);font-weight:600}
+
+  .page-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:18px;flex-wrap:wrap}
+  .title-row{display:flex;align-items:center;gap:14px}
+  .title-icon{width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,rgba(212,160,74,0.20),rgba(184,134,11,0.12));color:var(--pending-fg);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(212,160,74,0.30)}
+  .page-title{font-size:24px;font-weight:600;letter-spacing:-0.02em;color:var(--ink);display:flex;align-items:center;gap:12px}
+  .pending-badge{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--pending-bg);border:1px solid var(--pending-line);
+    color:var(--pending-fg);
+    padding:4px 11px 4px 10px;border-radius:999px;
+    font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .pending-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pending-strong);box-shadow:0 0 0 3px rgba(212,160,74,0.18)}
+  .page-sub{font-size:13.5px;color:var(--ink-mute);margin-top:6px}
+
+  /* ===== Filters ===== */
+  .filters{
+    display:flex;align-items:center;gap:14px;
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);
+    border-radius:12px;padding:12px 16px;
+    box-shadow:var(--shadow-sm);
+    margin-bottom:18px;flex-wrap:wrap;
+  }
+  .filter-tabs{display:flex;gap:4px;background:rgba(255,255,255,0.55);padding:3px;border-radius:9px;border:1px solid var(--line)}
+  .filter-tabs button{
+    border:0;background:transparent;color:var(--ink-mute);
+    font-family:inherit;font-size:12.5px;font-weight:600;
+    padding:6px 13px;border-radius:7px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .filter-tabs button.on{background:#fff;color:var(--brand-dark);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
+  .filter-tabs .count{font-family:'Geist Mono',monospace;font-size:11px;padding:1px 7px;border-radius:999px;background:rgba(58,143,139,0.10);color:var(--brand-dark);font-weight:600}
+  .filter-tabs button.on .count{background:var(--brand);color:#fff}
+
+  .search-box{
+    flex:1;min-width:220px;
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface-input);
+    border:1px solid var(--line);
+    border-radius:9px;padding:7px 12px;
+    color:var(--ink-dim);font-size:13px;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  .search-box:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px rgba(58,143,139,0.18);background:#fff}
+  .search-box input{background:transparent;border:0;outline:0;color:var(--ink);font-family:inherit;font-size:13px;width:100%}
+  .search-box input::placeholder{color:var(--ink-faint)}
+
+  .filter-info{margin-left:auto;font-size:12px;color:var(--ink-dim);display:flex;align-items:center;gap:6px}
+
+  /* ===== Pay cards list ===== */
+  .pay-list{display:flex;flex-direction:column;gap:14px}
+
+  .pay-card{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow-md);
+    display:grid;
+    grid-template-columns:180px 1fr 280px;
+    overflow:hidden;
+    transition:transform .12s, box-shadow .12s;
+  }
+  .pay-card:hover{transform:translateY(-1px);box-shadow:0 14px 32px -12px rgba(46,120,116,0.22), 0 1px 2px rgba(74,111,109,0.06)}
+
+  /* state variants */
+  .pay-card.approved{background:linear-gradient(180deg, var(--approved-bg), rgba(255,255,255,0.75));border-color:var(--approved-soft)}
+  .pay-card.rejected{background:linear-gradient(180deg, var(--rejected-bg), rgba(255,255,255,0.75));border-color:var(--rejected-line)}
+
+  /* === Thumb column === */
+  .pay-thumb{
+    padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px;
+    background:rgba(255,255,255,0.40);
+    border-right:1px solid var(--line-soft);
+  }
+  .pay-card.approved .pay-thumb{background:rgba(255,255,255,0.55);border-right-color:var(--approved-soft)}
+  .pay-card.rejected .pay-thumb{background:rgba(255,255,255,0.55);border-right-color:var(--rejected-line)}
+
+  .thumb-img{
+    width:130px;height:170px;border-radius:10px;
+    background:#fff;border:1px solid var(--line);
+    position:relative;overflow:hidden;
+    box-shadow:0 4px 12px -6px rgba(0,0,0,0.12);
+  }
+  .thumb-img .yhead{
+    position:absolute;top:0;left:0;right:0;height:54px;
+    background:linear-gradient(180deg,var(--yape),var(--yape-2));
+    color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .thumb-img .yhead .ylabel{font-size:10px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;font-family:'Geist Mono',monospace}
+  .thumb-img .yhead .yamt{font-size:14px;font-weight:700;font-family:'Geist Mono',monospace;margin-top:2px}
+  .thumb-img .ybody{
+    position:absolute;top:54px;left:0;right:0;bottom:0;
+    padding:10px 12px;background:#fff;
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .thumb-img .ybody span{height:5px;background:#ecedf0;border-radius:2px}
+  .thumb-img .ybody span.s60{width:60%}
+  .thumb-img .ybody span.s80{width:80%}
+  .thumb-img .ybody span.s45{width:45%}
+  .thumb-img .ybody span.s35{width:35%}
+
+  .view-full{
+    font-size:11.5px;font-weight:600;color:var(--brand-dark);
+    text-decoration:none;display:inline-flex;align-items:center;gap:5px;
+    padding:5px 10px;border-radius:7px;border:1px solid var(--info-line);
+    background:var(--info-bg);
+  }
+  .view-full:hover{background:rgba(58,143,139,0.18)}
+
+  /* === Body column === */
+  .pay-body{padding:18px 20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+  .pay-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .pay-code{font-family:'Geist Mono',monospace;font-size:15px;font-weight:700;color:var(--ink);letter-spacing:-0.01em}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:700;
+    padding:3px 9px 3px 8px;border-radius:999px;
+    border:1px solid transparent;text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .badge.pending{color:var(--pending-fg);background:var(--pending-bg);border-color:var(--pending-line)}
+  .badge.approved{color:var(--approved-fg);background:var(--approved-bg);border-color:var(--approved-line)}
+  .badge.rejected{color:var(--rejected-fg);background:var(--rejected-bg);border-color:var(--rejected-line)}
+  .badge.new-client{color:var(--brand-dark);background:var(--info-bg);border-color:var(--info-line)}
+  .badge.freq-client{color:var(--pending-fg);background:rgba(212,160,74,0.10);border-color:rgba(212,160,74,0.25)}
+  .badge.freq-client::before{background:var(--pending-strong)}
+
+  .client-row{display:flex;align-items:center;gap:11px;margin-top:2px}
+  .client-av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:rgba(255,255,255,0.7);color:var(--brand-dark);box-shadow:inset 0 0 0 1px var(--line);flex-shrink:0}
+  .client-name{font-size:14px;font-weight:600;color:var(--ink);line-height:1.2}
+  .client-doc{font-size:11.5px;color:var(--ink-dim);font-family:'Geist Mono',monospace}
+
+  .svc-line{font-size:13px;color:var(--ink-mute);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .svc-line .sw{width:9px;height:9px;border-radius:2px}
+  .svc-line b{color:var(--ink-2);font-weight:600}
+
+  .meta-line{display:flex;align-items:center;gap:14px;font-size:11.5px;color:var(--ink-dim);font-family:'Geist Mono',monospace;flex-wrap:wrap}
+  .meta-line .dot{width:3px;height:3px;border-radius:50%;background:var(--ink-faint)}
+
+  /* Rejected comment block */
+  .reject-comment{
+    margin-top:6px;
+    background:#fff;border:1px solid var(--rejected-line);
+    border-left:3px solid var(--rejected-strong);
+    border-radius:9px;padding:10px 12px;
+    font-size:12.5px;color:var(--rejected-fg);line-height:1.45;
+  }
+  .reject-comment .lbl{font-size:10.5px;font-weight:700;color:var(--rejected-fg);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;display:flex;align-items:center;gap:5px}
+  .reject-comment .lbl svg{flex-shrink:0}
+  .reject-comment .txt{color:var(--ink-2);font-weight:500}
+
+  /* === Right column: amount + actions === */
+  .pay-right{
+    padding:18px 20px;display:flex;flex-direction:column;justify-content:space-between;
+    background:rgba(255,255,255,0.25);
+    border-left:1px solid var(--line-soft);
+  }
+  .pay-card.approved .pay-right{background:rgba(58,143,139,0.05);border-left-color:var(--approved-soft)}
+  .pay-card.rejected .pay-right{background:rgba(192,57,43,0.04);border-left-color:var(--rejected-line)}
+
+  .amount-block{display:flex;flex-direction:column;gap:3px;margin-bottom:14px}
+  .amount-label{font-size:10.5px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;letter-spacing:0.06em}
+  .amount-val{font-family:'Geist Mono',monospace;font-size:30px;font-weight:700;color:var(--brand-dark);letter-spacing:-0.02em;line-height:1;font-variant-numeric:tabular-nums}
+  .amount-val .cur{font-size:16px;font-weight:600;opacity:.75;margin-right:5px;vertical-align:4px}
+  .amount-hint{font-size:11.5px;color:var(--ink-mute);margin-top:3px}
+
+  .resolved-line{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 12px;border-radius:9px;
+    font-size:12px;font-weight:500;
+  }
+  .resolved-line.approved{background:rgba(58,143,139,0.10);color:var(--approved-fg);border:1px solid var(--approved-soft)}
+  .resolved-line.rejected{background:rgba(192,57,43,0.08);color:var(--rejected-fg);border:1px solid var(--rejected-line)}
+  .resolved-line svg{flex-shrink:0}
+  .resolved-line .when{margin-left:auto;font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink-dim);font-weight:500}
+
+  .pay-actions{display:flex;flex-direction:column;gap:8px}
+  .btn{
+    font-family:inherit;font-size:13px;font-weight:600;
+    padding:10px 14px;border-radius:9px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    border:1px solid transparent;
+    transition:background .14s, transform .08s, filter .14s, box-shadow .14s, color .14s, border-color .14s;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:linear-gradient(180deg,var(--brand),var(--brand-dark));color:#fff;border-color:var(--brand-dark);box-shadow:0 8px 18px -8px rgba(58,143,139,0.55)}
+  .btn.primary:hover{filter:brightness(1.06)}
+  .btn.danger{background:#fff;color:var(--rejected-fg);border-color:var(--rejected-line)}
+  .btn.danger:hover{background:var(--rejected-bg);border-color:var(--rejected-strong)}
+  .btn.ghost{background:rgba(255,255,255,0.7);color:var(--ink-2);border-color:var(--line)}
+  .btn.ghost:hover{background:#fff;border-color:var(--brand-mid);color:var(--brand-dark)}
+  .btn.sm{padding:7px 12px;font-size:12.5px}
+  .btn.full{width:100%}
+
+  /* ===== Modal ===== */
+  .modal-mask{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(20,40,38,0.55);
+    backdrop-filter:blur(6px);
+    display:none;place-items:center;
+    padding:24px;
+  }
+  .modal-mask.open{display:grid}
+  .modal{
+    width:520px;max-width:100%;
+    background:rgba(255,255,255,0.96);
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.45) inset;
+    overflow:hidden;
+    animation:pop .18s ease-out;
+  }
+  @keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  .modal-head{padding:20px 24px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line-soft)}
+  .modal-title{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:600;color:var(--ink);letter-spacing:-0.01em}
+  .modal-title .icn{width:32px;height:32px;border-radius:9px;background:var(--rejected-bg);color:var(--rejected-fg);display:grid;place-items:center;border:1px solid var(--rejected-line)}
+  .modal-close{
+    width:30px;height:30px;border-radius:8px;
+    background:transparent;border:0;color:var(--ink-dim);cursor:pointer;
+    display:grid;place-items:center;
+  }
+  .modal-close:hover{background:rgba(0,0,0,0.05);color:var(--ink)}
+  .modal-body{padding:18px 24px 22px}
+
+  .modal-context{
+    background:var(--surface-input);
+    border:1px solid var(--line);
+    border-radius:10px;padding:12px 14px;
+    display:flex;align-items:center;gap:14px;
+    font-size:12.5px;color:var(--ink-mute);
+    margin-bottom:16px;
+  }
+  .modal-context .order-code{font-family:'Geist Mono',monospace;font-weight:700;color:var(--ink);font-size:13px}
+  .modal-context .sep{width:1px;height:14px;background:var(--line)}
+  .modal-context b{color:var(--ink);font-weight:600}
+
+  .modal-label{
+    display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);
+    margin-bottom:7px;
+  }
+  .modal-label .req{color:var(--rejected-fg);margin-left:2px}
+
+  textarea{
+    width:100%;min-height:130px;resize:vertical;
+    background:var(--surface-input);
+    border:1px solid var(--line);border-radius:10px;
+    padding:12px 14px;font-family:inherit;font-size:13.5px;color:var(--ink);line-height:1.5;
+    transition:border-color .15s, box-shadow .15s, background .15s;
+  }
+  textarea:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px rgba(58,143,139,0.18);background:#fff}
+  textarea::placeholder{color:var(--ink-faint)}
+
+  .quick-reasons{
+    display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;
+  }
+  .quick-reasons button{
+    background:rgba(255,255,255,0.6);border:1px solid var(--line);
+    color:var(--ink-mute);font-family:inherit;font-size:11.5px;font-weight:500;
+    padding:5px 10px;border-radius:999px;cursor:pointer;
+  }
+  .quick-reasons button:hover{background:#fff;border-color:var(--brand-mid);color:var(--brand-dark)}
+
+  .modal-info{
+    margin-top:14px;
+    background:var(--info-bg);border:1px solid var(--info-line);
+    border-radius:9px;padding:10px 13px;
+    display:flex;align-items:flex-start;gap:9px;
+    font-size:12.5px;color:var(--brand-dark);line-height:1.5;
+  }
+  .modal-info svg{flex:0 0 14px;margin-top:1px}
+
+  .modal-foot{
+    padding:16px 24px;
+    background:rgba(255,255,255,0.6);
+    border-top:1px solid var(--line-soft);
+    display:flex;justify-content:flex-end;gap:10px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/>
+          <path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">SIGEPED</div>
+        <div class="brand-sub">Admin</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Gestión</div>
+    <nav class="nav">
+      <a href="Dashboard Administrador v3.html">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM3 21h8v-6H3v6zM13 3v6h8V3h-8z"/></svg>
+        Dashboard
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        Pedidos
+        <span class="badge">12</span>
+      </a>
+      <a class="active" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+        Pagos pendientes
+        <span class="badge">4</span>
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/><circle cx="17" cy="6" r="3"/><path d="M22 18c0-2.5-2-4.5-4.5-4.5"/></svg>
+        Usuarios
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/></svg>
+        Servicios
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/></svg>
+        Reportes
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="health-card">
+        <div class="row"><span><span class="dot"></span>Sistema</span><span class="v ok">Operativo</span></div>
+        <div class="row"><span>Validados hoy</span><span class="v">7</span></div>
+        <div class="row"><span>Tiempo prom.</span><span class="v">12 min</span></div>
+      </div>
+      <div class="op-card">
+        <div class="av">JR</div>
+        <div>
+          <div class="nm">Jonatan Ruiz</div>
+          <div class="rl">Administrador</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ===== Navbar ===== -->
+    <header class="navbar">
+      <div class="crumbs">
+        <span>Admin</span>
+        <span class="sep">/</span>
+        <span class="here">Pagos pendientes</span>
+      </div>
+
+      <div class="nav-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input placeholder="Buscar pedido, cliente, operario…" />
+        <span class="kbd">⌘K</span>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" title="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="bell-badge">3</span>
+        </button>
+        <div class="avatar-chip">
+          <div class="avatar">JR</div>
+          <div>
+            <div class="avatar-name">Jonatan Ruiz</div>
+            <div class="avatar-role">Administrador</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Page ===== -->
+    <div class="page">
+
+      <nav class="page-crumbs">
+        <a href="Dashboard Administrador v3.html">Inicio</a>
+        <span class="sep">›</span>
+        <span class="here">Pagos pendientes</span>
+      </nav>
+
+      <div class="page-head">
+        <div class="title-row">
+          <div class="title-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+          </div>
+          <div>
+            <div class="page-title">
+              Pagos por validar
+              <span class="pending-badge">4 pendientes de revisión</span>
+            </div>
+            <div class="page-sub">Capturas de Yape recibidas · Aprueba o rechaza el comprobante en menos de 24 h</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <div class="filter-tabs">
+          <button>Todos <span class="count">8</span></button>
+          <button class="on">Pendiente <span class="count">4</span></button>
+          <button>Aprobado <span class="count">3</span></button>
+          <button>Rechazado <span class="count">1</span></button>
+        </div>
+
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input placeholder="Buscar por código de pedido o cliente…" />
+        </div>
+
+        <div class="filter-info">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          Ordenados por antigüedad de envío
+        </div>
+      </div>
+
+      <!-- ===== Pay cards ===== -->
+      <section class="pay-list">
+
+        <!-- ===== 1 — Pendiente — Cliente nuevo ===== -->
+        <article class="pay-card">
+          <div class="pay-thumb">
+            <div class="thumb-img">
+              <div class="yhead">
+                <div class="ylabel">Yape</div>
+                <div class="yamt">S/ 68.75</div>
+              </div>
+              <div class="ybody">
+                <span></span><span class="s80"></span><span class="s60"></span><span class="s45"></span><span class="s80"></span><span class="s35"></span>
+              </div>
+            </div>
+            <a href="#" class="view-full">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6M11 8v6"/></svg>
+              Ver captura completa
+            </a>
+          </div>
+
+          <div class="pay-body">
+            <div class="pay-top">
+              <span class="pay-code">#PED-0042</span>
+              <span class="badge pending">Pendiente</span>
+              <span class="badge new-client">Cliente nuevo</span>
+            </div>
+            <div class="client-row">
+              <div class="client-av">AT</div>
+              <div>
+                <div class="client-name">Ana Torres</div>
+                <div class="client-doc">DNI 45128973</div>
+              </div>
+            </div>
+            <div class="svc-line">
+              <span class="sw" style="background:#2e7874"></span>
+              <b>Corte láser</b> · MDF 3 mm — 25 unidades
+            </div>
+            <div class="meta-line">
+              <span>Enviado: 19/05 · 14:32</span>
+              <span class="dot"></span>
+              <span>Hace 12 min</span>
+              <span class="dot"></span>
+              <span>captura_yape.jpg · 1.2 MB</span>
+            </div>
+          </div>
+
+          <div class="pay-right">
+            <div class="amount-block">
+              <div class="amount-label">Monto del adelanto</div>
+              <div class="amount-val"><span class="cur">S/</span>68.75</div>
+              <div class="amount-hint">50% del total · S/ 137.50</div>
+            </div>
+            <div class="pay-actions">
+              <button class="btn primary full" data-action="approve">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                Aprobar
+              </button>
+              <button class="btn danger full" data-action="reject" data-code="#PED-0042" data-client="Ana Torres" data-amount="S/ 68.75">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg>
+                Rechazar
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- ===== 2 — Pendiente — Cliente frecuente ===== -->
+        <article class="pay-card">
+          <div class="pay-thumb">
+            <div class="thumb-img">
+              <div class="yhead">
+                <div class="ylabel">Yape</div>
+                <div class="yamt">S/ 625.00</div>
+              </div>
+              <div class="ybody">
+                <span class="s80"></span><span></span><span class="s45"></span><span class="s60"></span><span></span><span class="s35"></span>
+              </div>
+            </div>
+            <a href="#" class="view-full">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6M11 8v6"/></svg>
+              Ver captura completa
+            </a>
+          </div>
+
+          <div class="pay-body">
+            <div class="pay-top">
+              <span class="pay-code">#PED-0041</span>
+              <span class="badge pending">Pendiente</span>
+              <span class="badge freq-client">Cliente frecuente · 12 pedidos</span>
+            </div>
+            <div class="client-row">
+              <div class="client-av">JR</div>
+              <div>
+                <div class="client-name">Joaquín Rivera</div>
+                <div class="client-doc">DNI 70921384</div>
+              </div>
+            </div>
+            <div class="svc-line">
+              <span class="sw" style="background:#a8c0be"></span>
+              <b>Maqueta</b> · cartón pluma — proyecto residencial 1:100
+            </div>
+            <div class="meta-line">
+              <span>Enviado: 19/05 · 14:06</span>
+              <span class="dot"></span>
+              <span>Hace 38 min</span>
+              <span class="dot"></span>
+              <span>yape_001.png · 0.9 MB</span>
+            </div>
+          </div>
+
+          <div class="pay-right">
+            <div class="amount-block">
+              <div class="amount-label">Monto del adelanto</div>
+              <div class="amount-val"><span class="cur">S/</span>625.00</div>
+              <div class="amount-hint">50% del total · S/ 1,250.00</div>
+            </div>
+            <div class="pay-actions">
+              <button class="btn primary full" data-action="approve">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                Aprobar
+              </button>
+              <button class="btn danger full" data-action="reject" data-code="#PED-0041" data-client="Joaquín Rivera" data-amount="S/ 625.00">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg>
+                Rechazar
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- ===== 3 — Aprobado ===== -->
+        <article class="pay-card approved">
+          <div class="pay-thumb">
+            <div class="thumb-img">
+              <div class="yhead">
+                <div class="ylabel">Yape</div>
+                <div class="yamt">S/ 240.00</div>
+              </div>
+              <div class="ybody">
+                <span></span><span class="s60"></span><span class="s80"></span><span class="s45"></span><span></span><span class="s35"></span>
+              </div>
+            </div>
+            <a href="#" class="view-full">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6M11 8v6"/></svg>
+              Ver captura completa
+            </a>
+          </div>
+
+          <div class="pay-body">
+            <div class="pay-top">
+              <span class="pay-code">#PED-0040</span>
+              <span class="badge approved">Aprobado</span>
+              <span class="badge freq-client">Cliente frecuente · 6 pedidos</span>
+            </div>
+            <div class="client-row">
+              <div class="client-av">CV</div>
+              <div>
+                <div class="client-name">Carolina Vega Mendoza</div>
+                <div class="client-doc">DNI 48392714</div>
+              </div>
+            </div>
+            <div class="svc-line">
+              <span class="sw" style="background:#3a8f8b"></span>
+              <b>Ploteo</b> · papel couché 120 g — 3 láminas A0 render
+            </div>
+            <div class="meta-line">
+              <span>Enviado: 19/05 · 09:48</span>
+              <span class="dot"></span>
+              <span>Hace 5 horas</span>
+              <span class="dot"></span>
+              <span>yape_240.jpg · 1.4 MB</span>
+            </div>
+          </div>
+
+          <div class="pay-right">
+            <div class="amount-block">
+              <div class="amount-label">Monto del adelanto</div>
+              <div class="amount-val"><span class="cur">S/</span>240.00</div>
+              <div class="amount-hint">50% del total · S/ 480.00</div>
+            </div>
+            <div class="resolved-line approved">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+              Aprobado por ti
+              <span class="when">19/05 · 10:02</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- ===== 4 — Rechazado ===== -->
+        <article class="pay-card rejected">
+          <div class="pay-thumb">
+            <div class="thumb-img">
+              <div class="yhead">
+                <div class="ylabel">Yape</div>
+                <div class="yamt">S/ 50.00</div>
+              </div>
+              <div class="ybody">
+                <span class="s35"></span><span class="s60"></span><span></span><span class="s45"></span><span class="s80"></span><span class="s35"></span>
+              </div>
+            </div>
+            <a href="#" class="view-full">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6M11 8v6"/></svg>
+              Ver captura completa
+            </a>
+          </div>
+
+          <div class="pay-body">
+            <div class="pay-top">
+              <span class="pay-code">#PED-0039</span>
+              <span class="badge rejected">Rechazado</span>
+              <span class="badge new-client">Cliente nuevo</span>
+            </div>
+            <div class="client-row">
+              <div class="client-av">LP</div>
+              <div>
+                <div class="client-name">Lucía Paredes Soto</div>
+                <div class="client-doc">DNI 48392714</div>
+              </div>
+            </div>
+            <div class="svc-line">
+              <span class="sw" style="background:#6bb0ad"></span>
+              <b>Impresión 3D</b> · PLA blanco — pieza 14 cm
+            </div>
+            <div class="meta-line">
+              <span>Enviado: 19/05 · 08:12</span>
+              <span class="dot"></span>
+              <span>Hace 7 horas</span>
+              <span class="dot"></span>
+              <span>captura.png · 0.6 MB</span>
+            </div>
+
+            <div class="reject-comment">
+              <div class="lbl">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.01"/></svg>
+                Motivo del rechazo
+              </div>
+              <div class="txt">"La captura no corresponde al monto indicado. Se esperaba S/ 107.50 (adelanto del 50%) pero la transferencia muestra S/ 50.00. Por favor reenvía la captura con el monto correcto."</div>
+            </div>
+          </div>
+
+          <div class="pay-right">
+            <div class="amount-block">
+              <div class="amount-label">Monto declarado</div>
+              <div class="amount-val" style="color:var(--rejected-fg)"><span class="cur">S/</span>50.00</div>
+              <div class="amount-hint">Esperado: S/ 107.50 (50% de S/ 215.00)</div>
+            </div>
+            <div class="resolved-line rejected">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg>
+              Rechazado por ti
+              <span class="when">19/05 · 08:25</span>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-mask" id="rejectModal">
+  <div class="modal" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">
+        <span class="icn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.01"/></svg>
+        </span>
+        Motivo de rechazo
+      </div>
+      <button class="modal-close" id="modalClose" aria-label="Cerrar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-context">
+        <span class="order-code" id="ctxCode">#PED-0042</span>
+        <span class="sep"></span>
+        <span><b id="ctxClient">Ana Torres</b></span>
+        <span class="sep"></span>
+        <span>Monto: <b id="ctxAmount">S/ 68.75</b></span>
+      </div>
+
+      <label class="modal-label" for="rejectReason">
+        Comentario para el cliente <span class="req">*</span>
+      </label>
+      <textarea id="rejectReason" placeholder="Describe el motivo para que el cliente pueda corregirlo. Por ejemplo: 'El monto transferido no coincide' o 'La captura está borrosa'..."></textarea>
+
+      <div class="quick-reasons">
+        <button>El monto no coincide</button>
+        <button>La captura está borrosa</button>
+        <button>No se ve el destinatario</button>
+        <button>Falta el código de operación</button>
+      </div>
+
+      <div class="modal-info">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>
+        <span>Este comentario será visible para el cliente en su panel de pagos. Recibirá una notificación para reenviar la captura corregida.</span>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn ghost" id="modalCancel">Cancelar</button>
+      <button class="btn danger">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg>
+        Confirmar rechazo
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var modal = document.getElementById('rejectModal');
+    var close = document.getElementById('modalClose');
+    var cancel = document.getElementById('modalCancel');
+    var ctxCode = document.getElementById('ctxCode');
+    var ctxClient = document.getElementById('ctxClient');
+    var ctxAmount = document.getElementById('ctxAmount');
+    var textarea = document.getElementById('rejectReason');
+
+    function openModal(code, client, amount){
+      ctxCode.textContent = code;
+      ctxClient.textContent = client;
+      ctxAmount.textContent = amount;
+      modal.classList.add('open');
+      setTimeout(function(){ textarea.focus(); }, 80);
+    }
+    function closeModal(){ modal.classList.remove('open'); }
+
+    document.querySelectorAll('[data-action="reject"]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        openModal(btn.dataset.code, btn.dataset.client, btn.dataset.amount);
+      });
+    });
+
+    close.addEventListener('click', closeModal);
+    cancel.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeModal(); });
+
+    // Quick reasons
+    document.querySelectorAll('.quick-reasons button').forEach(function(b){
+      b.addEventListener('click', function(){
+        var current = textarea.value.trim();
+        textarea.value = current ? current + ' ' + b.textContent + '.' : b.textContent + '.';
+        textarea.focus();
+      });
+    });
+  })();
+</script>
+</body>
+</html>

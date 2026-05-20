@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>SIGEPED · Dashboard Administrador</title>
+<meta name="viewport" content="width=1440" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    /* === Paleta Register === */
+    --brand:        #3a8f8b;
+    --brand-dark:   #2e7874;
+    --brand-soft:   #c8d8d6;
+    --brand-mid:    #a8c0be;
+    --grad-1:       #b8c4c2;
+    --grad-2:       #8fa8a5;
+    --grad-3:       #6b8f8c;
+    --grad-4:       #4a6f6d;
+
+    --surface-1:    rgba(255,255,255,0.75);
+    --surface-2:    rgba(255,255,255,0.55);
+    --surface-3:    rgba(255,255,255,0.40);
+    --surface-input:rgba(240,240,240,0.80);
+    --line:         #e0e0e0;
+    --line-soft:    rgba(224,224,224,0.6);
+
+    --ink:          #2c2c2c;
+    --ink-2:        #333;
+    --ink-mute:     #666;
+    --ink-dim:      #888;
+    --ink-faint:    #999;
+
+    --error-bg:     #fff0f0;
+    --error-line:   #f5c6c6;
+    --error-fg:     #c0392b;
+    --error-strong: #e74c3c;
+    --ok:           #2e7874;
+    --warn:         #b8860b;
+    --info:         #3a8f8b;
+
+    --shadow-sm: 0 1px 2px rgba(74,111,109,0.08);
+    --shadow-md: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+    --shadow-lg: 0 20px 50px -20px rgba(46,120,116,0.30);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;color:var(--ink);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  body{
+    background:
+      radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+      radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+      linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+  }
+  /* decorative blurs */
+  body::before, body::after{
+    content:"";position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);opacity:.45;z-index:0;
+  }
+  body::before{width:380px;height:380px;background:#c8d8d6;top:-100px;right:-80px}
+  body::after{width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.35}
+
+  .mono{font-family:'Geist Mono',ui-monospace,monospace;font-feature-settings:"tnum"}
+  .tnum{font-variant-numeric:tabular-nums}
+
+  /* ===== Shell ===== */
+  .app{display:grid;grid-template-columns:248px 1fr;min-height:100vh;position:relative;z-index:1}
+
+  /* ===== Sidebar ===== */
+  .sidebar{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border-right:1px solid rgba(255,255,255,0.6);
+    display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;
+    box-shadow:1px 0 0 rgba(255,255,255,0.4) inset;
+  }
+  .brand{
+    display:flex;align-items:center;gap:11px;
+    padding:18px 20px;border-bottom:1px solid var(--line-soft);
+    height:64px;
+  }
+  .brand-mark{
+    width:30px;height:30px;border-radius:8px;
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    display:grid;place-items:center;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.4) inset, 0 4px 14px -4px rgba(58,143,139,0.55);
+  }
+  .brand-name{font-weight:600;letter-spacing:-0.01em;font-size:15px;color:var(--ink)}
+  .brand-sub{font-size:11px;color:var(--ink-mute);margin-top:1px}
+
+  .nav-group-label{
+    font-size:11px;letter-spacing:0.08em;color:var(--ink-dim);
+    text-transform:uppercase;padding:18px 20px 8px;font-weight:500;
+  }
+  .nav{display:flex;flex-direction:column;gap:2px;padding:4px 12px}
+  .nav a{
+    display:flex;align-items:center;gap:11px;
+    padding:10px 12px;border-radius:9px;
+    color:var(--ink-2);text-decoration:none;
+    font-size:13.5px;font-weight:500;
+    transition:background .14s ease, color .14s ease;
+  }
+  .nav a:hover{background:rgba(255,255,255,0.55);color:var(--brand-dark)}
+  .nav a.active{
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    color:#fff;
+    box-shadow:0 6px 16px -6px rgba(58,143,139,0.55), inset 0 0 0 1px rgba(255,255,255,0.15);
+  }
+  .nav a.active .icon{color:#fff}
+  .nav .icon{width:18px;height:18px;color:var(--ink-mute);flex:0 0 18px}
+  .nav .badge{
+    margin-left:auto;font-size:11px;
+    background:rgba(255,255,255,0.55);color:var(--ink-mute);
+    padding:1px 8px;border-radius:999px;
+    font-family:'Geist Mono',monospace;font-weight:500;
+    border:1px solid var(--line-soft);
+  }
+  .nav a.active .badge{background:rgba(255,255,255,0.25);color:#fff;border-color:rgba(255,255,255,0.3)}
+
+  .side-foot{margin-top:auto;padding:16px 20px;border-top:1px solid var(--line-soft);font-size:11px;color:var(--ink-dim)}
+  .side-foot .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--brand);margin-right:6px;vertical-align:middle;box-shadow:0 0 0 3px rgba(58,143,139,0.18)}
+
+  /* ===== Navbar ===== */
+  .navbar{
+    height:64px;
+    border-bottom:1px solid rgba(255,255,255,0.4);
+    background:var(--surface-2);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    display:flex;align-items:center;
+    padding:0 32px;gap:24px;
+    position:sticky;top:0;z-index:5;
+  }
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-mute)}
+  .crumbs .sep{color:var(--ink-faint)}
+  .crumbs .here{color:var(--ink);font-weight:600}
+
+  .search{
+    margin-left:24px;flex:0 1 360px;
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface-input);border:1px solid var(--line);
+    padding:8px 12px;border-radius:9px;
+    color:var(--ink-dim);font-size:13px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .search:focus-within{
+    border-color:var(--brand);
+    box-shadow:0 0 0 3px rgba(58,143,139,0.18);
+    background:#fff;
+  }
+  .search input{
+    background:transparent;border:0;outline:0;color:var(--ink);
+    font-family:inherit;font-size:13px;width:100%;
+  }
+  .search input::placeholder{color:var(--ink-faint)}
+  .kbd{
+    margin-left:auto;font-family:'Geist Mono',monospace;font-size:10.5px;
+    color:var(--ink-mute);border:1px solid var(--line);
+    padding:1px 6px;border-radius:4px;background:#fff;
+  }
+
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .icon-btn{
+    width:36px;height:36px;display:grid;place-items:center;
+    border-radius:9px;color:var(--ink-mute);cursor:pointer;
+    border:1px solid transparent;background:transparent;position:relative;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,0.6);color:var(--brand-dark);border-color:rgba(255,255,255,0.5)}
+  .icon-btn .dot{
+    position:absolute;top:8px;right:9px;width:7px;height:7px;
+    border-radius:50%;background:var(--error-strong);
+    box-shadow:0 0 0 2px var(--surface-2);
+  }
+
+  .avatar-chip{
+    display:flex;align-items:center;gap:10px;
+    padding:4px 12px 4px 4px;border-radius:999px;
+    border:1px solid rgba(255,255,255,0.55);background:rgba(255,255,255,0.55);
+    cursor:pointer;
+  }
+  .avatar-chip:hover{background:rgba(255,255,255,0.75)}
+  .avatar{
+    width:30px;height:30px;border-radius:50%;
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    display:grid;place-items:center;
+    font-size:12px;font-weight:600;color:#fff;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25);
+  }
+  .avatar-meta{line-height:1.15}
+  .avatar-name{font-size:13px;font-weight:600;color:var(--ink)}
+  .avatar-role{font-size:11px;color:var(--ink-mute)}
+
+  /* ===== Page ===== */
+  .page{padding:28px 32px 48px}
+  .page-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:22px}
+  .page-title{font-size:24px;font-weight:600;letter-spacing:-0.02em;color:var(--ink)}
+  .page-sub{font-size:13px;color:var(--ink-mute);margin-top:4px}
+  .range{
+    display:inline-flex;background:var(--surface-1);border:1px solid rgba(255,255,255,0.6);
+    border-radius:10px;padding:3px;font-size:12.5px;
+    box-shadow:var(--shadow-sm);
+  }
+  .range button{
+    background:transparent;border:0;color:var(--ink-mute);
+    padding:7px 14px;border-radius:7px;font-family:inherit;font-weight:500;
+    cursor:pointer;
+  }
+  .range button.on{background:#fff;color:var(--brand-dark);box-shadow:0 1px 2px rgba(0,0,0,0.06)}
+
+  /* ===== Cards baseline ===== */
+  .card, .kpi, .table-card{
+    background:var(--surface-1);
+    backdrop-filter:blur(20px) saturate(140%);
+    -webkit-backdrop-filter:blur(20px) saturate(140%);
+    border:1px solid rgba(255,255,255,0.6);
+    border-radius:16px;
+    box-shadow:var(--shadow-md);
+  }
+
+  /* ===== KPI ===== */
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+  .kpi{padding:22px 22px;position:relative;overflow:hidden}
+  .kpi-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .kpi-label{font-size:13px;color:var(--ink-mute);font-weight:500}
+  .kpi-icon{
+    width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    color:#fff;
+    box-shadow:0 6px 14px -6px rgba(58,143,139,0.5);
+  }
+  .kpi-icon.alt{background:rgba(255,255,255,0.8);color:var(--brand-dark);box-shadow:inset 0 0 0 1px var(--brand-soft)}
+  .kpi-icon.warn{background:linear-gradient(135deg,#d4a04a,#b8860b);color:#fff}
+  .kpi-value{font-size:32px;font-weight:600;letter-spacing:-0.025em;line-height:1.05;color:var(--ink)}
+  .kpi-value .cur{color:var(--ink-mute);font-weight:500;margin-right:6px;font-size:19px;vertical-align:2px}
+  .kpi-value .dec{color:var(--ink-mute);font-weight:500;font-size:19px}
+  .kpi-foot{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:12.5px}
+  .delta{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:600}
+  .delta.up{background:rgba(58,143,139,0.12);color:var(--brand-dark)}
+  .delta.flat{background:rgba(102,102,102,0.10);color:var(--ink-mute);font-weight:500}
+  .kpi-hint{color:var(--ink-dim)}
+
+  /* ===== Charts row ===== */
+  .row{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;margin-bottom:20px}
+  .card{padding:22px 22px}
+  .card-head{display:flex;align-items:start;justify-content:space-between;margin-bottom:18px}
+  .card-title{font-size:15px;font-weight:600;letter-spacing:-0.01em;color:var(--ink)}
+  .card-sub{font-size:12px;color:var(--ink-dim);margin-top:3px}
+  .legend{display:flex;gap:14px;font-size:11.5px;color:var(--ink-mute);align-items:center}
+  .legend .swatch{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+
+  /* Bar chart */
+  .bars{display:flex;flex-direction:column;gap:18px;padding:4px 0}
+  .bar-row{display:grid;grid-template-columns:140px 1fr 80px;gap:14px;align-items:center}
+  .bar-label{font-size:13px;color:var(--ink);display:flex;align-items:center;gap:8px;font-weight:500}
+  .bar-label .sw{width:9px;height:9px;border-radius:2px}
+  .bar-track{height:10px;background:rgba(255,255,255,0.6);border-radius:6px;overflow:hidden;position:relative;box-shadow:inset 0 0 0 1px var(--line-soft)}
+  .bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--brand-dark),var(--brand));position:relative}
+  .bar-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.25),transparent 60%);border-radius:6px}
+  .bar-val{text-align:right;font-family:'Geist Mono',monospace;font-size:12.5px;color:var(--ink-mute);font-variant-numeric:tabular-nums}
+  .bar-val b{color:var(--ink);font-weight:600}
+
+  /* Line chart */
+  .chart-wrap{position:relative;height:240px}
+  .chart-wrap svg{width:100%;height:100%;display:block;overflow:visible}
+  .axis-y{font-family:'Geist Mono',monospace;font-size:10.5px;fill:var(--ink-dim)}
+  .axis-x{font-family:'Geist',sans-serif;font-size:11px;fill:var(--ink-dim)}
+  .grid{stroke:rgba(74,111,109,0.15);stroke-width:1;stroke-dasharray:3 4}
+
+  /* ===== Table ===== */
+  .table-card{overflow:hidden}
+  .table-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 14px}
+  .table-actions{display:flex;gap:8px;font-size:12.5px}
+  .pill-btn{
+    border:1px solid var(--line);background:rgba(255,255,255,0.6);color:var(--ink-2);
+    padding:7px 14px;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:500;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+    transition:background .14s, border-color .14s;
+  }
+  .pill-btn:hover{background:#fff;border-color:var(--brand-mid);color:var(--brand-dark)}
+  .pill-btn.primary{
+    background:linear-gradient(135deg,var(--brand) 0%, var(--brand-dark) 100%);
+    border-color:var(--brand-dark);color:#fff;
+    box-shadow:0 6px 14px -6px rgba(58,143,139,0.55);
+  }
+  .pill-btn.primary:hover{background:linear-gradient(135deg,var(--brand-dark),var(--brand-dark));color:#fff}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{
+    text-align:left;font-weight:600;font-size:11.5px;letter-spacing:0.06em;
+    text-transform:uppercase;color:var(--ink-dim);
+    padding:11px 24px;background:rgba(255,255,255,0.45);
+    border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);
+  }
+  tbody td{padding:14px 24px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover{background:rgba(255,255,255,0.4)}
+  .order-id{font-family:'Geist Mono',monospace;font-size:12px;color:var(--ink-dim)}
+  .amount{font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink)}
+
+  .client{display:flex;align-items:center;gap:10px}
+  .client-av{
+    width:30px;height:30px;border-radius:50%;
+    display:grid;place-items:center;font-size:11px;font-weight:600;
+    background:rgba(255,255,255,0.7);color:var(--brand-dark);
+    box-shadow:inset 0 0 0 1px var(--line);
+  }
+  .client-meta{line-height:1.2}
+  .client-name{font-size:13px;font-weight:600;color:var(--ink)}
+  .client-id{font-size:11px;color:var(--ink-dim);font-family:'Geist Mono',monospace}
+
+  .status{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11.5px;font-weight:600;
+    padding:4px 10px 4px 9px;border-radius:999px;
+    border:1px solid transparent;
+  }
+  .status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .status.listo{color:var(--brand-dark);background:rgba(58,143,139,0.12);border-color:rgba(58,143,139,0.25)}
+  .status.proceso{color:#1e6e6a;background:rgba(168,192,190,0.35);border-color:rgba(107,143,140,0.35)}
+  .status.cola{color:#9a6b00;background:rgba(212,160,74,0.18);border-color:rgba(212,160,74,0.40)}
+  .status.pago{color:var(--error-fg);background:var(--error-bg);border-color:var(--error-line)}
+  .status.entregado{color:var(--ink-mute);background:rgba(136,136,136,0.10);border-color:rgba(136,136,136,0.20)}
+
+  .svc{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+  .svc .sw{width:9px;height:9px;border-radius:2px}
+
+  .row-action{color:var(--ink-faint);cursor:pointer;font-size:18px;line-height:1}
+  .row-action:hover{color:var(--brand-dark)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/>
+          <path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">SIGEPED</div>
+        <div class="brand-sub">Gestión de Pedidos</div>
+      </div>
+    </div>
+
+    <div class="nav-group-label">Menú</div>
+    <nav class="nav">
+      <a class="active" href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM3 21h8v-6H3v6zM13 3v6h8V3h-8z"/></svg>
+        Dashboard
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        Pedidos
+        <span class="badge">12</span>
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+        Pagos
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/><circle cx="17" cy="6" r="3"/><path d="M22 18c0-2.5-2-4.5-4.5-4.5"/></svg>
+        Usuarios
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/></svg>
+        Servicios
+      </a>
+      <a href="#">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/></svg>
+        Reportes
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <span class="dot"></span> Sistema operativo · v2.4.1
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ===== Navbar ===== -->
+    <header class="navbar">
+      <div class="crumbs">
+        <span>Admin</span>
+        <span class="sep">/</span>
+        <span class="here">Dashboard</span>
+      </div>
+
+      <div class="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input placeholder="Buscar pedido, cliente, servicio…" />
+        <span class="kbd">⌘ K</span>
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn" title="Ayuda">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.9.4-1 1-1 1.7"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg>
+        </button>
+        <button class="icon-btn" title="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="dot"></span>
+        </button>
+        <div class="avatar-chip">
+          <div class="avatar">DR</div>
+          <div class="avatar-meta">
+            <div class="avatar-name">Diego Ramírez</div>
+            <div class="avatar-role">Administrador</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--ink-faint);margin-left:2px"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== Page ===== -->
+    <div class="page">
+
+      <div class="page-head">
+        <div>
+          <div class="page-title">Resumen general</div>
+          <div class="page-sub">Martes, 19 de mayo · Periodo: mayo 2026</div>
+        </div>
+        <div class="range">
+          <button>Hoy</button>
+          <button>7 días</button>
+          <button class="on">Mes</button>
+          <button>Trimestre</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <section class="kpis">
+        <div class="kpi">
+          <div class="kpi-head">
+            <div class="kpi-label">Ventas del mes</div>
+            <div class="kpi-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum"><span class="cur">S/</span>4,320<span class="dec">.00</span></div>
+          <div class="kpi-foot">
+            <span class="delta up">▲ 18.2%</span>
+            <span class="kpi-hint">vs. abril (S/ 3,656)</span>
+          </div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi-head">
+            <div class="kpi-label">Pedidos activos</div>
+            <div class="kpi-icon alt">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18l-2 13H5L3 6z"/><path d="M8 6V4a4 4 0 0 1 8 0v2"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum">12</div>
+          <div class="kpi-foot">
+            <span class="delta flat">5 en proceso · 4 en cola · 3 por pagar</span>
+          </div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi-head">
+            <div class="kpi-label">Listos para recoger</div>
+            <div class="kpi-icon warn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value tnum">3</div>
+          <div class="kpi-foot">
+            <span class="delta up">2 notificados al cliente</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts row -->
+      <section class="row">
+
+        <!-- Bar chart -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Servicios más solicitados</div>
+              <div class="card-sub">Pedidos completados este mes · 48 órdenes</div>
+            </div>
+            <div class="legend">
+              <span><span class="swatch" style="background:linear-gradient(90deg,var(--brand-dark),var(--brand))"></span>Volumen</span>
+            </div>
+          </div>
+
+          <div class="bars">
+            <div class="bar-row">
+              <div class="bar-label"><span class="sw" style="background:#2e7874"></span>Corte Láser</div>
+              <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+              <div class="bar-val"><b>19</b> <span>·39%</span></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label"><span class="sw" style="background:#3a8f8b"></span>Ploteo</div>
+              <div class="bar-track"><div class="bar-fill" style="width:68%;background:linear-gradient(90deg,#3a8f8b,#6bb0ad)"></div></div>
+              <div class="bar-val"><b>13</b> <span>·27%</span></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label"><span class="sw" style="background:#6bb0ad"></span>Impresión 3D</div>
+              <div class="bar-track"><div class="bar-fill" style="width:52%;background:linear-gradient(90deg,#6bb0ad,#a8c0be)"></div></div>
+              <div class="bar-val"><b>10</b> <span>·21%</span></div>
+            </div>
+            <div class="bar-row">
+              <div class="bar-label"><span class="sw" style="background:#a8c0be"></span>Maqueta</div>
+              <div class="bar-track"><div class="bar-fill" style="width:32%;background:linear-gradient(90deg,#a8c0be,#c8d8d6)"></div></div>
+              <div class="bar-val"><b>6</b> <span>·13%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Line chart -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Ventas · últimos 7 días</div>
+              <div class="card-sub">Total S/ 3,180 · prom. diario S/ 454</div>
+            </div>
+            <div class="legend">
+              <span><span class="swatch" style="background:#3a8f8b"></span>Ventas</span>
+              <span><span class="swatch" style="background:#a8c0be"></span>Sem. anterior</span>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <svg viewBox="0 0 560 240" preserveAspectRatio="none">
+              <!-- grid -->
+              <line class="grid" x1="40" y1="30"  x2="560" y2="30"/>
+              <line class="grid" x1="40" y1="80"  x2="560" y2="80"/>
+              <line class="grid" x1="40" y1="130" x2="560" y2="130"/>
+              <line class="grid" x1="40" y1="180" x2="560" y2="180"/>
+
+              <!-- y axis labels -->
+              <text class="axis-y" x="0"  y="34">800</text>
+              <text class="axis-y" x="0"  y="84">600</text>
+              <text class="axis-y" x="0"  y="134">400</text>
+              <text class="axis-y" x="0"  y="184">200</text>
+              <text class="axis-y" x="10" y="218">0</text>
+
+              <!-- previous week (muted) -->
+              <polyline
+                fill="none" stroke="#a8c0be" stroke-width="1.75" stroke-dasharray="4 4"
+                points="60,170 130,150 200,160 270,135 340,145 410,125 510,140" />
+
+              <!-- area fill -->
+              <defs>
+                <linearGradient id="lineFill2" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%"  stop-color="#3a8f8b" stop-opacity=".30"/>
+                  <stop offset="100%" stop-color="#3a8f8b" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M60,155 L130,125 L200,140 L270,90 L340,110 L410,70 L510,55 L510,210 L60,210 Z" fill="url(#lineFill2)"/>
+
+              <!-- current week line -->
+              <polyline
+                fill="none" stroke="#2e7874" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                points="60,155 130,125 200,140 270,90 340,110 410,70 510,55" />
+
+              <!-- points -->
+              <g fill="#ffffff" stroke="#2e7874" stroke-width="2">
+                <circle cx="60"  cy="155" r="3.5"/>
+                <circle cx="130" cy="125" r="3.5"/>
+                <circle cx="200" cy="140" r="3.5"/>
+                <circle cx="270" cy="90"  r="3.5"/>
+                <circle cx="340" cy="110" r="3.5"/>
+                <circle cx="410" cy="70"  r="3.5"/>
+                <circle cx="510" cy="55"  r="4.5" fill="#2e7874"/>
+              </g>
+
+              <!-- focus tooltip on today -->
+              <g transform="translate(510,55)" style="pointer-events:none">
+                <line x1="0" y1="0" x2="0" y2="155" stroke="#2e7874" stroke-opacity=".35" stroke-dasharray="3 3"/>
+                <rect x="-62" y="-46" width="66" height="34" rx="7" fill="#ffffff" stroke="#a8c0be"/>
+                <text x="-54" y="-30" font-family="Geist Mono" font-size="10" fill="#666">Lun 19</text>
+                <text x="-54" y="-16" font-family="Geist Mono" font-size="11.5" fill="#2c2c2c" font-weight="700">S/ 720</text>
+              </g>
+
+              <!-- x labels -->
+              <text class="axis-x" x="60"  y="232" text-anchor="middle">Mar 13</text>
+              <text class="axis-x" x="130" y="232" text-anchor="middle">Mié 14</text>
+              <text class="axis-x" x="200" y="232" text-anchor="middle">Jue 15</text>
+              <text class="axis-x" x="270" y="232" text-anchor="middle">Vie 16</text>
+              <text class="axis-x" x="340" y="232" text-anchor="middle">Sáb 17</text>
+              <text class="axis-x" x="410" y="232" text-anchor="middle">Dom 18</text>
+              <text class="axis-x" x="510" y="232" text-anchor="middle" fill="#2e7874" font-weight="600">Lun 19</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- Table -->
+      <section class="table-card">
+        <div class="table-head">
+          <div>
+            <div class="card-title">Últimos pedidos</div>
+            <div class="card-sub">Mostrando 5 más recientes de 48 totales</div>
+          </div>
+          <div class="table-actions">
+            <button class="pill-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+              Filtros
+            </button>
+            <button class="pill-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+              Exportar
+            </button>
+            <button class="pill-btn primary">Ver todos →</button>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:150px">Estado</th>
+              <th>Cliente</th>
+              <th>Servicio</th>
+              <th style="width:130px">Monto</th>
+              <th style="width:40px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="status listo">Listo p/ recoger</span>
+                <div class="order-id" style="margin-top:5px">#PED-0241</div>
+              </td>
+              <td>
+                <div class="client">
+                  <div class="client-av">MA</div>
+                  <div class="client-meta">
+                    <div class="client-name">Estudio Alvarez & Co.</div>
+                    <div class="client-id">RUC 20587391022</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#2e7874"></span>Corte Láser · 8 piezas MDF 3mm</span></td>
+              <td class="amount">S/ 480.00</td>
+              <td><span class="row-action">⋯</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <span class="status proceso">En proceso</span>
+                <div class="order-id" style="margin-top:5px">#PED-0240</div>
+              </td>
+              <td>
+                <div class="client">
+                  <div class="client-av">CV</div>
+                  <div class="client-meta">
+                    <div class="client-name">Carolina Vega Mendoza</div>
+                    <div class="client-id">DNI 45128973</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#6bb0ad"></span>Impresión 3D · Pieza ABS 14cm</span></td>
+              <td class="amount">S/ 215.00</td>
+              <td><span class="row-action">⋯</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <span class="status pago">Esperando pago</span>
+                <div class="order-id" style="margin-top:5px">#PED-0239</div>
+              </td>
+              <td>
+                <div class="client">
+                  <div class="client-av">JR</div>
+                  <div class="client-meta">
+                    <div class="client-name">Joaquín Rivera Arq.</div>
+                    <div class="client-id">DNI 70921384</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#a8c0be"></span>Maqueta · Proyecto residencial 1:100</span></td>
+              <td class="amount">S/ 1,250.00</td>
+              <td><span class="row-action">⋯</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <span class="status cola">En cola</span>
+                <div class="order-id" style="margin-top:5px">#PED-0238</div>
+              </td>
+              <td>
+                <div class="client">
+                  <div class="client-av">LP</div>
+                  <div class="client-meta">
+                    <div class="client-name">Lucía Paredes Soto</div>
+                    <div class="client-id">DNI 48392714</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#3a8f8b"></span>Ploteo · 4 láminas A1 color</span></td>
+              <td class="amount">S/ 96.00</td>
+              <td><span class="row-action">⋯</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <span class="status entregado">Entregado</span>
+                <div class="order-id" style="margin-top:5px">#PED-0237</div>
+              </td>
+              <td>
+                <div class="client">
+                  <div class="client-av">RH</div>
+                  <div class="client-meta">
+                    <div class="client-name">Rubén Huamán Q.</div>
+                    <div class="client-id">DNI 71029384</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="svc"><span class="sw" style="background:#2e7874"></span>Corte Láser · Acrílico 5mm grabado</span></td>
+              <td class="amount">S/ 340.00</td>
+              <td><span class="row-action">⋯</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

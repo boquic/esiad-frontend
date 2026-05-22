@@ -1,6 +1,7 @@
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { getUserName } from '../../../core/utils/jwt.utils';
 import {
   ClientOrderDetail,
   ClientOrdersService,
@@ -17,7 +18,7 @@ type OrderStatusMeta = {
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, CurrencyPipe, DatePipe],
+  imports: [CommonModule, RouterLink, DatePipe],
   templateUrl: './order-detail.component.html',
 })
 export class OrderDetailComponent {
@@ -30,26 +31,35 @@ export class OrderDetailComponent {
   loading = false;
   error = '';
 
+  readonly userName: string = getUserName() || 'Usuario';
+
+  get userInitials(): string {
+    const parts = this.userName.trim().split(/\s+/);
+    const a = (parts[0]?.[0] ?? '').toUpperCase();
+    const b = (parts[1]?.[0] ?? '').toUpperCase();
+    return a + b;
+  }
+
+  isActive(path: string): boolean {
+    return this.router.url === path || this.router.url.startsWith(path + '?');
+  }
+
   ngOnInit(): void {
     const orderId = this.route.snapshot.paramMap.get('id');
-
     if (!orderId) {
       this.error = 'No se encontro el pedido solicitado.';
       return;
     }
-
     this.loadOrder(orderId);
   }
 
   loadOrder(orderId: string): void {
     this.loading = true;
     this.error = '';
-
     this.ordersService.getOrderById(orderId).subscribe({
       next: (response) => {
         this.order = this.ordersService.unwrapResource(response);
         this.loading = false;
-
         if (!this.order) {
           this.error = 'No se encontro el detalle del pedido.';
         }
@@ -72,7 +82,6 @@ export class OrderDetailComponent {
 
   getStatusMeta(status: string | null | undefined): OrderStatusMeta {
     const normalizedStatus = String(status ?? '').trim().toUpperCase() as OrderStatus;
-
     switch (normalizedStatus) {
       case 'BUDGETED':
         return { label: 'Presupuestado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };

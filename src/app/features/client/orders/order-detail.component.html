@@ -1,213 +1,414 @@
-<div class="min-h-screen font-sans" style="background: #f4f5f6;">
+<!-- ══════════════════════════════════════════════════════════════
+     SIGEPED · Detalle de Pedido  ·  /client/orders/:id
+     ══════════════════════════════════════════════════════════════ -->
 
-  <!-- Navbar -->
-  <nav style="background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <svg width="28" height="32" viewBox="0 0 72 80" fill="none">
-          <polygon points="4,76 26,4 36,4 18,76" fill="#3a8f8b"/>
-          <polygon points="68,76 46,4 36,4 54,76" fill="#3a8f8b"/>
-          <rect x="16" y="42" width="40" height="8" rx="1" fill="#3a8f8b"/>
-        </svg>
+<div class="grid min-h-screen relative"
+     style="grid-template-columns:200px 1fr;
+            background:
+              radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+              radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+              linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+            background-attachment:fixed;">
+
+  <!-- Blur orbes (fixed) -->
+  <div class="fixed rounded-full pointer-events-none" style="width:360px;height:360px;background:#c8d8d6;top:-100px;right:-80px;opacity:.40;filter:blur(80px);z-index:0;"></div>
+  <div class="fixed rounded-full pointer-events-none" style="width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.30;filter:blur(80px);z-index:0;"></div>
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sticky top-0 flex flex-col overflow-hidden"
+         style="height:100vh;z-index:10;background:rgba(30,75,72,0.92);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);color:#e6f0ee;box-shadow:inset -1px 0 0 rgba(255,255,255,0.05);">
+
+    <!-- Brand -->
+    <div class="flex items-center px-[18px] h-16" style="gap:11px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div class="grid place-items-center rounded-[8px]" style="width:30px;height:30px;flex-shrink:0;background:linear-gradient(135deg,#3a8f8b,#2e7874);box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset,0 4px 14px -4px rgba(58,143,139,0.5);">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/><path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/></svg>
+      </div>
+      <div>
+        <div class="font-semibold text-white" style="font-size:15px;letter-spacing:-0.01em;">SIGEPED</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px;">Cliente</div>
+      </div>
+    </div>
+
+    <!-- Nav label -->
+    <div class="uppercase font-semibold" style="font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);padding:18px 18px 8px;">Mi cuenta</div>
+
+    <!-- Nav links -->
+    <nav class="flex flex-col px-2" style="gap:2px;">
+
+      <a routerLink="/client/dashboard"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 12px;font-size:13.5px;"
+         [style.background]="isActive('/client/dashboard') ? 'rgba(58,143,139,0.35)' : ''"
+         [style.color]="isActive('/client/dashboard') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/dashboard') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.borderRadius]="isActive('/client/dashboard') ? '0 8px 8px 0' : '8px'"
+         [style.paddingLeft]="isActive('/client/dashboard') ? '14px' : '12px'"
+         [style.fontWeight]="isActive('/client/dashboard') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        Inicio
+      </a>
+
+      <a routerLink="/client/orders/new"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 12px;font-size:13.5px;"
+         [style.background]="isActive('/client/orders/new') ? 'rgba(58,143,139,0.35)' : ''"
+         [style.color]="isActive('/client/orders/new') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/orders/new') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.borderRadius]="isActive('/client/orders/new') ? '0 8px 8px 0' : '8px'"
+         [style.paddingLeft]="isActive('/client/orders/new') ? '14px' : '12px'"
+         [style.fontWeight]="isActive('/client/orders/new') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+        Nuevo pedido
+      </a>
+
+      <!-- Mis pedidos activo (esta ruta es hija de /client/orders) -->
+      <a routerLink="/client/orders"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 14px;font-size:13.5px;font-weight:600;color:#fff;background:rgba(58,143,139,0.35);border-left:3px solid #3a8f8b;border-radius:0 8px 8px 0;">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        Mis pedidos
+      </a>
+
+      <a routerLink="/client/payments"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 12px;font-size:13.5px;"
+         [style.background]="isActive('/client/payments') ? 'rgba(58,143,139,0.35)' : ''"
+         [style.color]="isActive('/client/payments') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/payments') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.borderRadius]="isActive('/client/payments') ? '0 8px 8px 0' : '8px'"
+         [style.paddingLeft]="isActive('/client/payments') ? '14px' : '12px'"
+         [style.fontWeight]="isActive('/client/payments') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+        Pagos
+      </a>
+
+      <a routerLink="/client/notifications"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 12px;font-size:13.5px;"
+         [style.background]="isActive('/client/notifications') ? 'rgba(58,143,139,0.35)' : ''"
+         [style.color]="isActive('/client/notifications') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/notifications') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.borderRadius]="isActive('/client/notifications') ? '0 8px 8px 0' : '8px'"
+         [style.paddingLeft]="isActive('/client/notifications') ? '14px' : '12px'"
+         [style.fontWeight]="isActive('/client/notifications') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+        Notificaciones
+      </a>
+    </nav>
+
+    <!-- Sidebar footer -->
+    <div class="mt-auto p-[18px]" style="border-top:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center p-[10px] rounded-[10px]" style="gap:10px;background:rgba(255,255,255,0.05);">
+        <div class="grid place-items-center rounded-full font-semibold text-white" style="width:34px;height:34px;flex-shrink:0;background:linear-gradient(135deg,#3a8f8b,#2e7874);font-size:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2);">{{ userInitials }}</div>
         <div>
-          <p class="font-bold text-sm tracking-widest uppercase" style="color: #2c2c2c; letter-spacing: 0.15em;">ESIAD ARQ</p>
-          <p class="text-xs" style="color: #3a8f8b; letter-spacing: 0.08em;">Portal Cliente</p>
+          <div class="font-semibold text-white" style="font-size:12.5px;line-height:1.2;">{{ userName }}</div>
+          <div style="font-size:10.5px;color:rgba(255,255,255,0.55);">Cliente</div>
         </div>
       </div>
-      <div class="flex items-center gap-1">
-        <a routerLink="/client/orders" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">
-          ← Mis Pedidos
+    </div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main>
+
+    <!-- Header -->
+    <header class="sticky top-0 flex items-center text-white h-16"
+            style="z-index:5;padding:0 28px;gap:24px;background:rgba(42,100,97,0.95);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);box-shadow:0 1px 0 rgba(255,255,255,0.06) inset,0 8px 20px -16px rgba(0,0,0,0.4);">
+
+      <div class="flex items-center" style="gap:8px;font-size:13px;color:rgba(255,255,255,0.7);">
+        <span>Mi cuenta</span>
+        <span style="color:rgba(255,255,255,0.4);">/</span>
+        <a routerLink="/client/orders" class="no-underline" style="color:rgba(255,255,255,0.7);">Mis pedidos</a>
+        <span style="color:rgba(255,255,255,0.4);">/</span>
+        <span class="font-semibold text-white">
+          {{ order ? '#' + order.id : 'Detalle' }}
+        </span>
+      </div>
+
+      <div class="ml-auto flex items-center" style="gap:10px;">
+        <a routerLink="/client/orders"
+           class="inline-flex items-center font-semibold rounded-[10px] no-underline text-white"
+           style="gap:7px;font-size:13px;padding:8px 14px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.12);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>
+          Mis pedidos
         </a>
-        <button type="button" (click)="logout()"
-                class="ml-1 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
-                style="color: #6b7280; border: 1px solid #e5e7eb; background: white;"
-                onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='white'">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
-          Salir
+        <div class="flex items-center cursor-pointer rounded-full" style="gap:10px;padding:4px 14px 4px 4px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.1);">
+          <div class="grid place-items-center rounded-full font-bold text-white" style="width:32px;height:32px;background:linear-gradient(135deg,#3a8f8b,#2e7874);font-size:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25);">{{ userInitials }}</div>
+          <div>
+            <div class="font-semibold text-white" style="font-size:13px;line-height:1.1;">{{ userName }}</div>
+            <div style="font-size:10.5px;color:rgba(255,255,255,0.65);">Cliente</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7;color:#fff;"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <button (click)="logout()" class="grid place-items-center rounded-[10px] border-0 cursor-pointer" style="width:38px;height:38px;color:#fff;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);" title="Cerrar sesión">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         </button>
       </div>
-    </div>
-  </nav>
+    </header>
 
-  <!-- Contenido -->
-  <main class="max-w-7xl mx-auto px-6 py-10">
+    <!-- Page content -->
+    <div style="padding:22px 32px 56px;max-width:1280px;margin:0 auto;">
 
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold" style="color: #1f2937;">Detalle de Pedido</h1>
-      <p class="text-sm mt-1" style="color: #6b7280;">Información completa, archivos subidos y presupuesto registrado.</p>
-    </div>
+      <!-- Breadcrumbs -->
+      <nav class="flex items-center" style="gap:6px;font-size:12.5px;color:rgba(255,255,255,0.7);margin-bottom:18px;">
+        <a routerLink="/client/dashboard" style="color:rgba(255,255,255,0.7);text-decoration:none;">Inicio</a>
+        <span style="color:rgba(255,255,255,0.4);">›</span>
+        <a routerLink="/client/orders" style="color:rgba(255,255,255,0.7);text-decoration:none;">Mis pedidos</a>
+        <span style="color:rgba(255,255,255,0.4);">›</span>
+        <span class="font-semibold text-white">Detalle del pedido</span>
+      </nav>
 
-    <!-- Error -->
-    <div *ngIf="error" class="mb-5 px-4 py-3 rounded-lg text-sm flex items-center gap-2"
-         style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
-      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-      </svg>
-      {{ error }}
-    </div>
-
-    <div *ngIf="loading" class="text-center py-12 text-sm" style="color: #6b7280;">
-      Cargando detalle del pedido...
-    </div>
-
-    <div *ngIf="!loading && order" class="grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.95fr)]">
-
-      <!-- Columna principal -->
-      <div class="space-y-5">
-
-        <!-- Info del pedido -->
-        <section class="rounded-xl overflow-hidden"
-                 style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-          <div class="px-6 py-4 flex items-start justify-between" style="border-bottom: 1px solid #f0f0f0;">
-            <div>
-              <p class="text-xs font-medium" style="color: #9ca3af;">#{{ order.id }}</p>
-              <h2 class="font-bold text-lg mt-0.5" style="color: #1f2937;">{{ getServiceName() }}</h2>
-              <p class="text-sm mt-0.5" style="color: #6b7280;">{{ getMaterialName() }}</p>
-            </div>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border mt-1"
-                  [class]="getStatusMeta(order.status).classes">
-              {{ getStatusMeta(order.status).label }}
-            </span>
-          </div>
-
-          <div class="px-6 py-5 grid grid-cols-2 gap-3">
-            <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-              <p class="text-xs" style="color: #9ca3af;">Creación</p>
-              <p class="font-semibold text-sm mt-0.5" style="color: #374151;">
-                {{ order.created_at ? (order.created_at | date:'dd/MM/yyyy HH:mm') : 'Sin fecha' }}
-              </p>
-            </div>
-            <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-              <p class="text-xs" style="color: #9ca3af;">Última actualización</p>
-              <p class="font-semibold text-sm mt-0.5" style="color: #374151;">
-                {{ (order.updated_at ?? order.updatedAt) ? ((order.updated_at ?? order.updatedAt) | date:'dd/MM/yyyy HH:mm') : 'Sin actualización' }}
-              </p>
-            </div>
-            <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-              <p class="text-xs" style="color: #9ca3af;">Condición de pago</p>
-              <p class="font-semibold text-sm mt-0.5" style="color: #374151;">
-                {{ order.payment_condition === 'CASH_ON_DELIVERY' ? 'Contraentrega' : 'Adelanto 50%' }}
-              </p>
-            </div>
-            <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-              <p class="text-xs" style="color: #9ca3af;">Vigencia del presupuesto</p>
-              <p class="font-semibold text-sm mt-0.5" style="color: #374151;">
-                {{ order.budget_expires_at ? (order.budget_expires_at | date:'dd/MM/yyyy HH:mm') : 'No aplica' }}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Archivos -->
-        <section class="rounded-xl overflow-hidden"
-                 style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-          <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid #f0f0f0;">
-            <div>
-              <h3 class="font-semibold text-sm" style="color: #1f2937;">Planos y Archivos</h3>
-              <p class="text-xs mt-0.5" style="color: #6b7280;">Archivos asociados a este pedido</p>
-            </div>
-            <span class="inline-flex px-2.5 py-1 rounded-full text-xs font-semibold"
-                  style="background: #f0fafa; color: #3a8f8b; border: 1px solid #b2dedd;">
-              {{ getOrderFiles().length }} archivo(s)
-            </span>
-          </div>
-
-          <div class="px-6 py-5">
-            <div *ngIf="getOrderFiles().length === 0" class="text-center py-6 text-sm" style="color: #9ca3af;">
-              <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="#d1d5db" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-              Este pedido todavía no tiene archivos.
-            </div>
-
-            <div *ngIf="getOrderFiles().length > 0" class="space-y-3">
-              <article *ngFor="let file of getOrderFiles()"
-                       class="rounded-lg px-4 py-3 flex items-center justify-between gap-4"
-                       style="background: #f9fafb; border: 1px solid #f0f0f0;">
-                <div class="min-w-0">
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: #9ca3af;">{{ getFileType(file) }}</p>
-                  <p class="text-xs break-all mt-0.5" style="color: #374151;">{{ getFileUrl(file) || 'Sin URL disponible' }}</p>
-                  <p class="text-xs mt-1" style="color: #9ca3af;">
-                    Subido: {{ (file.uploaded_at ?? file.uploadedAt) ? ((file.uploaded_at ?? file.uploadedAt) | date:'dd/MM/yyyy HH:mm') : 'Sin fecha' }}
-                  </p>
-                </div>
-                <a *ngIf="getFileUrl(file)" [href]="getFileUrl(file)" target="_blank" rel="noreferrer"
-                   class="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                   style="color: #3a8f8b; border: 1px solid #b2dedd; background: #f0fafa;">
-                  Ver
-                </a>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        <!-- Notas -->
-        <section *ngIf="order.notes" class="rounded-xl px-6 py-5"
-                 style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-          <p class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: #9ca3af;">Notas</p>
-          <p class="text-sm leading-6" style="color: #374151;">{{ order.notes }}</p>
-        </section>
-
+      <!-- Error -->
+      <div *ngIf="error" class="flex items-center rounded-[10px] mb-5"
+           style="gap:9px;padding:12px 16px;background:#fff0f0;border:1px solid #f5c6c6;font-size:13px;color:#c0392b;">
+        <svg class="flex-shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        {{ error }}
       </div>
 
-      <!-- Sidebar -->
-      <aside class="space-y-5">
+      <!-- Loading -->
+      <div *ngIf="loading" class="flex items-center justify-center py-16" style="gap:10px;color:rgba(255,255,255,0.75);font-size:13.5px;">
+        <svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+        Cargando detalle del pedido…
+      </div>
 
-        <!-- Presupuesto -->
-        <section class="rounded-xl overflow-hidden"
-                 style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-          <div class="px-5 py-4" style="background: #3a8f8b;">
-            <p class="text-xs font-semibold uppercase tracking-wider text-white opacity-80">Presupuesto</p>
-            <h2 class="text-base font-bold text-white mt-0.5">Resumen económico</h2>
-          </div>
-          <div class="px-5 py-5">
-            <div class="rounded-lg px-4 py-4 text-center mb-4" style="background: #f0fafa; border: 1px solid #b2dedd;">
-              <p class="text-xs uppercase tracking-wider mb-1" style="color: #3a8f8b;">Monto estimado</p>
-              <p class="text-3xl font-black" style="color: #3a8f8b;">{{ getEstimatedPrice() | currency:'PEN':'symbol':'1.2-2' }}</p>
-            </div>
-            <div *ngIf="order.advance_amount" class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-              <p class="text-xs" style="color: #9ca3af;">Adelanto registrado</p>
-              <p class="font-semibold text-sm mt-0.5" style="color: #374151;">{{ order.advance_amount | currency:'PEN':'symbol':'1.2-2' }}</p>
-            </div>
-          </div>
-        </section>
+      <!-- Content grid -->
+      <div *ngIf="!loading && order" class="grid gap-5" style="grid-template-columns:minmax(0,1.45fr) minmax(280px,0.95fr);align-items:start;">
 
-        <!-- Pagos -->
-        <section class="rounded-xl overflow-hidden"
-                 style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-          <div class="px-5 py-4" style="border-bottom: 1px solid #f0f0f0;">
-            <h3 class="font-semibold text-sm" style="color: #1f2937;">Historial de Pagos</h3>
-          </div>
-          <div class="px-5 py-4">
-            <div *ngIf="getOrderPayments().length === 0" class="text-center py-4 text-sm" style="color: #9ca3af;">
-              No hay pagos registrados aún.
-            </div>
-            <div *ngIf="getOrderPayments().length > 0" class="space-y-3">
-              <article *ngFor="let payment of getOrderPayments()"
-                       class="rounded-lg px-4 py-3"
-                       style="background: #f9fafb; border: 1px solid #f0f0f0;">
-                <div class="flex items-start justify-between gap-2 mb-1">
-                  <div>
-                    <p class="text-xs uppercase tracking-wider" style="color: #9ca3af;">{{ payment.payment_type ?? payment.paymentType ?? 'Pago' }}</p>
-                    <p class="font-semibold text-sm mt-0.5" style="color: #1f2937;">{{ getPaymentAmount(payment) | currency:'PEN':'symbol':'1.2-2' }}</p>
-                  </div>
-                  <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold"
-                        style="background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb;">
-                    {{ payment.status ?? 'PENDING' }}
+        <!-- ══════ COLUMNA PRINCIPAL ══════ -->
+        <div class="flex flex-col" style="gap:16px;">
+
+          <!-- ─ Encabezado del pedido ─ -->
+          <section class="rounded-[12px]"
+                   style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
+
+            <!-- Header with id + status -->
+            <div class="flex items-start justify-between" style="padding:20px 24px 18px;border-bottom:1px solid rgba(224,224,224,0.65);">
+              <div>
+                <div class="flex items-center flex-wrap" style="gap:8px;margin-bottom:4px;">
+                  <span style="font-size:11.5px;font-weight:600;color:#9ca3af;font-family:monospace;">#{{ order.id }}</span>
+                  <span class="inline-flex items-center rounded-full text-xs font-semibold border"
+                        style="padding:2px 10px;"
+                        [class]="getStatusMeta(order.status).classes">
+                    {{ getStatusMeta(order.status).label }}
                   </span>
                 </div>
-                <p class="text-xs" style="color: #9ca3af;">
-                  {{ (payment.created_at ?? payment.createdAt) ? ((payment.created_at ?? payment.createdAt) | date:'dd/MM/yyyy HH:mm') : 'Sin fecha' }}
+                <h2 class="font-bold" style="font-size:18px;color:#1f2937;letter-spacing:-0.01em;">{{ getServiceName() }}</h2>
+                <p style="font-size:13px;color:#6b7280;margin-top:3px;">{{ getMaterialName() }}</p>
+              </div>
+              <!-- Quick budget badge -->
+              <div class="flex-shrink-0 text-right">
+                <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;margin-bottom:4px;">Presupuesto</p>
+                <p style="font-size:20px;font-weight:700;color:#2e7874;font-family:monospace;letter-spacing:-0.02em;line-height:1;">
+                  <span style="font-size:12px;font-weight:600;opacity:.75;margin-right:3px;vertical-align:2px;">S/</span>{{ getEstimatedPrice() | number:'1.2-2' }}
                 </p>
-              </article>
+              </div>
             </div>
-          </div>
-        </section>
 
-      </aside>
-    </div>
+            <!-- Metadata grid -->
+            <div class="grid grid-cols-2 gap-3" style="padding:18px 24px;">
+              <div class="rounded-[9px] px-3 py-2.5" style="background:rgba(249,250,251,0.80);border:1px solid #f0f0f0;">
+                <p style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Creación</p>
+                <p style="font-size:13px;font-weight:600;color:#374151;margin-top:3px;">
+                  {{ order.created_at ? (order.created_at | date:'dd/MM/yyyy HH:mm') : 'Sin fecha' }}
+                </p>
+              </div>
+              <div class="rounded-[9px] px-3 py-2.5" style="background:rgba(249,250,251,0.80);border:1px solid #f0f0f0;">
+                <p style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Última actualización</p>
+                <p style="font-size:13px;font-weight:600;color:#374151;margin-top:3px;">
+                  {{ (order.updated_at ?? order.updatedAt) ? ((order.updated_at ?? order.updatedAt) | date:'dd/MM/yyyy HH:mm') : 'Sin actualización' }}
+                </p>
+              </div>
+              <div class="rounded-[9px] px-3 py-2.5" style="background:rgba(249,250,251,0.80);border:1px solid #f0f0f0;">
+                <p style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Condición de pago</p>
+                <p style="font-size:13px;font-weight:600;color:#374151;margin-top:3px;">
+                  {{ order.payment_condition === 'CASH_ON_DELIVERY' ? 'Contraentrega' : 'Adelanto 50%' }}
+                </p>
+              </div>
+              <div class="rounded-[9px] px-3 py-2.5" style="background:rgba(249,250,251,0.80);border:1px solid #f0f0f0;">
+                <p style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Vigencia del presupuesto</p>
+                <p style="font-size:13px;font-weight:600;color:#374151;margin-top:3px;">
+                  {{ order.budget_expires_at ? (order.budget_expires_at | date:'dd/MM/yyyy HH:mm') : 'No aplica' }}
+                </p>
+              </div>
+            </div>
+          </section>
 
+          <!-- ─ Planos y archivos ─ -->
+          <section class="rounded-[12px]"
+                   style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
+
+            <div class="flex items-center justify-between" style="padding:18px 24px 16px;border-bottom:1px solid rgba(224,224,224,0.65);">
+              <div class="flex items-center font-semibold" style="gap:9px;font-size:15px;letter-spacing:-0.005em;color:#2c2c2c;">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Planos y Archivos
+              </div>
+              <span class="inline-flex items-center rounded-full font-semibold"
+                    style="font-size:12px;padding:3px 11px;background:rgba(58,143,139,0.10);color:#2e7874;border:1px solid rgba(58,143,139,0.25);">
+                {{ getOrderFiles().length }} archivo{{ getOrderFiles().length !== 1 ? 's' : '' }}
+              </span>
+            </div>
+
+            <div style="padding:18px 24px;">
+
+              <!-- Empty files -->
+              <div *ngIf="getOrderFiles().length === 0" class="flex flex-col items-center py-8 text-center" style="gap:10px;">
+                <div class="grid place-items-center rounded-[11px]" style="width:44px;height:44px;background:rgba(58,143,139,0.07);border:1px solid rgba(58,143,139,0.18);">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="1.5">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                </div>
+                <p style="font-size:13.5px;color:#888;">Este pedido todavía no tiene archivos adjuntos.</p>
+              </div>
+
+              <!-- Files list -->
+              <div *ngIf="getOrderFiles().length > 0" class="flex flex-col" style="gap:10px;">
+                <article *ngFor="let file of getOrderFiles()"
+                         class="flex items-center justify-between gap-4 rounded-[10px]"
+                         style="padding:14px 16px;background:rgba(249,250,251,0.85);border:1px solid #f0f0f0;">
+                  <div class="flex items-center min-w-0" style="gap:12px;">
+                    <div class="grid place-items-center rounded-[9px] flex-shrink-0" style="width:38px;height:38px;background:rgba(58,143,139,0.08);border:1px solid rgba(58,143,139,0.20);color:#3a8f8b;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">{{ getFileType(file) }}</p>
+                      <p class="truncate" style="font-size:12.5px;font-weight:600;color:#374151;margin-top:2px;max-width:320px;">{{ getFileUrl(file) || 'Sin URL disponible' }}</p>
+                      <p style="font-size:11.5px;color:#9ca3af;margin-top:2px;">
+                        Subido: {{ (file.uploaded_at ?? file.uploadedAt) ? ((file.uploaded_at ?? file.uploadedAt) | date:'dd/MM/yyyy HH:mm') : 'Sin fecha' }}
+                      </p>
+                    </div>
+                  </div>
+                  <a *ngIf="getFileUrl(file)" [href]="getFileUrl(file)" target="_blank" rel="noreferrer"
+                     class="flex-shrink-0 inline-flex items-center no-underline font-semibold rounded-[8px]"
+                     style="gap:6px;font-size:12.5px;padding:7px 14px;color:#2e7874;border:1px solid rgba(58,143,139,0.30);background:rgba(58,143,139,0.07);">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Ver
+                  </a>
+                </article>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ─ Notas ─ -->
+          <section *ngIf="order.notes" class="rounded-[12px]"
+                   style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:18px 24px;">
+            <div class="flex items-center font-semibold" style="gap:9px;font-size:15px;letter-spacing:-0.005em;color:#2c2c2c;margin-bottom:12px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2"><path d="M9 13h6M9 17h3M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
+              Notas del pedido
+            </div>
+            <p style="font-size:13.5px;color:#374151;line-height:1.7;">{{ order.notes }}</p>
+          </section>
+
+        </div>
+        <!-- end columna principal -->
+
+        <!-- ══════ SIDEBAR DERECHO ══════ -->
+        <div class="flex flex-col" style="gap:16px;">
+
+          <!-- ─ Resumen económico ─ -->
+          <section class="rounded-[12px] overflow-hidden"
+                   style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
+
+            <!-- Green header band -->
+            <div style="padding:16px 22px;background:linear-gradient(135deg,#3a8f8b,#2e7874);">
+              <p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.80);margin-bottom:2px;">Presupuesto</p>
+              <h3 class="font-bold text-white" style="font-size:15px;letter-spacing:-0.005em;">Resumen económico</h3>
+            </div>
+
+            <div style="padding:18px 22px;">
+
+              <!-- Total -->
+              <div class="rounded-[10px] text-center" style="padding:16px;background:rgba(58,143,139,0.07);border:1px solid rgba(58,143,139,0.22);margin-bottom:14px;">
+                <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#3a8f8b;margin-bottom:6px;">Monto estimado</p>
+                <p style="font-size:28px;font-weight:800;color:#2e7874;font-family:monospace;letter-spacing:-0.03em;line-height:1;">
+                  <span style="font-size:15px;font-weight:600;opacity:.75;margin-right:4px;vertical-align:3px;">S/</span>{{ getEstimatedPrice() | number:'1.2-2' }}
+                </p>
+              </div>
+
+              <!-- Advance -->
+              <div *ngIf="order.advance_amount" class="rounded-[9px] px-3 py-2.5" style="background:rgba(249,250,251,0.85);border:1px solid #f0f0f0;">
+                <p style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Adelanto registrado</p>
+                <p style="font-size:14px;font-weight:700;color:#374151;margin-top:3px;font-family:monospace;">S/ {{ order.advance_amount | number:'1.2-2' }}</p>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ─ Historial de pagos ─ -->
+          <section class="rounded-[12px]"
+                   style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
+
+            <div class="flex items-center font-semibold" style="gap:9px;font-size:15px;letter-spacing:-0.005em;color:#2c2c2c;padding:18px 22px 16px;border-bottom:1px solid rgba(224,224,224,0.65);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+              Historial de Pagos
+            </div>
+
+            <div style="padding:16px 22px;">
+
+              <!-- No payments -->
+              <div *ngIf="getOrderPayments().length === 0" class="flex flex-col items-center py-6 text-center" style="gap:8px;">
+                <div class="grid place-items-center rounded-[9px]" style="width:38px;height:38px;background:rgba(58,143,139,0.07);border:1px solid rgba(58,143,139,0.18);">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="1.8"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>
+                </div>
+                <p style="font-size:13px;color:#888;">No hay pagos registrados aún.</p>
+              </div>
+
+              <!-- Payments list -->
+              <div *ngIf="getOrderPayments().length > 0" class="flex flex-col" style="gap:9px;">
+                <article *ngFor="let payment of getOrderPayments()"
+                         class="rounded-[9px]"
+                         style="padding:12px 14px;background:rgba(249,250,251,0.85);border:1px solid #f0f0f0;">
+                  <div class="flex items-start justify-between" style="gap:8px;margin-bottom:4px;">
+                    <div>
+                      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">{{ payment.payment_type ?? payment.paymentType ?? 'Pago' }}</p>
+                      <p style="font-size:14px;font-weight:700;color:#1f2937;margin-top:2px;font-family:monospace;">S/ {{ getPaymentAmount(payment) | number:'1.2-2' }}</p>
+                    </div>
+                    <span class="inline-flex items-center rounded-full font-semibold"
+                          style="font-size:11px;padding:2px 9px;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;flex-shrink:0;">
+                      {{ payment.status ?? 'PENDING' }}
+                    </span>
+                  </div>
+                  <p style="font-size:11.5px;color:#9ca3af;">
+                    {{ (payment.created_at ?? payment.createdAt) ? ((payment.created_at ?? payment.createdAt) | date:'dd/MM/yyyy HH:mm') : 'Sin fecha' }}
+                  </p>
+                </article>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ─ Acciones rápidas ─ -->
+          <section class="rounded-[12px]"
+                   style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:18px 22px;">
+            <p class="font-semibold" style="font-size:14px;color:#2c2c2c;margin-bottom:12px;letter-spacing:-0.005em;">Acciones</p>
+            <div class="flex flex-col" style="gap:8px;">
+              <a routerLink="/client/orders"
+                 class="inline-flex items-center justify-center no-underline font-semibold rounded-[9px]"
+                 style="gap:7px;font-size:13px;padding:10px 16px;color:#2e7874;border:1px solid rgba(58,143,139,0.30);background:rgba(58,143,139,0.07);">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>
+                Volver a mis pedidos
+              </a>
+              <a routerLink="/client/orders/new"
+                 class="inline-flex items-center justify-center no-underline font-semibold rounded-[9px] text-white"
+                 style="gap:7px;font-size:13px;padding:10px 16px;background:#3a8f8b;border:1px solid #2e7874;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+                Nuevo pedido
+              </a>
+            </div>
+          </section>
+
+        </div>
+        <!-- end sidebar derecho -->
+
+      </div>
+      <!-- end content grid -->
+
+    </div><!-- /page content -->
   </main>
-</div>
+
+</div><!-- /app shell -->

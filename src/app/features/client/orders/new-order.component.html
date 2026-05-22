@@ -1,276 +1,629 @@
-<div class="min-h-screen font-sans" style="background: #f4f5f6;">
+<!-- ══════════════════════════════════════════════════════════════
+     SIGEPED · Nuevo Pedido Cliente  ·  /client/orders/new
+     ══════════════════════════════════════════════════════════════ -->
 
-  <!-- Navbar -->
-  <nav style="background: white; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <svg width="28" height="32" viewBox="0 0 72 80" fill="none">
-          <polygon points="4,76 26,4 36,4 18,76" fill="#3a8f8b"/>
-          <polygon points="68,76 46,4 36,4 54,76" fill="#3a8f8b"/>
-          <rect x="16" y="42" width="40" height="8" rx="1" fill="#3a8f8b"/>
-        </svg>
+<div class="grid min-h-screen relative"
+     style="grid-template-columns:200px 1fr;
+            background:
+              radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+              radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+              linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+            background-attachment:fixed;">
+
+  <!-- Blur orbes (fixed) -->
+  <div class="fixed rounded-full pointer-events-none" style="width:360px;height:360px;background:#c8d8d6;top:-100px;right:-80px;opacity:.40;filter:blur(80px);z-index:0;"></div>
+  <div class="fixed rounded-full pointer-events-none" style="width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.30;filter:blur(80px);z-index:0;"></div>
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sticky top-0 flex flex-col overflow-hidden"
+         style="height:100vh;z-index:10;background:rgba(30,75,72,0.92);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);color:#e6f0ee;box-shadow:inset -1px 0 0 rgba(255,255,255,0.05);">
+
+    <!-- Brand -->
+    <div class="flex items-center px-[18px] h-16" style="gap:11px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div class="grid place-items-center rounded-[8px]" style="width:30px;height:30px;flex-shrink:0;background:linear-gradient(135deg,#3a8f8b,#2e7874);box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset,0 4px 14px -4px rgba(58,143,139,0.5);">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/><path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/></svg>
+      </div>
+      <div>
+        <div class="font-semibold text-white" style="font-size:15px;letter-spacing:-0.01em;">SIGEPED</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px;">Cliente</div>
+      </div>
+    </div>
+
+    <!-- Nav label -->
+    <div class="uppercase font-semibold" style="font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);padding:18px 18px 8px;">Mi cuenta</div>
+
+    <!-- Nav links -->
+    <nav class="flex flex-col px-2" style="gap:2px;">
+
+      <a routerLink="/client/dashboard"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 12px;font-size:13.5px;"
+         [style.background]="isActive('/client/dashboard') ? 'rgba(58,143,139,0.35)' : ''"
+         [style.color]="isActive('/client/dashboard') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/dashboard') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.borderRadius]="isActive('/client/dashboard') ? '0 8px 8px 0' : '8px'"
+         [style.paddingLeft]="isActive('/client/dashboard') ? '14px' : '12px'"
+         [style.fontWeight]="isActive('/client/dashboard') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        Inicio
+      </a>
+
+      <a routerLink="/client/orders/new"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 12px;font-size:13.5px;"
+         [style.background]="isActive('/client/orders/new') ? 'rgba(58,143,139,0.35)' : ''"
+         [style.color]="isActive('/client/orders/new') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/orders/new') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.borderRadius]="isActive('/client/orders/new') ? '0 8px 8px 0' : '8px'"
+         [style.paddingLeft]="isActive('/client/orders/new') ? '14px' : '12px'"
+         [style.fontWeight]="isActive('/client/orders/new') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+        Nuevo pedido
+      </a>
+
+      <a routerLink="/client/orders"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 12px;font-size:13.5px;"
+         [style.background]="isActive('/client/orders') ? 'rgba(58,143,139,0.35)' : ''"
+         [style.color]="isActive('/client/orders') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/orders') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.borderRadius]="isActive('/client/orders') ? '0 8px 8px 0' : '8px'"
+         [style.paddingLeft]="isActive('/client/orders') ? '14px' : '12px'"
+         [style.fontWeight]="isActive('/client/orders') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        Mis pedidos
+      </a>
+
+      <a routerLink="/client/payments"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 12px;font-size:13.5px;"
+         [style.background]="isActive('/client/payments') ? 'rgba(58,143,139,0.35)' : ''"
+         [style.color]="isActive('/client/payments') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/payments') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.borderRadius]="isActive('/client/payments') ? '0 8px 8px 0' : '8px'"
+         [style.paddingLeft]="isActive('/client/payments') ? '14px' : '12px'"
+         [style.fontWeight]="isActive('/client/payments') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/></svg>
+        Pagos
+      </a>
+
+      <a routerLink="/client/notifications"
+         class="flex items-center no-underline transition-colors duration-150 hover:bg-[rgba(255,255,255,0.06)] hover:text-white"
+         style="gap:11px;padding:10px 12px;font-size:13.5px;"
+         [style.background]="isActive('/client/notifications') ? 'rgba(58,143,139,0.35)' : ''"
+         [style.color]="isActive('/client/notifications') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/notifications') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.borderRadius]="isActive('/client/notifications') ? '0 8px 8px 0' : '8px'"
+         [style.paddingLeft]="isActive('/client/notifications') ? '14px' : '12px'"
+         [style.fontWeight]="isActive('/client/notifications') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+        Notificaciones
+      </a>
+    </nav>
+
+    <!-- Sidebar footer -->
+    <div class="mt-auto p-[18px]" style="border-top:1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center p-[10px] rounded-[10px]" style="gap:10px;background:rgba(255,255,255,0.05);">
+        <div class="grid place-items-center rounded-full font-semibold text-white" style="width:34px;height:34px;flex-shrink:0;background:linear-gradient(135deg,#3a8f8b,#2e7874);font-size:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2);">{{ userInitials }}</div>
         <div>
-          <p class="font-bold text-sm tracking-widest uppercase" style="color: #2c2c2c; letter-spacing: 0.15em;">ESIAD ARQ</p>
-          <p class="text-xs" style="color: #3a8f8b; letter-spacing: 0.08em;">Portal Cliente</p>
+          <div class="font-semibold text-white" style="font-size:12.5px;line-height:1.2;">{{ userName }}</div>
+          <div style="font-size:10.5px;color:rgba(255,255,255,0.55);">Cliente</div>
         </div>
       </div>
-      <div class="flex items-center gap-1">
-        <a routerLink="/client/dashboard" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Dashboard</a>
-        <a routerLink="/client/orders" class="px-4 py-2 rounded-lg text-sm font-medium" style="color: #3a8f8b;">Mis Pedidos</a>
-        <button type="button" (click)="logout()"
-                class="ml-1 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium"
-                style="color: #6b7280; border: 1px solid #e5e7eb; background: white;"
-                onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='white'">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
-          Salir
+    </div>
+  </aside>
+
+  <!-- ══════════ MAIN ══════════ -->
+  <main>
+
+    <!-- Navbar -->
+    <header class="sticky top-0 flex items-center text-white h-16"
+            style="z-index:5;padding:0 28px;gap:24px;background:rgba(42,100,97,0.95);backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);box-shadow:0 1px 0 rgba(255,255,255,0.06) inset,0 8px 20px -16px rgba(0,0,0,0.4);">
+
+      <div class="flex items-center" style="gap:8px;font-size:13px;color:rgba(255,255,255,0.7);">
+        <span>Mi cuenta</span>
+        <span style="color:rgba(255,255,255,0.4);">/</span>
+        <span class="font-semibold text-white">Nuevo pedido</span>
+      </div>
+
+      <div class="ml-auto flex items-center" style="gap:10px;">
+        <button class="grid place-items-center rounded-[10px] border-0 cursor-pointer" style="width:38px;height:38px;color:#fff;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);" title="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+        </button>
+        <div class="flex items-center cursor-pointer rounded-full" style="gap:10px;padding:4px 14px 4px 4px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.1);">
+          <div class="grid place-items-center rounded-full font-bold text-white" style="width:32px;height:32px;background:linear-gradient(135deg,#3a8f8b,#2e7874);font-size:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25);">{{ userInitials }}</div>
+          <div>
+            <div class="font-semibold text-white" style="font-size:13px;line-height:1.1;">{{ userName }}</div>
+            <div style="font-size:10.5px;color:rgba(255,255,255,0.65);">Cliente</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7;color:#fff;"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <button (click)="logout()" class="grid place-items-center rounded-[10px] border-0 cursor-pointer" style="width:38px;height:38px;color:#fff;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);" title="Cerrar sesión">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         </button>
       </div>
-    </div>
-  </nav>
+    </header>
 
-  <!-- Contenido -->
-  <main class="max-w-7xl mx-auto px-6 py-10">
+    <!-- Page content -->
+    <div style="padding:22px 32px 56px;max-width:1280px;margin:0 auto;">
 
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold" style="color: #1f2937;">Nuevo Pedido</h1>
-      <p class="text-sm mt-1" style="color: #6b7280;">Selecciona tu servicio, material y obtén un presupuesto en tiempo real.</p>
-    </div>
+      <!-- Breadcrumbs -->
+      <nav class="flex items-center" style="gap:6px;font-size:12.5px;color:#666;margin-bottom:18px;">
+        <a routerLink="/client/dashboard" style="color:#666;text-decoration:none;">Inicio</a>
+        <span style="color:#999;">›</span>
+        <span class="font-semibold" style="color:#2c2c2c;">Nuevo pedido</span>
+      </nav>
 
-    <div class="grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_minmax(300px,0.95fr)]">
+      <!-- ── Stepper ── -->
+      <div class="flex items-center justify-center mx-auto rounded-[12px]"
+           style="max-width:760px;margin-bottom:26px;padding:18px 22px;background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
 
-      <!-- Formulario -->
-      <section class="rounded-xl overflow-hidden"
-               style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-        <div class="px-6 py-4" style="border-bottom: 1px solid #f0f0f0;">
-          <h2 class="font-semibold text-base" style="color: #1f2937;">Datos del pedido</h2>
-          <p class="text-xs mt-0.5" style="color: #6b7280;">Preview en tiempo real mientras completas el formulario</p>
+        <!-- Step 1: Servicio -->
+        <div class="flex items-center" style="gap:10px;">
+          <div class="grid place-items-center rounded-full font-bold transition-all duration-200"
+               style="width:30px;height:30px;flex-shrink:0;font-size:13px;background:#3a8f8b;color:#fff;"
+               [style.box-shadow]="selectedService ? 'none' : '0 0 0 4px rgba(58, 143, 139, 0.16)'">
+            <span *ngIf="!selectedService">1</span>
+            <svg *ngIf="selectedService" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M5 12l5 5L20 7"/>
+            </svg>
+          </div>
+          <div class="font-semibold text-transition" style="font-size:13px;letter-spacing:-0.005em; transition: color .2s;"
+               [style.color]="selectedService ? '#2e7874' : '#3a8f8b'">Servicio</div>
         </div>
 
-        <div class="px-6 py-5">
+        <div style="width:80px;height:2px;margin:0 14px;border-radius:2px;transition:background-color .2s;"
+             [style.background]="selectedService ? '#3a8f8b' : '#ccc'"></div>
 
-          <!-- Error servicios -->
-          <div *ngIf="servicesError" class="mb-5 px-4 py-3 rounded-lg text-sm flex items-center gap-2"
-               style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
-            {{ servicesError }}
+        <!-- Step 2: Especificaciones -->
+        <div class="flex items-center" style="gap:10px;">
+          <div class="grid place-items-center rounded-full font-bold transition-all duration-200"
+               style="width:30px;height:30px;flex-shrink:0;font-size:13px;"
+               [style.background]="selectedService ? '#3a8f8b' : '#e0e0e0'"
+               [style.color]="selectedService ? '#fff' : '#888'"
+               [style.box-shadow]="selectedService && !selectedMaterial ? '0 0 0 4px rgba(58, 143, 139, 0.16)' : 'none'">
+            <span *ngIf="!selectedMaterial">2</span>
+            <svg *ngIf="selectedMaterial" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M5 12l5 5L20 7"/>
+            </svg>
           </div>
+          <div class="font-semibold text-transition" style="font-size:13px;letter-spacing:-0.005em; transition: color .2s;"
+               [style.color]="selectedMaterial ? '#2e7874' : (selectedService ? '#3a8f8b' : '#888')">Especificaciones</div>
+        </div>
 
-          <div *ngIf="loadingServices && !hasServices" class="text-sm py-2" style="color: #6b7280;">
-            Cargando servicios disponibles...
+        <div style="width:80px;height:2px;margin:0 14px;border-radius:2px;transition:background-color .2s;"
+             [style.background]="selectedMaterial ? '#3a8f8b' : '#ccc'"></div>
+
+        <!-- Step 3: Plano -->
+        <div class="flex items-center" style="gap:10px;">
+          <div class="grid place-items-center rounded-full font-bold transition-all duration-200"
+               style="width:30px;height:30px;flex-shrink:0;font-size:13px;"
+               [style.background]="selectedMaterial ? '#3a8f8b' : '#e0e0e0'"
+               [style.color]="selectedMaterial ? '#fff' : '#888'"
+               [style.box-shadow]="selectedMaterial && !selectedFile ? '0 0 0 4px rgba(58, 143, 139, 0.16)' : 'none'">
+            <span *ngIf="!selectedFile">3</span>
+            <svg *ngIf="selectedFile" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M5 12l5 5L20 7"/>
+            </svg>
           </div>
+          <div class="font-semibold text-transition" style="font-size:13px;letter-spacing:-0.005em; transition: color .2s;"
+               [style.color]="selectedFile ? '#2e7874' : (selectedMaterial ? '#3a8f8b' : '#888')">Plano</div>
+        </div>
 
-          <form *ngIf="hasServices || !loadingServices" [formGroup]="orderForm" class="space-y-5" novalidate (ngSubmit)="submitOrder()">
+        <div style="width:80px;height:2px;margin:0 14px;border-radius:2px;transition:background-color .2s;"
+             [style.background]="selectedFile ? '#3a8f8b' : '#ccc'"></div>
 
-            <!-- Servicio + Material -->
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label for="serviceTypeId" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: #6b7280;">Servicio</label>
-                <select id="serviceTypeId" formControlName="serviceTypeId"
-                        class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
-                        style="border: 1px solid #e0e0e0; background: #f9fafb; color: #1f2937;">
-                  <option value="">Selecciona un servicio</option>
-                  <option *ngFor="let service of services" [value]="service.id">{{ service.name }}</option>
-                </select>
-                <p *ngIf="orderForm.controls.serviceTypeId.touched && orderForm.controls.serviceTypeId.invalid"
-                   class="text-xs mt-1" style="color: #e74c3c;">Selecciona un servicio.</p>
-              </div>
+        <!-- Step 4: Confirmar -->
+        <div class="flex items-center" style="gap:10px;">
+          <div class="grid place-items-center rounded-full font-bold transition-all duration-200"
+               style="width:30px;height:30px;flex-shrink:0;font-size:13px;"
+               [style.background]="selectedFile ? '#3a8f8b' : '#e0e0e0'"
+               [style.color]="selectedFile ? '#fff' : '#888'"
+               [style.box-shadow]="selectedFile ? '0 0 0 4px rgba(58, 143, 139, 0.16)' : 'none'">
+            <span>4</span>
+          </div>
+          <div class="font-semibold text-transition" style="font-size:13px;letter-spacing:-0.005em; transition: color .2s;"
+               [style.color]="selectedFile ? '#3a8f8b' : '#888'">Confirmar</div>
+        </div>
+      </div>
 
-              <div>
-                <label for="materialId" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: #6b7280;">Material</label>
-                <select id="materialId" formControlName="materialId"
-                        [disabled]="loadingMaterials || materials.length === 0"
-                        class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed"
-                        style="border: 1px solid #e0e0e0; background: #f9fafb; color: #1f2937;">
-                  <option value="">Selecciona un material</option>
-                  <option *ngFor="let material of materials" [value]="material.id">{{ material.name }}</option>
-                </select>
-                <p *ngIf="orderForm.controls.materialId.touched && orderForm.controls.materialId.invalid"
-                   class="text-xs mt-1" style="color: #e74c3c;">Selecciona un material.</p>
-              </div>
+      <!-- ── 2-col grid form ── -->
+      <form [formGroup]="orderForm" class="grid" style="grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+
+        <!-- ══════════ LEFT COLUMN ══════════ -->
+        <div class="flex flex-col" style="gap:20px;">
+
+          <!-- A · Tipo de servicio -->
+          <section class="rounded-[12px]" style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px 24px;">
+
+            <div class="flex items-center font-semibold" style="gap:9px;font-size:15px;letter-spacing:-0.005em;color:#2c2c2c;margin-bottom:16px;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              Tipo de servicio
             </div>
 
-            <!-- Error materiales -->
-            <div *ngIf="materialsError" class="px-4 py-3 rounded-lg text-sm" style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
-              {{ materialsError }}
+            <!-- Loading services -->
+            <div *ngIf="loadingServices" class="flex items-center justify-center py-10" style="gap:10px;color:#666;">
+              <svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="#3a8f8b" stroke-width="4"/><path class="opacity-75" fill="#3a8f8b" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              <span style="font-size:13.5px;">Cargando servicios disponibles…</span>
             </div>
-            <div *ngIf="loadingMaterials" class="text-sm" style="color: #6b7280;">Cargando materiales del servicio...</div>
 
-            <!-- Campo dinámico + modelo -->
-            <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_220px]">
-              <div *ngIf="requiresMeasurementInput; else fixedPricingInfo">
-                <label [for]="activeField.controlName" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: #6b7280;">
-                  {{ activeField.label }}
-                </label>
-                <input type="number" min="0.01" [step]="activeField.step"
-                       [id]="activeField.controlName" [formControlName]="activeField.controlName"
-                       [placeholder]="activeField.placeholder"
-                       class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none"
-                       style="border: 1px solid #e0e0e0; background: #f9fafb; color: #1f2937;"/>
-                <p class="text-xs mt-1" style="color: #9ca3af;">{{ activeField.hint }}</p>
-                <p *ngIf="orderForm.controls[activeField.controlName].touched && orderForm.controls[activeField.controlName].invalid"
-                   class="text-xs mt-1" style="color: #e74c3c;">Ingresa un valor mayor a 0.</p>
-              </div>
+            <!-- Services error -->
+            <div *ngIf="servicesError && !loadingServices" class="flex items-center rounded-[9px]" style="gap:9px;padding:10px 14px;background:#fff0f0;border:1px solid #f5c6c6;font-size:13px;color:#c0392b;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+              {{ servicesError }}
+              <button type="button" (click)="loadServices()" class="ml-auto font-semibold underline cursor-pointer border-0" style="background:none;color:#c0392b;font-size:12.5px;">Reintentar</button>
+            </div>
 
-              <ng-template #fixedPricingInfo>
-                <div class="rounded-lg px-4 py-3" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
-                  <p class="text-xs font-semibold uppercase tracking-wider mb-1" style="color: #166534;">Tarifa fija</p>
-                  <p class="text-xs leading-5" style="color: #374151;">
-                    Este servicio no requiere medida variable. El precio depende directamente del material.
-                  </p>
+            <!-- No services -->
+            <div *ngIf="!loadingServices && !servicesError && !hasServices" class="py-8 text-center" style="font-size:13.5px;color:#888;">
+              No hay servicios disponibles en este momento.
+            </div>
+
+            <!-- Service cards grid -->
+            <div *ngIf="!loadingServices && hasServices" class="grid" style="grid-template-columns:1fr 1fr;gap:12px;">
+              <div *ngFor="let service of services"
+                   (click)="orderForm.controls.serviceTypeId.setValue(String(service.id))"
+                   class="flex flex-col relative cursor-pointer rounded-[11px] transition-all"
+                   style="gap:6px;padding:17px 17px;"
+                   [style.border]="orderForm.value.serviceTypeId === String(service.id) ? '2px solid #3a8f8b' : '1px solid #e0e0e0'"
+                   [style.background]="orderForm.value.serviceTypeId === String(service.id) ? 'rgba(58,143,139,0.08)' : 'rgba(255,255,255,0.6)'">
+
+                <!-- Check badge when selected -->
+                <span *ngIf="orderForm.value.serviceTypeId === String(service.id)"
+                      class="absolute grid place-items-center rounded-full"
+                      style="top:10px;right:10px;width:22px;height:22px;background:#3a8f8b;color:#fff;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>
+                </span>
+
+                <!-- Dynamic service icon -->
+                <div [ngSwitch]="service.name.toLowerCase()" style="margin-bottom:2px; display: inline-flex;">
+                  <!-- Laser / Scissors -->
+                  <svg *ngSwitchCase="'corte láser'" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
+                       [style.color]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'"
+                       [attr.stroke]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'">
+                    <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="9.8" y1="8.2" x2="20" y2="17"/><line x1="9.8" y1="15.8" x2="20" y2="7"/>
+                  </svg>
+                  <svg *ngSwitchCase="'corte laser'" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
+                       [style.color]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'"
+                       [attr.stroke]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'">
+                    <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="9.8" y1="8.2" x2="20" y2="17"/><line x1="9.8" y1="15.8" x2="20" y2="7"/>
+                  </svg>
+
+                  <!-- Printer / Plotter -->
+                  <svg *ngSwitchCase="'ploteo'" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
+                       [style.color]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'"
+                       [attr.stroke]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'">
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V4h12v5"/><rect x="6" y="14" width="12" height="8" rx="1"/><path d="M8 18h8"/>
+                  </svg>
+
+                  <!-- 3D Printer / Cube -->
+                  <svg *ngSwitchCase="'impresión 3d'" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
+                       [style.color]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'"
+                       [attr.stroke]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 7v10"/><path d="M12 12v10"/><path d="M22 7v10"/>
+                  </svg>
+                  <svg *ngSwitchCase="'impresion 3d'" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
+                       [style.color]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'"
+                       [attr.stroke]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 7v10"/><path d="M12 12v10"/><path d="M22 7v10"/>
+                  </svg>
+
+                  <!-- Architectural model / House -->
+                  <svg *ngSwitchCase="'maqueta'" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
+                       [style.color]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'"
+                       [attr.stroke]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                  <svg *ngSwitchCase="'maquetas'" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
+                       [style.color]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'"
+                       [attr.stroke]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+
+                  <!-- Default generic icon -->
+                  <svg *ngSwitchDefault width="26" height="26" viewBox="0 0 24 24" fill="none" stroke-width="1.8"
+                       [style.color]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'"
+                       [attr.stroke]="orderForm.value.serviceTypeId === String(service.id) ? '#2e7874' : '#888'">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                  </svg>
                 </div>
-              </ng-template>
 
-              <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #e5e7eb;">
-                <p class="text-xs uppercase tracking-wider mb-1" style="color: #9ca3af;">Modelo detectado</p>
-                <p class="font-semibold text-sm" style="color: #1f2937;">{{ pricingModel === 'UNKNOWN' ? 'PER_UNIT (fallback)' : pricingModel }}</p>
+                <div class="font-semibold" style="font-size:14.5px;letter-spacing:-0.005em;"
+                     [style.color]="orderForm.value.serviceTypeId === String(service.id) ? '#2c2c2c' : '#2c2c2c'">{{ service.name }}</div>
+                <div style="font-size:12px;color:#666;">{{ getPricingLabel(service) }}</div>
               </div>
             </div>
+          </section>
 
-            <!-- Notas -->
-            <div>
-              <label for="notes" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color: #6b7280;">Notas adicionales</label>
-              <textarea id="notes" formControlName="notes" rows="3"
-                        placeholder="Ej: Corte con borde pulido"
-                        class="w-full px-3 py-2.5 rounded-lg text-sm focus:outline-none resize-none"
-                        style="border: 1px solid #e0e0e0; background: #f9fafb; color: #1f2937;"></textarea>
+          <!-- B · Especificaciones -->
+          <section class="rounded-[12px]" style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px 24px;">
+
+            <div class="flex items-center font-semibold" style="gap:9px;font-size:15px;letter-spacing:-0.005em;color:#2c2c2c;margin-bottom:16px;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"/><path d="M9 12l2 2 4-4"/></svg>
+              Especificaciones
             </div>
 
-            <!-- Mensajes submit -->
-            <div *ngIf="submitError" class="px-4 py-3 rounded-lg text-sm" style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
-              {{ submitError }}
-            </div>
-            <div *ngIf="submitSuccess" class="px-4 py-3 rounded-lg text-sm" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;">
-              {{ submitSuccess }}
+            <!-- Material -->
+            <div class="flex flex-col" style="gap:7px;margin-bottom:14px;">
+              <label for="material" class="flex items-center font-semibold" style="gap:5px;font-size:12.5px;color:#333;">
+                Material <span style="color:#2e7874;">*</span>
+              </label>
+
+              <!-- Loading materials -->
+              <div *ngIf="loadingMaterials" class="flex items-center rounded-[9px]" style="gap:8px;padding:11px 12px;background:rgba(240,240,240,0.80);border:1px solid #e0e0e0;font-size:13.5px;color:#888;">
+                <svg class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="#3a8f8b" stroke-width="4"/><path class="opacity-75" fill="#3a8f8b" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                Cargando materiales…
+              </div>
+
+              <!-- Materials error -->
+              <div *ngIf="materialsError && !loadingMaterials" style="font-size:11.5px;color:#c0392b;font-weight:500;">{{ materialsError }}</div>
+
+              <!-- Material select -->
+              <div *ngIf="!loadingMaterials" class="flex items-center rounded-[9px] relative transition-all"
+                   style="background:rgba(240,240,240,0.80);border:1px solid #e0e0e0;padding:0 12px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="flex-shrink:0;margin-right:9px;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <select id="material" formControlName="materialId"
+                        class="flex-1 border-0 outline-none cursor-pointer font-medium"
+                        style="appearance:none;-webkit-appearance:none;background:transparent;font-family:inherit;font-size:14px;color:#2c2c2c;padding:11px 24px 11px 0;">
+                  <option value="" disabled>-- Selecciona un material --</option>
+                  <option *ngFor="let mat of materials" [value]="String(mat.id)">{{ mat.name }}</option>
+                </select>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="position:absolute;right:12px;pointer-events:none;"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+
+              <!-- No materials message -->
+              <div *ngIf="!loadingMaterials && !selectedService && !servicesError" style="font-size:11.5px;color:#888;margin-left:2px;">Selecciona un servicio primero.</div>
+              <div *ngIf="!loadingMaterials && selectedService && materials.length === 0 && !materialsError" style="font-size:11.5px;color:#888;margin-left:2px;">No hay materiales disponibles para este servicio.</div>
             </div>
 
-            <!-- Acciones -->
-            <div class="flex flex-wrap justify-end gap-3 pt-2" style="border-top: 1px solid #f0f0f0;">
-              <a routerLink="/client/orders"
-                 class="inline-flex items-center px-5 py-2.5 rounded-lg text-sm font-medium"
-                 style="color: #6b7280; border: 1px solid #e5e7eb; background: white;">
-                Ver mis pedidos
-              </a>
-              <button type="submit"
-                      [disabled]="submitting || loadingMaterials || loadingServices"
-                      class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
-                      style="background: #3a8f8b;"
-                      onmouseover="if(!this.disabled) this.style.background='#2e7874'" onmouseout="if(!this.disabled) this.style.background='#3a8f8b'">
-                <svg *ngIf="submitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-                {{ submitting ? 'Creando pedido...' : 'Crear pedido' }}
+            <!-- Dynamic measurement field -->
+            <div *ngIf="requiresMeasurementInput" class="flex flex-col" style="gap:7px;margin-bottom:14px;">
+              <label class="flex items-center font-semibold" style="gap:5px;font-size:12.5px;color:#333;">
+                {{ activeField.label }} <span style="color:#2e7874;">*</span>
+              </label>
+              <div class="flex items-center rounded-[9px] transition-all"
+                   style="background:rgba(240,240,240,0.80);border:1px solid #e0e0e0;padding:0 12px;"
+                   [style.border-color]="getControl(activeField.controlName)?.touched && getControl(activeField.controlName)?.invalid ? '#f5c6c6' : '#e0e0e0'"
+                   [style.background]="getControl(activeField.controlName)?.touched && getControl(activeField.controlName)?.invalid ? '#fff' : 'rgba(240,240,240,0.80)'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="flex-shrink:0;margin-right:9px;"><rect x="2" y="7" width="3" height="10" rx="1"/><rect x="19" y="7" width="3" height="10" rx="1"/><path d="M5 12h14"/></svg>
+                <input [formControlName]="activeField.controlName"
+                       type="number" [step]="activeField.step" min="0.01"
+                       class="flex-1 min-w-0 border-0 outline-none font-medium"
+                       style="background:transparent;font-family:inherit;font-size:14px;color:#2c2c2c;padding:11px 0;"
+                       [placeholder]="activeField.placeholder">
+              </div>
+              <div *ngIf="getControl(activeField.controlName)?.touched && getControl(activeField.controlName)?.invalid"
+                   class="flex items-center" style="gap:5px;font-size:11.5px;color:#c0392b;font-weight:600;margin-left:2px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+                El valor debe ser mayor a 0
+              </div>
+              <div style="font-size:11.5px;color:#888;margin-left:2px;">{{ activeField.hint }}</div>
+            </div>
+
+            <!-- Fixed pricing note -->
+            <div *ngIf="!requiresMeasurementInput && selectedService" class="flex items-center rounded-[8px]" style="gap:9px;padding:11px 12px;background:rgba(58,143,139,0.08);border:1px solid rgba(58,143,139,0.20);margin-bottom:14px;font-size:12.5px;color:#2e7874;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+              Este servicio tiene <b>precio fijo</b>; no requiere indicar cantidad.
+            </div>
+
+            <!-- Notes -->
+            <div class="flex flex-col" style="gap:7px;">
+              <label for="notes" class="font-semibold" style="font-size:12.5px;color:#333;">Notas / Indicaciones</label>
+              <div class="flex items-center rounded-[9px] transition-all" style="background:rgba(240,240,240,0.80);border:1px solid #e0e0e0;padding:0 12px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="flex-shrink:0;margin-right:9px;align-self:flex-start;margin-top:12px;"><path d="M9 13h6M9 17h3M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/></svg>
+                <textarea id="notes" formControlName="notes" rows="3"
+                          class="flex-1 min-w-0 border-0 outline-none font-medium resize-none"
+                          style="background:transparent;font-family:inherit;font-size:14px;color:#2c2c2c;padding:11px 0;line-height:1.5;"
+                          placeholder="Medidas especiales, acabado, color, instrucciones…"></textarea>
+              </div>
+              <div style="font-size:11.5px;color:#888;margin-left:2px;">Opcional. Ayuda al operador a entender mejor tu pedido.</div>
+            </div>
+          </section>
+
+          <!-- C · Plano técnico (UI – upload wired para futura integración) -->
+          <section class="rounded-[12px]" style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px 24px;">
+
+            <div class="flex items-center font-semibold" style="gap:9px;font-size:15px;letter-spacing:-0.005em;color:#2c2c2c;margin-bottom:4px;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Plano técnico
+            </div>
+            <div style="font-size:12.5px;color:#666;margin-bottom:14px;">Formatos aceptados: .dwg, .dxf, .pdf — Máx. 20 MB</div>
+
+            <!-- Hidden file input -->
+            <input #fileInput type="file" accept=".dwg,.dxf,.pdf" class="hidden" (change)="onFileSelect($event)">
+
+            <!-- File selected state -->
+            <div *ngIf="selectedFile" class="flex items-center rounded-[12px]" style="gap:16px;padding:18px;background:rgba(58,143,139,0.05);border:1.5px solid #3a8f8b;">
+              <div class="grid place-items-center rounded-[11px] flex-shrink-0" style="width:48px;height:48px;background:rgba(58,143,139,0.10);color:#3a8f8b;border:1px solid rgba(58,143,139,0.30);">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8l5 5v10a2 2 0 0 1-2 2h-2"/><polyline points="9 11 12 14 15 11"/><line x1="12" y1="14" x2="12" y2="4"/></svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center flex-wrap" style="gap:8px;font-family:monospace;font-size:14px;font-weight:600;color:#2c2c2c;letter-spacing:-0.01em;">
+                  {{ selectedFile.name }}
+                  <span class="inline-flex items-center font-bold uppercase" style="gap:4px;background:rgba(58,143,139,0.12);color:#2e7874;padding:2px 9px;border-radius:999px;font-size:11px;border:1px solid rgba(58,143,139,0.30);">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                    Archivo listo
+                  </span>
+                </div>
+                <div class="flex items-center" style="gap:10px;font-size:12px;color:#666;margin-top:3px;">
+                  <span>{{ fileSizeMB }}</span>
+                  <span style="width:3px;height:3px;border-radius:50%;background:#999;display:inline-block;"></span>
+                  <span>Subido ahora</span>
+                </div>
+              </div>
+              <button type="button" (click)="fileInput.click()" class="inline-flex items-center font-medium cursor-pointer flex-shrink-0 rounded-[8px]" style="gap:6px;border:1px solid #e0e0e0;background:rgba(255,255,255,0.7);color:#666;font-family:inherit;font-size:12px;padding:7px 13px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.96"/></svg>
+                Cambiar archivo
               </button>
             </div>
 
-          </form>
+            <!-- No file state -->
+            <div *ngIf="!selectedFile"
+                 (click)="fileInput.click()"
+                 class="flex flex-col items-center justify-center cursor-pointer rounded-[12px] transition-all"
+                 style="gap:12px;padding:28px;border:1.5px dashed #ccc;background:rgba(255,255,255,0.40);text-align:center;">
+              <div class="grid place-items-center rounded-[11px]" style="width:48px;height:48px;background:rgba(58,143,139,0.08);color:#3a8f8b;border:1px solid rgba(58,143,139,0.20);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <div>
+                <div class="font-semibold" style="font-size:14px;color:#2c2c2c;margin-bottom:4px;">Arrastra tu archivo o haz clic para subir</div>
+                <div style="font-size:12px;color:#888;">.dwg, .dxf, .pdf · máx. 20 MB</div>
+              </div>
+            </div>
+
+            <!-- File error -->
+            <div *ngIf="fileError" class="flex items-center rounded-[9px] mt-3" style="gap:9px;padding:10px 14px;background:#fff0f0;border:1px solid #f5c6c6;font-size:12.5px;color:#c0392b;font-weight:500;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+              {{ fileError }}
+            </div>
+          </section>
         </div>
-      </section>
+        <!-- end left col -->
 
-      <!-- Sidebar -->
-      <aside class="space-y-5">
+        <!-- ══════════ RIGHT COLUMN ══════════ -->
+        <div class="flex flex-col" style="gap:20px;">
 
-        <!-- Presupuesto preview -->
-        <section class="rounded-xl overflow-hidden"
-                 style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-          <div class="px-5 py-4" style="background: #3a8f8b;">
-            <p class="text-xs font-semibold uppercase tracking-wider text-white opacity-80">Presupuesto</p>
-            <h2 class="text-base font-bold text-white mt-0.5">Vista previa instantánea</h2>
-          </div>
+          <!-- D · Presupuesto estimado -->
+          <section class="rounded-[12px]" style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px 24px;">
 
-          <div class="px-5 py-5">
-            <div *ngIf="canShowPreview && preview" class="space-y-3">
-              <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-                <p class="text-xs" style="color: #9ca3af;">Servicio</p>
-                <p class="font-semibold text-sm mt-0.5" style="color: #1f2937;">{{ selectedService?.name }}</p>
+            <div class="flex items-center font-semibold" style="gap:9px;font-size:15px;letter-spacing:-0.005em;color:#2c2c2c;margin-bottom:16px;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+              Presupuesto estimado
+            </div>
+
+            <!-- Success: order created -->
+            <div *ngIf="submitSuccess && createdOrder" class="rounded-[9px] mb-4" style="background:rgba(72,187,120,0.10);border:1px solid rgba(47,133,90,0.30);padding:14px;">
+              <div class="flex items-center font-semibold" style="gap:8px;font-size:13.5px;color:#2f855a;margin-bottom:4px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                {{ submitSuccess }}
               </div>
-              <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-                <p class="text-xs" style="color: #9ca3af;">Material</p>
-                <p class="font-semibold text-sm mt-0.5" style="color: #1f2937;">{{ selectedMaterial?.name }}</p>
+              <div style="font-size:12.5px;color:#2f855a;margin-top:2px;">
+                Pedido <b style="font-family:monospace;">#{{ createdOrder.id }}</b> registrado correctamente.
               </div>
-              <div class="rounded-lg px-4 py-3 space-y-2" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-                <div class="flex items-center justify-between text-xs">
-                  <span style="color: #9ca3af;">{{ preview.measureLabel }}</span>
-                  <span class="font-medium" style="color: #374151;">{{ preview.units }} {{ preview.unitName }}</span>
+              <a routerLink="/client/orders" class="inline-flex items-center no-underline font-semibold mt-3" style="font-size:12.5px;color:#2e7874;gap:5px;">
+                Ver mis pedidos
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+
+            <!-- Empty state -->
+            <div *ngIf="!canShowPreview && !submitSuccess" class="flex flex-col items-center py-8 text-center" style="gap:10px;">
+              <div class="grid place-items-center rounded-[12px]" style="width:48px;height:48px;background:rgba(58,143,139,0.08);border:1px solid rgba(58,143,139,0.20);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="1.8"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+              </div>
+              <div>
+                <div class="font-semibold" style="font-size:13.5px;color:#2c2c2c;margin-bottom:3px;">Presupuesto en tiempo real</div>
+                <div style="font-size:12.5px;color:#888;line-height:1.5;">Selecciona servicio y material<br>para ver el estimado.</div>
+              </div>
+            </div>
+
+            <!-- Preview breakdown -->
+            <ng-container *ngIf="canShowPreview">
+              <div class="flex flex-col" style="gap:9px;">
+                <div class="flex justify-between items-center" style="font-size:13px;">
+                  <span style="color:#666;font-weight:500;">Servicio</span>
+                  <span style="color:#2c2c2c;font-weight:600;">{{ selectedService?.name }}</span>
                 </div>
-                <div class="flex items-center justify-between text-xs">
-                  <span style="color: #9ca3af;">Precio unitario</span>
-                  <span class="font-medium" style="color: #374151;">{{ preview.unitPrice | currency:'PEN':'symbol':'1.2-2' }} / {{ preview.unitName }}</span>
+                <div class="flex justify-between items-center" style="font-size:13px;">
+                  <span style="color:#666;font-weight:500;">Material</span>
+                  <span style="color:#2c2c2c;font-weight:600;">{{ selectedMaterial?.name }}</span>
+                </div>
+                <div *ngIf="requiresMeasurementInput" class="flex justify-between items-center" style="font-size:13px;">
+                  <span style="color:#666;font-weight:500;">{{ preview?.measureLabel }}</span>
+                  <span style="color:#2c2c2c;font-weight:600;font-family:monospace;">{{ preview?.units }} {{ preview?.unitName }}</span>
+                </div>
+                <div class="flex justify-between items-center" style="font-size:13px;">
+                  <span style="color:#666;font-weight:500;">Precio unitario</span>
+                  <span style="color:#2c2c2c;font-weight:600;font-family:monospace;">S/ {{ preview?.unitPrice | number:'1.2-2' }}</span>
                 </div>
               </div>
-              <div class="rounded-lg px-4 py-4 text-center" style="background: #f0fafa; border: 1px solid #b2dedd;">
-                <p class="text-xs uppercase tracking-wider mb-1" style="color: #3a8f8b;">Estimado actual</p>
-                <p class="text-3xl font-black" style="color: #3a8f8b;">{{ preview.total | currency:'PEN':'symbol':'1.2-2' }}</p>
+
+              <!-- Separator -->
+              <div style="height:1px;background:rgba(224,224,224,0.65);margin:12px 0;"></div>
+
+              <!-- Total -->
+              <div class="flex justify-between items-center" style="margin-bottom:14px;">
+                <span class="font-semibold" style="font-size:13.5px;color:#2c2c2c;">Total estimado</span>
+                <span style="font-family:monospace;font-size:24px;font-weight:700;color:#2e7874;letter-spacing:-0.02em;line-height:1;">
+                  <span style="font-size:14px;font-weight:600;opacity:.75;margin-right:4px;vertical-align:3px;">S/</span>{{ preview?.total | number:'1.2-2' }}
+                </span>
+              </div>
+
+              <!-- Info block: anticipo 50% -->
+              <div class="flex items-start rounded-[8px]" style="gap:9px;padding:11px 12px;background:rgba(58,143,139,0.08);border:1px solid rgba(58,143,139,0.20);font-size:12.5px;color:#2e7874;line-height:1.45;margin-bottom:10px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+                <span>Como cliente nuevo debes abonar el <b>50%</b> antes de iniciar la producción: <b style="font-family:monospace;">S/ {{ (preview?.total ?? 0) / 2 | number:'1.2-2' }}</b></span>
+              </div>
+
+              <!-- Validity -->
+              <div class="flex items-center rounded-[8px]" style="gap:9px;padding:9px 12px;background:#f9f9f9;border:1px solid #e0e0e0;font-size:12px;color:#888;line-height:1.45;margin-bottom:14px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                Este presupuesto vence en <b style="color:#666;font-weight:600;margin-left:4px;">24 horas</b>
+              </div>
+            </ng-container>
+
+            <!-- Submit error -->
+            <div *ngIf="submitError" class="flex items-center rounded-[9px] mb-3" style="gap:9px;padding:10px 14px;background:#fff0f0;border:1px solid #f5c6c6;font-size:12.5px;color:#c0392b;font-weight:500;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+              {{ submitError }}
+            </div>
+
+            <!-- Actions -->
+             <div *ngIf="!submitSuccess" class="flex flex-col" style="gap:10px;">
+               <!-- Confirm button -->
+               <button type="button" (click)="submitOrder()"
+                       [disabled]="!canSubmit"
+                       class="w-full inline-flex items-center justify-center font-semibold rounded-[10px] cursor-pointer transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#2e7874] hover:border-[#2e7874] active:scale-[0.98]"
+                       style="gap:7px;font-family:inherit;font-size:13.5px;padding:11px 16px;border:1px solid #3a8f8b;color:#fff;box-shadow: 0 4px 12px rgba(58, 143, 139, 0.15);"
+                       [style.background]="canSubmit ? '#3a8f8b' : '#3a8f8b'">
+                 <svg *ngIf="submitting" class="animate-spin" width="15" height="15" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                 <svg *ngIf="!submitting" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                 {{ submitting ? 'Creando pedido…' : 'Confirmar pedido' }}
+               </button>
+              <!-- Disabled hint when not ready -->
+              <div *ngIf="!canShowPreview" class="inline-flex items-center justify-center" style="gap:6px;background:#f9f9f9;border:1px solid #e0e0e0;padding:6px 11px;border-radius:8px;font-size:11.5px;color:#888;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+                Completa todos los campos para continuar
+              </div>
+              <!-- Cancel -->
+              <a routerLink="/client/dashboard"
+                 class="w-full inline-flex items-center justify-center no-underline font-semibold rounded-[10px] cursor-pointer transition-all"
+                 style="font-family:inherit;font-size:13.5px;padding:11px 16px;color:#888;border:1px solid #e0e0e0;background:transparent;">
+                Cancelar
+              </a>
+            </div>
+          </section>
+
+          <!-- E · Condiciones -->
+          <section class="rounded-[12px]" style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px 24px;">
+
+            <div class="flex items-center font-semibold" style="gap:9px;font-size:15px;letter-spacing:-0.005em;color:#2c2c2c;margin-bottom:16px;">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Condiciones
+            </div>
+
+            <div class="flex flex-col" style="gap:10px;">
+              <div class="flex items-start" style="gap:10px;font-size:13px;color:#333;line-height:1.45;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2.5" style="flex-shrink:0;margin-top:2px;"><path d="M5 12l5 5L20 7"/></svg>
+                <span><b style="color:#2c2c2c;font-weight:600;">Recojo exclusivo en tienda</b>, sin delivery</span>
+              </div>
+              <div class="flex items-start" style="gap:10px;font-size:13px;color:#333;line-height:1.45;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2.5" style="flex-shrink:0;margin-top:2px;"><path d="M5 12l5 5L20 7"/></svg>
+                <span>Recibirás notificación cuando esté listo</span>
+              </div>
+              <div class="flex items-start" style="gap:10px;font-size:13px;color:#333;line-height:1.45;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2.5" style="flex-shrink:0;margin-top:2px;"><path d="M5 12l5 5L20 7"/></svg>
+                <span>Un pedido activo por tipo de servicio</span>
               </div>
             </div>
+          </section>
 
-            <div *ngIf="!canShowPreview" class="py-4 text-center text-sm" style="color: #9ca3af;">
-              <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="#d1d5db" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-              </svg>
-              Selecciona servicio y material para ver el presupuesto.
-            </div>
-          </div>
-        </section>
+        </div>
+        <!-- end right col -->
 
-        <!-- Pedido creado -->
-        <section *ngIf="createdOrder" class="rounded-xl overflow-hidden"
-                 style="background: white; border: 1px solid #a7f3d0; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-          <div class="px-5 py-4" style="background: #10b981;">
-            <p class="text-xs font-semibold uppercase tracking-wider text-white opacity-80">Pedido creado</p>
-            <h2 class="text-base font-bold text-white mt-0.5">Presupuesto generado</h2>
-          </div>
-          <div class="px-5 py-5 space-y-3">
-            <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-              <p class="text-xs" style="color: #9ca3af;">Código</p>
-              <p class="font-semibold text-sm mt-0.5 break-all" style="color: #1f2937;">{{ createdOrder.id }}</p>
-            </div>
-            <div class="rounded-lg px-4 py-3" style="background: #f9fafb; border: 1px solid #f0f0f0;">
-              <p class="text-xs" style="color: #9ca3af;">Condición de pago</p>
-              <p class="font-semibold text-sm mt-0.5" style="color: #1f2937;">
-                {{ createdOrder.payment_condition === 'CASH_ON_DELIVERY' ? 'Contraentrega' : 'Adelanto 50%' }}
-              </p>
-            </div>
-            <div class="rounded-lg px-4 py-4 text-center" style="background: #f0fdf4; border: 1px solid #bbf7d0;">
-              <p class="text-xs uppercase tracking-wider mb-1" style="color: #166534;">Monto estimado</p>
-              <p class="text-3xl font-black" style="color: #059669;">{{ createdOrder.estimated_price | currency:'PEN':'symbol':'1.2-2' }}</p>
-              <p class="text-xs mt-1" style="color: #6b7280;">Vigente hasta {{ createdOrder.budget_expires_at | date:'dd/MM/yyyy HH:mm' }}</p>
-            </div>
-            <a *ngIf="createdOrder.id" [routerLink]="['/client/orders', createdOrder.id]"
-               class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-semibold text-white"
-               style="background: #059669;"
-               onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
-              Ver detalle del pedido
-            </a>
-          </div>
-        </section>
+      </form>
 
-        <!-- Alcance -->
-        <section class="rounded-xl px-5 py-4"
-                 style="background: white; border: 1px solid #e5e7eb; box-shadow: 0 1px 4px rgba(0,0,0,0.05);">
-          <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color: #9ca3af;">Alcance actual</p>
-          <ul class="space-y-2 text-xs leading-5" style="color: #6b7280;">
-            <li class="flex items-center gap-2">
-              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              Servicio activo del catálogo
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              Material filtrado por servicio
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              Campo dinámico según <code class="font-mono" style="color: #374151;">pricing_model</code>
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="#3a8f8b" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              Presupuesto generado al instante
-            </li>
-          </ul>
-        </section>
-
-      </aside>
-    </div>
+    </div><!-- /page content -->
   </main>
-</div>
+
+</div><!-- /app shell -->

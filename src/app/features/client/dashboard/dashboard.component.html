@@ -1,0 +1,433 @@
+<!-- ══════════════════════════════════════════════════════════════
+     SIGEPED · Dashboard Cliente
+     Layout: grid sidebar(200px) + main · glassmorphism + paleta SIGEPED
+     ══════════════════════════════════════════════════════════════ -->
+
+<!-- Page shell: gradient background + 2-col grid -->
+<div
+  class="grid min-h-screen relative"
+  style="grid-template-columns:200px 1fr;
+         background:
+           radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
+           radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
+           linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+         background-attachment:fixed;">
+
+  <!-- Decorative fixed blur orbes -->
+  <div class="fixed rounded-full pointer-events-none" style="width:360px;height:360px;background:#c8d8d6;top:-100px;right:-80px;opacity:.40;filter:blur(80px);z-index:0;"></div>
+  <div class="fixed rounded-full pointer-events-none" style="width:420px;height:420px;background:#3d8c89;bottom:-140px;left:-120px;opacity:.30;filter:blur(80px);z-index:0;"></div>
+
+  <!-- ══════════════ SIDEBAR ══════════════ -->
+  <aside
+    class="sticky top-0 flex flex-col overflow-hidden"
+    style="height:100vh;z-index:10;
+           background:rgba(30,75,72,0.92);
+           backdrop-filter:blur(18px) saturate(140%);
+           -webkit-backdrop-filter:blur(18px) saturate(140%);
+           color:#e6f0ee;
+           box-shadow:inset -1px 0 0 rgba(255,255,255,0.05);">
+
+    <!-- Brand row -->
+    <div class="flex items-center px-[18px] h-16" style="gap:11px;border-bottom:1px solid rgba(255,255,255,0.08);">
+      <div class="grid place-items-center rounded-[8px]" style="width:30px;height:30px;flex-shrink:0;background:linear-gradient(135deg,#3a8f8b 0%,#2e7874 100%);box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset,0 4px 14px -4px rgba(58,143,139,0.5);">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/>
+          <path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/>
+        </svg>
+      </div>
+      <div>
+        <div class="font-semibold text-white" style="font-size:15px;letter-spacing:-0.01em;">SIGEPED</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px;">Cliente</div>
+      </div>
+    </div>
+
+    <!-- Nav section label -->
+    <div class="uppercase font-semibold" style="font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);padding:18px 18px 8px;">Mi cuenta</div>
+
+    <!-- Navigation links -->
+    <nav class="flex flex-col px-2" style="gap:2px;">
+
+      <!-- Inicio -->
+      <a routerLink="/client/dashboard"
+         class="flex items-center no-underline transition-colors"
+         style="gap:11px;padding:10px 12px;border-radius:8px;font-size:13.5px;font-weight:500;"
+         [style.background]="isActive('/client/dashboard') ? 'rgba(58,143,139,0.22)' : ''"
+         [style.color]="isActive('/client/dashboard') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/dashboard') ? '3px solid #3a8f8b' : '3px solid transparent'"
+         [style.fontWeight]="isActive('/client/dashboard') ? '600' : '500'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>
+        </svg>
+        Inicio
+      </a>
+
+      <!-- Nuevo pedido -->
+      <a routerLink="/client/orders/new"
+         class="flex items-center no-underline transition-colors"
+         style="gap:11px;padding:10px 12px;border-radius:8px;font-size:13.5px;font-weight:500;"
+         [style.background]="isActive('/client/orders/new') ? 'rgba(58,143,139,0.22)' : ''"
+         [style.color]="isActive('/client/orders/new') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/orders/new') ? '3px solid #3a8f8b' : '3px solid transparent'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>
+        </svg>
+        Nuevo pedido
+      </a>
+
+      <!-- Mis pedidos -->
+      <a routerLink="/client/orders"
+         class="flex items-center no-underline transition-colors"
+         style="gap:11px;padding:10px 12px;border-radius:8px;font-size:13.5px;font-weight:500;"
+         [style.background]="isActive('/client/orders') ? 'rgba(58,143,139,0.22)' : ''"
+         [style.color]="isActive('/client/orders') ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.borderLeft]="isActive('/client/orders') ? '3px solid #3a8f8b' : '3px solid transparent'">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/>
+        </svg>
+        Mis pedidos
+        <span class="ml-auto font-semibold" style="font-size:11px;background:rgba(255,255,255,0.12);color:#fff;padding:1px 7px;border-radius:999px;font-family:monospace;">{{ ordersBadge }}</span>
+      </a>
+
+      <!-- Pagos -->
+      <a routerLink="/client/orders"
+         class="flex items-center no-underline transition-colors"
+         style="gap:11px;padding:10px 12px;border-radius:8px;font-size:13.5px;font-weight:500;color:rgba(255,255,255,0.75);border-left:3px solid transparent;">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/>
+        </svg>
+        Pagos
+      </a>
+
+      <!-- Notificaciones -->
+      <a routerLink="/client/dashboard"
+         class="flex items-center no-underline transition-colors"
+         style="gap:11px;padding:10px 12px;border-radius:8px;font-size:13.5px;font-weight:500;color:rgba(255,255,255,0.75);border-left:3px solid transparent;">
+        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/>
+        </svg>
+        Notificaciones
+        <span class="ml-auto font-semibold" style="font-size:11px;background:#48bb78;color:#fff;padding:1px 7px;border-radius:999px;font-family:monospace;">{{ notifCount }}</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar footer -->
+    <div class="mt-auto p-[18px]" style="border-top:1px solid rgba(255,255,255,0.08);">
+
+      <!-- Help card -->
+      <div class="rounded-[11px] p-[13px]" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);">
+        <div class="font-semibold text-white" style="font-size:12.5px;margin-bottom:3px;">¿Tienes dudas?</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.4;margin-bottom:9px;">Te ayudamos con tu pedido en tienda</div>
+        <a href="#" class="inline-flex items-center no-underline font-semibold" style="font-size:11.5px;color:#c8e8e5;gap:5px;">
+          Contactar soporte
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <!-- User pill -->
+      <div class="flex items-center mt-[14px] p-[10px] rounded-[10px]" style="gap:10px;background:rgba(255,255,255,0.05);">
+        <div class="grid place-items-center rounded-full font-semibold text-white" style="width:34px;height:34px;flex-shrink:0;background:linear-gradient(135deg,#3a8f8b,#2e7874);font-size:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2);">
+          {{ userInitials }}
+        </div>
+        <div>
+          <div class="font-semibold text-white" style="font-size:12.5px;line-height:1.2;">{{ userName }}</div>
+          <div style="font-size:10.5px;color:rgba(255,255,255,0.55);">Cliente</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════════ MAIN ══════════════ -->
+  <main>
+
+    <!-- ── Navbar ── -->
+    <header
+      class="sticky top-0 flex items-center text-white h-16"
+      style="z-index:5;padding:0 28px;gap:24px;
+             background:rgba(42,100,97,0.95);
+             backdrop-filter:blur(16px) saturate(140%);
+             -webkit-backdrop-filter:blur(16px) saturate(140%);
+             box-shadow:0 1px 0 rgba(255,255,255,0.06) inset,0 8px 20px -16px rgba(0,0,0,0.4);">
+
+      <!-- Breadcrumbs -->
+      <div class="flex items-center" style="gap:8px;font-size:13px;color:rgba(255,255,255,0.7);">
+        <span>Mi cuenta</span>
+        <span style="color:rgba(255,255,255,0.4);">/</span>
+        <span class="font-semibold text-white">Inicio</span>
+      </div>
+
+      <!-- Right actions -->
+      <div class="ml-auto flex items-center" style="gap:10px;">
+
+        <!-- Bell with badge -->
+        <button
+          class="grid place-items-center rounded-[10px] relative cursor-pointer border-0"
+          style="width:38px;height:38px;color:#fff;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);"
+          title="Notificaciones">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/>
+          </svg>
+          <span class="absolute grid place-items-center font-bold" style="top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;background:#48bb78;color:#fff;border-radius:999px;font-size:10.5px;box-shadow:0 0 0 2px rgba(42,100,97,1);">{{ notifCount }}</span>
+        </button>
+
+        <!-- Avatar chip -->
+        <div class="flex items-center cursor-pointer rounded-full" style="gap:10px;padding:4px 14px 4px 4px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.1);">
+          <div class="grid place-items-center rounded-full font-bold text-white" style="width:32px;height:32px;background:linear-gradient(135deg,#3a8f8b,#2e7874);font-size:12px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25);">{{ userInitials }}</div>
+          <div>
+            <div class="font-semibold text-white" style="font-size:13px;line-height:1.1;">{{ userName }}</div>
+            <div style="font-size:10.5px;color:rgba(255,255,255,0.65);">Cliente</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.7;color:#fff;"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+
+        <!-- Logout -->
+        <button
+          (click)="logout()"
+          class="grid place-items-center rounded-[10px] cursor-pointer border-0"
+          style="width:38px;height:38px;color:#fff;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);"
+          title="Cerrar sesión">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Page content ── -->
+    <div style="padding:28px 36px 56px;max-width:1280px;margin:0 auto;">
+
+      <!-- Page header: greeting + CTA -->
+      <div class="flex items-end justify-between flex-wrap" style="gap:18px;margin-bottom:22px;">
+        <div>
+          <div class="font-semibold leading-none" style="font-size:26px;letter-spacing:-0.025em;color:#2c2c2c;">
+            Bienvenido, {{ userFirstName }}
+            <span style="font-size:24px;display:inline-block;transform:translateY(-2px);margin-left:2px;">👋</span>
+          </div>
+          <div style="font-size:13.5px;color:#666;margin-top:6px;">Martes, 19 de mayo · Esto es lo que pasa con tus pedidos hoy</div>
+        </div>
+        <a
+          routerLink="/client/orders/new"
+          class="inline-flex items-center justify-center no-underline font-semibold text-white rounded-[10px] cursor-pointer"
+          style="gap:8px;font-size:14px;padding:13px 22px;
+                 background:linear-gradient(180deg,#3a8f8b 0%,#2e7874 100%);
+                 border:1px solid #2e7874;
+                 box-shadow:0 10px 22px -8px rgba(58,143,139,0.55),0 0 0 1px rgba(255,255,255,0.15) inset;">
+          <span class="grid place-items-center rounded-full font-bold" style="width:18px;height:18px;background:rgba(255,255,255,0.20);font-size:14px;line-height:1;">+</span>
+          Nuevo pedido
+        </a>
+      </div>
+
+      <!-- ── KPIs ── -->
+      <section class="grid" style="grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px;">
+
+        <!-- KPI 1: Pedidos activos -->
+        <div class="rounded-[14px] relative overflow-hidden"
+             style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+          <div class="flex items-center justify-between" style="margin-bottom:14px;">
+            <div style="font-size:13px;color:#666;font-weight:500;">Pedidos activos</div>
+            <div class="grid place-items-center rounded-[10px]" style="width:36px;height:36px;background:linear-gradient(135deg,#3a8f8b 0%,#2e7874 100%);color:#fff;box-shadow:0 6px 14px -6px rgba(58,143,139,0.5);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18l-2 13H5L3 6z"/><path d="M8 6V4a4 4 0 0 1 8 0v2"/></svg>
+            </div>
+          </div>
+          <div class="font-semibold leading-none" style="font-size:34px;letter-spacing:-0.025em;color:#2c2c2c;font-variant-numeric:tabular-nums;">{{ activeOrders }}</div>
+          <div class="flex items-center" style="margin-top:10px;gap:8px;font-size:12.5px;color:#666;">
+            <span class="inline-flex items-center font-semibold uppercase" style="gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:0.04em;color:#2e7874;background:rgba(58,143,139,0.10);border:1px solid rgba(58,143,139,0.30);">
+              <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>En curso
+            </span>
+            <span>1 en proceso · 1 pago pendiente</span>
+          </div>
+        </div>
+
+        <!-- KPI 2: Listos para recoger (featured green) -->
+        <div class="rounded-[14px] relative overflow-hidden"
+             style="background:linear-gradient(180deg,rgba(72,187,120,0.10) 0%,rgba(255,255,255,0.75) 60%);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid rgba(47,133,90,0.30);padding:22px;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+          <!-- Radial glow top-right -->
+          <div class="absolute pointer-events-none" style="top:0;right:0;width:120px;height:120px;background:radial-gradient(circle at 100% 0%,rgba(72,187,120,0.30),transparent 60%);"></div>
+          <div class="flex items-center justify-between" style="margin-bottom:14px;">
+            <div style="font-size:13px;color:#666;font-weight:500;">Listos para recoger</div>
+            <div class="grid place-items-center rounded-[10px]" style="width:36px;height:36px;background:linear-gradient(135deg,#48bb78,#2f855a);color:#fff;box-shadow:0 6px 14px -6px rgba(72,187,120,0.55);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg>
+            </div>
+          </div>
+          <div class="font-semibold leading-none" style="font-size:34px;letter-spacing:-0.025em;color:#2c2c2c;font-variant-numeric:tabular-nums;">{{ readyOrders }}</div>
+          <div class="flex items-center" style="margin-top:10px;gap:8px;font-size:12.5px;color:#666;">
+            <span class="inline-flex items-center font-semibold uppercase" style="gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:0.04em;color:#2f855a;background:rgba(72,187,120,0.14);border:1px solid rgba(47,133,90,0.30);">
+              <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>¡Urgente!
+            </span>
+            <span>Recógelo en tienda</span>
+          </div>
+        </div>
+
+        <!-- KPI 3: Completados -->
+        <div class="rounded-[14px] relative overflow-hidden"
+             style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+          <div class="flex items-center justify-between" style="margin-bottom:14px;">
+            <div style="font-size:13px;color:#666;font-weight:500;">Pedidos completados</div>
+            <div class="grid place-items-center rounded-[10px]" style="width:36px;height:36px;background:rgba(255,255,255,0.8);color:#2e7874;box-shadow:inset 0 0 0 1px #c8d8d6;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>
+            </div>
+          </div>
+          <div class="font-semibold leading-none" style="font-size:34px;letter-spacing:-0.025em;color:#2c2c2c;font-variant-numeric:tabular-nums;">{{ completedOrders }}</div>
+          <div class="flex items-center" style="margin-top:10px;gap:8px;font-size:12.5px;color:#666;">
+            <span class="inline-flex items-center font-semibold uppercase" style="gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:0.04em;color:#666;background:rgba(136,136,136,0.10);border:1px solid rgba(136,136,136,0.2);">
+              <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>Historial
+            </span>
+            <span>desde febrero 2026</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Notificación reciente ── -->
+      <section style="margin-bottom:22px;">
+        <div class="flex items-center justify-between" style="margin-bottom:12px;">
+          <div class="font-semibold" style="font-size:16px;letter-spacing:-0.005em;color:#2c2c2c;">Notificación reciente</div>
+          <a href="#" class="inline-flex items-center no-underline font-semibold" style="color:#2e7874;font-size:12.5px;gap:5px;">
+            Ver todas
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <div class="flex items-start relative overflow-hidden rounded-[14px]"
+             style="gap:14px;padding:18px 20px;background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+          <!-- Left accent bar -->
+          <div class="absolute left-0 top-0 bottom-0" style="width:4px;background:linear-gradient(180deg,#3a8f8b,#2e7874);"></div>
+
+          <!-- Icon -->
+          <div class="grid place-items-center rounded-[11px] flex-shrink-0 relative text-white"
+               style="width:42px;height:42px;background:linear-gradient(135deg,#48bb78,#2f855a);box-shadow:0 6px 14px -6px rgba(72,187,120,0.55);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/>
+            </svg>
+            <span class="absolute rounded-full" style="top:-3px;right:-3px;width:11px;height:11px;background:#fff;border:2px solid #48bb78;"></span>
+          </div>
+
+          <!-- Body -->
+          <div class="flex-1">
+            <div class="font-semibold" style="font-size:14px;color:#2c2c2c;margin-bottom:3px;letter-spacing:-0.005em;">
+              Tu pedido <b style="color:#2e7874;font-family:monospace;font-weight:700;">{{ recentNotif.orderCode }}</b> está listo para recoger en tienda
+            </div>
+            <div style="font-size:13px;color:#666;line-height:1.5;">{{ recentNotif.message }}</div>
+            <div class="flex items-center" style="gap:14px;margin-top:8px;font-size:11.5px;color:#888;">
+              <span class="inline-flex items-center" style="gap:5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                {{ recentNotif.timeAgo }}
+              </span>
+              <span style="width:3px;height:3px;border-radius:50%;background:#999;display:inline-block;"></span>
+              <span>Notificación de tienda</span>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <a routerLink="/client/orders"
+             class="inline-flex items-center justify-center no-underline font-semibold text-white rounded-[8px] self-center"
+             style="white-space:nowrap;font-size:12.5px;padding:7px 13px;background:linear-gradient(180deg,#3a8f8b,#2e7874);border:1px solid #2e7874;box-shadow:0 10px 22px -8px rgba(58,143,139,0.55);">
+            Ver pedido
+          </a>
+        </div>
+      </section>
+
+      <!-- ── Pedidos recientes ── -->
+      <section>
+        <div class="flex items-center justify-between" style="margin-bottom:12px;">
+          <div class="flex items-center font-semibold" style="font-size:16px;letter-spacing:-0.005em;color:#2c2c2c;gap:8px;">
+            Pedidos recientes
+            <span class="font-medium" style="font-size:12px;color:#666;background:rgba(255,255,255,0.5);padding:2px 9px;border-radius:999px;border:1px solid #e0e0e0;">Últimos 4</span>
+          </div>
+          <a routerLink="/client/orders" class="inline-flex items-center no-underline font-semibold" style="color:#2e7874;font-size:12.5px;gap:5px;">
+            Ver todos
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <div class="overflow-hidden rounded-[14px]"
+             style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+          <table class="w-full" style="border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr>
+                <th class="text-left font-semibold uppercase" style="width:120px;font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Código</th>
+                <th class="text-left font-semibold uppercase" style="font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Servicio</th>
+                <th class="text-left font-semibold uppercase" style="font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Material</th>
+                <th class="text-left font-semibold uppercase" style="width:170px;font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Estado</th>
+                <th class="text-left font-semibold uppercase" style="width:170px;font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Fecha estimada</th>
+                <th style="width:130px;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of recentOrders; let last = last"
+                  [style.background]="order.status === 'listo' ? 'rgba(72,187,120,0.10)' : ''">
+
+                <!-- Código -->
+                <td style="vertical-align:middle;" [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'">
+                  <span style="font-family:monospace;font-size:13px;color:#2c2c2c;font-weight:600;">{{ order.code }}</span>
+                </td>
+
+                <!-- Servicio -->
+                <td style="vertical-align:middle;" [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'">
+                  <span class="inline-flex items-center" style="gap:8px;font-size:13px;color:#333;font-weight:500;">
+                    <span class="rounded-[2px] flex-shrink-0" [style.background]="order.serviceColor" style="width:9px;height:9px;display:inline-block;"></span>
+                    {{ order.service }}
+                  </span>
+                </td>
+
+                <!-- Material -->
+                <td style="vertical-align:middle;" [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'">
+                  <span style="font-size:12.5px;color:#666;">{{ order.material }}</span>
+                </td>
+
+                <!-- Estado -->
+                <td style="vertical-align:middle;" [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'">
+                  <!-- listo -->
+                  <ng-container *ngIf="order.status === 'listo'">
+                    <span class="inline-flex items-center font-semibold uppercase" style="gap:6px;font-size:11.5px;padding:4px 10px 4px 9px;border-radius:999px;letter-spacing:0.04em;color:#2f855a;background:rgba(72,187,120,0.14);border:1px solid rgba(47,133,90,0.30);">
+                      <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Listo para recoger
+                    </span>
+                    <div class="flex items-center font-semibold" style="font-size:11.5px;color:#2f855a;margin-top:5px;gap:5px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                      ¡Tu pedido está listo! Recógelo en tienda.
+                    </div>
+                  </ng-container>
+                  <!-- proceso -->
+                  <span *ngIf="order.status === 'proceso'" class="inline-flex items-center font-semibold uppercase" style="gap:6px;font-size:11.5px;padding:4px 10px 4px 9px;border-radius:999px;letter-spacing:0.04em;color:#2e7874;background:rgba(58,143,139,0.10);border:1px solid rgba(58,143,139,0.30);">
+                    <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>En proceso
+                  </span>
+                  <!-- pago -->
+                  <span *ngIf="order.status === 'pago'" class="inline-flex items-center font-semibold uppercase" style="gap:6px;font-size:11.5px;padding:4px 10px 4px 9px;border-radius:999px;letter-spacing:0.04em;color:#b8860b;background:#fff7e6;border:1px solid #f5d39a;">
+                    <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Pendiente de pago
+                  </span>
+                  <!-- entregado -->
+                  <span *ngIf="order.status === 'entregado'" class="inline-flex items-center font-semibold uppercase" style="gap:6px;font-size:11.5px;padding:4px 10px 4px 9px;border-radius:999px;letter-spacing:0.04em;color:#666;background:rgba(136,136,136,0.10);border:1px solid rgba(136,136,136,0.20);">
+                    <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Entregado
+                  </span>
+                </td>
+
+                <!-- Fecha estimada -->
+                <td style="vertical-align:middle;" [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'">
+                  <span style="font-family:monospace;font-size:12.5px;color:#666;">{{ order.datePre }}<b style="color:#2c2c2c;font-weight:500;">{{ order.dateBold }}</b>{{ order.datePost }}</span>
+                </td>
+
+                <!-- Acción -->
+                <td style="vertical-align:middle;" [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'">
+                  <!-- Ver detalle (listo / proceso / entregado) -->
+                  <a *ngIf="order.status !== 'pago'"
+                     routerLink="/client/orders"
+                     class="inline-flex items-center justify-center no-underline font-semibold rounded-[8px] cursor-pointer"
+                     style="font-size:12.5px;padding:7px 13px;color:#333;border:1px solid #e0e0e0;background:rgba(255,255,255,0.55);">
+                    Ver detalle
+                  </a>
+                  <!-- Pagar ahora -->
+                  <a *ngIf="order.status === 'pago'"
+                     routerLink="/client/orders"
+                     class="inline-flex items-center justify-center no-underline font-semibold text-white rounded-[8px] cursor-pointer"
+                     style="font-size:12.5px;padding:7px 13px;background:linear-gradient(180deg,#3a8f8b,#2e7874);border:1px solid #2e7874;box-shadow:0 10px 22px -8px rgba(58,143,139,0.55);">
+                    Pagar ahora
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div><!-- /page content -->
+  </main>
+
+</div><!-- /app shell -->

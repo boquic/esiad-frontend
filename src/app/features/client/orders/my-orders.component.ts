@@ -1,6 +1,7 @@
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { getUserName } from '../../../core/utils/jwt.utils';
 import { ClientOrder, ClientOrdersService, OrderStatus } from './orders.service';
 
 type OrderStatusMeta = {
@@ -11,7 +12,7 @@ type OrderStatusMeta = {
 @Component({
   selector: 'app-my-orders',
   standalone: true,
-  imports: [CommonModule, RouterLink, CurrencyPipe, DatePipe],
+  imports: [CommonModule, RouterLink, DatePipe],
   templateUrl: './my-orders.component.html',
 })
 export class MyOrdersComponent {
@@ -22,6 +23,20 @@ export class MyOrdersComponent {
   orders: ClientOrder[] = [];
   loading = false;
   error = '';
+
+  // ── User ────────────────────────────────────────────────────────────────
+  readonly userName: string = getUserName() || 'Usuario';
+
+  get userInitials(): string {
+    const parts = this.userName.trim().split(/\s+/);
+    const a = (parts[0]?.[0] ?? '').toUpperCase();
+    const b = (parts[1]?.[0] ?? '').toUpperCase();
+    return a + b;
+  }
+
+  isActive(path: string): boolean {
+    return this.router.url === path || this.router.url.startsWith(path + '?');
+  }
 
   ngOnInit(): void {
     this.loadOrders();

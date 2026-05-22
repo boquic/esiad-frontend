@@ -1,60 +1,59 @@
 import { Routes } from '@angular/router';
 
-// Componentes Creados
+// Auth
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
+
+// Client layout + pages
+import { ClientLayoutComponent } from './features/client/layout/client-layout.component';
 import { ClientDashboardComponent } from './features/client/dashboard/dashboard.component';
 import { NewOrderComponent } from './features/client/orders/new-order.component';
 import { MyOrdersComponent } from './features/client/orders/my-orders.component';
 import { OrderDetailComponent } from './features/client/orders/order-detail.component';
+import { ClientPaymentComponent } from './features/client/payments/client-payment.component';
+
+// Operator
 import { OperatorDashboardComponent } from './features/operator/dashboard/dashboard.component';
+import { OperatorOrderDetailComponent } from './features/operator/order-detail/order-detail.component';
+import { OperatorHistoryComponent } from './features/operator/history/operator-history.component';
+
+// Admin
 import { AdminDashboardComponent } from './features/admin/dashboard/dashboard.component';
 import { ServicesAdminComponent } from './features/admin/services/services-admin.component';
 import { MaterialsAdminComponent } from './features/admin/materials/materials-admin.component';
 import { AdminOrdersComponent } from './features/admin/orders/admin-orders.component';
-import { ClientPaymentComponent } from './features/client/payments/client-payment.component';
 import { AdminPaymentsComponent } from './features/admin/payments/admin-payments.component';
-import { OperatorOrderDetailComponent } from './features/operator/order-detail/order-detail.component';
-import { OperatorHistoryComponent } from './features/operator/history/operator-history.component';
 import { AdminUsersComponent } from './features/admin/users/admin-users.component';
 import { AdminReportsComponent } from './features/admin/reports/admin-reports.component';
 
-// Guards Creados
+// Guards
 import { authGuard, publicGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
 
-    // -- Rutas Públicas (Usa publicGuard para expulsar a quienes ya estén logueados)
-    { path: 'login', component: LoginComponent, canActivate: [publicGuard] },
+    // Rutas públicas
+    { path: 'login',    component: LoginComponent,    canActivate: [publicGuard] },
     { path: 'register', component: RegisterComponent, canActivate: [publicGuard] },
 
-    // -- Dashboards Restringidos: Solicitan tanto Login (authGuard) como Rol (roleGuard)
+    // ── Cliente (layout compartido) ──────────────────────────────────────────
     {
-        path: 'client/dashboard',
-        component: ClientDashboardComponent,
+        path: 'client',
+        component: ClientLayoutComponent,
         canActivate: [authGuard, roleGuard],
-        data: { roles: ['CLIENT'] }
+        data: { roles: ['CLIENT'] },
+        children: [
+            { path: 'dashboard',            component: ClientDashboardComponent },
+            { path: 'orders/new',           component: NewOrderComponent },
+            { path: 'orders/:id/payment',   component: ClientPaymentComponent },
+            { path: 'orders/:id',           component: OrderDetailComponent },
+            { path: 'orders',               component: MyOrdersComponent },
+            { path: '',                     redirectTo: 'dashboard', pathMatch: 'full' },
+        ]
     },
-    {
-        path: 'client/orders/new',
-        component: NewOrderComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['CLIENT'] }
-    },
-    {
-        path: 'client/orders',
-        component: MyOrdersComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['CLIENT'] }
-    },
-    {
-        path: 'client/orders/:id',
-        component: OrderDetailComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['CLIENT'] }
-    },
+
+    // ── Operador ─────────────────────────────────────────────────────────────
     {
         path: 'operator/dashboard',
         component: OperatorDashboardComponent,
@@ -73,6 +72,8 @@ export const routes: Routes = [
         canActivate: [authGuard, roleGuard],
         data: { roles: ['OPERATOR'] }
     },
+
+    // ── Admin ─────────────────────────────────────────────────────────────────
     {
         path: 'admin/dashboard',
         component: AdminDashboardComponent,
@@ -98,12 +99,6 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] }
     },
     {
-        path: 'client/orders/:id/payment',
-        component: ClientPaymentComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['CLIENT'] }
-    },
-    {
         path: 'admin/payments',
         component: AdminPaymentsComponent,
         canActivate: [authGuard, roleGuard],
@@ -122,6 +117,5 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] }
     },
 
-    // Resguardo contra rutas inexistentes
     { path: '**', redirectTo: 'login' }
 ];

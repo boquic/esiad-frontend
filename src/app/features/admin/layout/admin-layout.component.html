@@ -1,0 +1,214 @@
+<div class="admin-shell" [class.collapsed]="sidebarCollapsed">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="admin-sidebar" [class.collapsed]="sidebarCollapsed">
+
+    <!-- Brand -->
+    <div class="admin-brand">
+      <div class="admin-brand-mark">
+        <svg width="16" height="16" viewBox="0 0 428 451" fill="none">
+          <path fill="rgba(255,255,255,0.92)" d="M338.218201,86.728973 C353.860413,151.408997 369.415833,215.680695 384.970825,279.952484 C387.940125,292.221436 390.840485,304.507690 393.925049,316.747589 C394.662476,319.673859 394.105865,321.338928 391.515656,323.246185 C342.889984,359.051361 294.370941,395.001282 245.788925,430.865936 C244.405899,431.886902 242.581299,432.899963 240.955338,432.911713 C221.480286,433.052277 202.003860,433.002502 182.064133,433.002502 C182.064133,369.740967 182.064133,306.692963 182.064133,243.220337 C156.523453,243.220337 131.440903,243.220337 105.658791,243.220337 C107.631348,233.665970 109.492691,224.650269 111.442642,215.205399 C134.681290,215.205399 157.934677,215.205399 181.565598,215.205399 C181.565598,166.064957 181.565598,117.367439 181.565598,68.412415 C164.102737,68.412415 146.678375,68.412415 128.855774,68.412415 C106.826164,160.918610 84.786568,253.466782 62.574501,346.739136 C52.508755,338.510223 43.018585,330.505005 33.227974,322.885803 C29.935354,320.323456 28.893690,318.130646 29.946138,313.832794 C53.059425,219.445343 75.996925,125.014824 98.885536,30.572559 C99.522644,27.943766 100.183640,26.612568 103.295311,26.619930 C148.620865,26.727163 193.946747,26.696535 239.272552,26.709229 C239.928421,26.709412 240.584259,26.842278 241.638443,26.956303 C241.638443,144.742249 241.638443,262.488373 241.638443,381.252350 C249.964066,375.501648 257.571014,370.298615 265.125244,365.020111 C292.395203,345.965363 319.629913,326.860107 346.938019,307.860291 C349.226624,306.267944 350.237488,305.023834 349.516388,301.890533 C331.778564,224.820679 314.192932,147.715790 296.481628,70.185921 C286.269318,70.185921 276.010834,70.185921 265.410156,70.185921 C265.410156,55.537655 265.410156,41.333363 265.410156,26.910526 C284.803619,26.910526 304.073669,26.910526 323.830353,26.910526 C328.590942,46.687450 333.361084,66.504066 338.218201,86.728973 z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="admin-brand-name">ESIAD ARQ</div>
+        <div class="admin-brand-sub">Administración</div>
+      </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="admin-nav" style="margin-top:6px;">
+
+      <!-- Dashboard -->
+      <a routerLink="/admin/dashboard"
+         class="admin-nav-link"
+         [class.active]="isActive('/admin/dashboard')">
+        <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 13h8V3H3v10zM13 21h8V11h-8v10zM3 21h8v-6H3v6zM13 3v6h8V3h-8z"/>
+        </svg>
+        <span class="admin-nav-text">Dashboard</span>
+      </a>
+
+      <!-- Pedidos -->
+      <a routerLink="/admin/orders"
+         class="admin-nav-link"
+         [class.active]="isActive('/admin/orders')">
+        <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/>
+        </svg>
+        <span class="admin-nav-text">Pedidos</span>
+        <span *ngIf="activeOrdersCount > 0" class="admin-nav-badge">{{ activeOrdersCount }}</span>
+      </a>
+
+      <!-- Pagos pendientes -->
+      <a routerLink="/admin/payments"
+         class="admin-nav-link"
+         [class.active]="isActive('/admin/payments')">
+        <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/>
+        </svg>
+        <span class="admin-nav-text">Pagos pendientes</span>
+        <span *ngIf="pendingPaymentsCount > 0"
+              class="admin-nav-badge warn">{{ pendingPaymentsCount }}</span>
+      </a>
+
+      <!-- Usuarios -->
+      <a routerLink="/admin/users"
+         class="admin-nav-link"
+         [class.active]="isActive('/admin/users')">
+        <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/>
+          <circle cx="17" cy="6" r="3"/><path d="M22 18c0-2.5-2-4.5-4.5-4.5"/>
+        </svg>
+        <span class="admin-nav-text">Usuarios</span>
+      </a>
+
+      <!-- Servicios -->
+      <a routerLink="/admin/services"
+         class="admin-nav-link"
+         [class.active]="isActive('/admin/services')">
+        <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l9 5v10l-9 5-9-5V7l9-5z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/>
+        </svg>
+        <span class="admin-nav-text">Servicios</span>
+      </a>
+
+      <!-- Materiales -->
+      <a routerLink="/admin/materials"
+         class="admin-nav-link"
+         [class.active]="isActive('/admin/materials')">
+        <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/>
+        </svg>
+        <span class="admin-nav-text">Materiales</span>
+      </a>
+
+      <!-- Reportes -->
+      <a routerLink="/admin/reports"
+         class="admin-nav-link"
+         [class.active]="isActive('/admin/reports')">
+        <svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/>
+        </svg>
+        <span class="admin-nav-text">Reportes</span>
+      </a>
+
+    </nav>
+
+    <!-- Sidebar footer -->
+    <div class="admin-side-foot">
+      <div class="admin-op-card">
+        <div class="admin-op-avatar">{{ userInitials }}</div>
+        <div>
+          <div class="admin-op-name">{{ userName }}</div>
+          <div class="admin-op-role">Administrador</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main style="display:flex;flex-direction:column;min-width:0;overflow:hidden;">
+
+    <!-- Header -->
+    <header class="admin-navbar">
+      <!-- Toggle sidebar -->
+      <button class="admin-collapse-btn" (click)="toggleSidebar()" [title]="sidebarCollapsed ? 'Expandir sidebar' : 'Contraer sidebar'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             [style.transform]="sidebarCollapsed ? 'rotate(180deg)' : 'rotate(0deg)'"
+             style="transition:transform .22s ease;">
+          <path d="M3 12h18M3 6h18M3 18h18"/>
+        </svg>
+      </button>
+
+      <div class="admin-crumbs">
+        <span>Admin</span>
+        <span class="sep">›</span>
+        <span class="here">{{ pageTitle }}</span>
+      </div>
+
+      <div class="admin-nav-right">
+
+        <!-- Avatar chip -->
+        <button class="admin-avatar-chip" (click)="toggleUserMenu()">
+          <div class="admin-avatar">{{ userInitials }}</div>
+          <div>
+            <div class="admin-chip-name">{{ userName }}</div>
+            <div class="admin-chip-role">Administrador</div>
+          </div>
+          <svg class="admin-chip-chevron" width="14" height="14" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2"
+               [style.transform]="showUserMenu ? 'rotate(180deg)' : 'rotate(0deg)'">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+
+        <!-- Backdrop -->
+        <div *ngIf="showUserMenu"
+             style="position:fixed;inset:0;z-index:40;"
+             (click)="closeUserMenu()">
+        </div>
+
+        <!-- Dropdown -->
+        <div *ngIf="showUserMenu" class="admin-user-dropdown">
+          <div class="admin-dd-header">
+            <div class="admin-dd-av">{{ userInitials }}</div>
+            <div>
+              <div class="admin-dd-name">{{ userName }}</div>
+              <div class="admin-dd-role">Administrador SIGEPED</div>
+            </div>
+          </div>
+
+          <div class="admin-dd-section">
+            <button class="admin-dd-item">
+              <div class="admin-dd-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+                </svg>
+              </div>
+              <div>
+                <div class="admin-dd-label">Mi perfil</div>
+                <div class="admin-dd-sub">Ver información de cuenta</div>
+              </div>
+            </button>
+            <button class="admin-dd-item">
+              <div class="admin-dd-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"/><path d="M19.1 4.9a9.5 9.5 0 0 1 0 14.2M4.9 4.9a9.5 9.5 0 0 0 0 14.2"/>
+                </svg>
+              </div>
+              <div>
+                <div class="admin-dd-label">Configuración</div>
+                <div class="admin-dd-sub">Preferencias del sistema</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="admin-dd-divider"></div>
+
+          <div class="admin-dd-section">
+            <button class="admin-dd-item admin-dd-item-danger" (click)="logout()">
+              <div class="admin-dd-icon admin-dd-icon-danger">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+              </div>
+              <div>
+                <div class="admin-dd-label">Cerrar sesión</div>
+                <div class="admin-dd-sub">Salir del panel admin</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <router-outlet></router-outlet>
+
+  </main>
+
+</div>

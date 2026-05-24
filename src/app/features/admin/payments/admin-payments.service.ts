@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface AdminPayment {
   id: string;
@@ -42,10 +43,16 @@ export interface GenericResponse {
 export interface Operator {
   id: string;
   user_id?: string;
+  is_active?: boolean;
   first_name?: string;
   last_name?: string;
   specialties?: string[];
-  user?: any;
+  user?: {
+    first_name?: string;
+    last_name?: string;
+    dni?: string;
+    phone?: string;
+  };
 }
 
 @Injectable({
@@ -67,8 +74,12 @@ export class AdminPaymentsService {
   }
 
   getOperators(): Observable<CollectionResponse<Operator>> {
-    // NOTE: This endpoint is not documented in API_CONTRACT.md but used by the application
-    return this.http.get<CollectionResponse<Operator>>('/api/operators');
+    return this.http.get<any>('/api/admin/operators').pipe(
+      map(res => ({
+        data: Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []),
+        total: res?.total
+      }))
+    );
   }
 
   assignOperatorToOrder(orderId: string, operatorId: string): Observable<GenericResponse> {

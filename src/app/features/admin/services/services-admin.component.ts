@@ -2,7 +2,6 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
 import { ServicesService } from './services.service';
 
 type ServiceItem = {
@@ -15,7 +14,7 @@ type ServiceItem = {
 @Component({
   selector: 'app-services-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, RouterLink],
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './services-admin.component.html',
   styles: [`
     @keyframes togglePulse {

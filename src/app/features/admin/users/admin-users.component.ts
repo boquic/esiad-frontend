@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { AdminUsersService, UserClient, UserOperator, UpdateOperatorPayload } from './admin-users.service';
@@ -18,7 +17,7 @@ const SPECIALTY_LABELS: Record<Specialty, string> = {
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-users.component.html',
   styles: [`
     @keyframes modalIn {

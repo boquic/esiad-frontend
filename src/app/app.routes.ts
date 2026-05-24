@@ -19,7 +19,8 @@ import { OperatorDashboardComponent } from './features/operator/dashboard/dashbo
 import { OperatorOrderDetailComponent } from './features/operator/order-detail/order-detail.component';
 import { OperatorHistoryComponent } from './features/operator/history/operator-history.component';
 
-// Admin
+// Admin layout + pages
+import { AdminLayoutComponent } from './features/admin/layout/admin-layout.component';
 import { AdminDashboardComponent } from './features/admin/dashboard/dashboard.component';
 import { ServicesAdminComponent } from './features/admin/services/services-admin.component';
 import { MaterialsAdminComponent } from './features/admin/materials/materials-admin.component';
@@ -77,48 +78,22 @@ export const routes: Routes = [
         data: { roles: ['OPERATOR'] }
     },
 
-    // ── Admin ─────────────────────────────────────────────────────────────────
+    // ── Admin (layout compartido) ─────────────────────────────────────────
     {
-        path: 'admin/dashboard',
-        component: AdminDashboardComponent,
+        path: 'admin',
+        component: AdminLayoutComponent,
         canActivate: [authGuard, roleGuard],
-        data: { roles: ['ADMIN'] }
-    },
-    {
-        path: 'admin/services',
-        component: ServicesAdminComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['ADMIN'] }
-    },
-    {
-        path: 'admin/materials',
-        component: MaterialsAdminComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['ADMIN'] }
-    },
-    {
-        path: 'admin/orders',
-        component: AdminOrdersComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['ADMIN'] }
-    },
-    {
-        path: 'admin/payments',
-        component: AdminPaymentsComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['ADMIN'] }
-    },
-    {
-        path: 'admin/users',
-        component: AdminUsersComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['ADMIN'] }
-    },
-    {
-        path: 'admin/reports',
-        component: AdminReportsComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['ADMIN'] }
+        data: { roles: ['ADMIN'] },
+        children: [
+            { path: 'dashboard',  component: AdminDashboardComponent },
+            { path: 'orders',     component: AdminOrdersComponent },
+            { path: 'payments',   component: AdminPaymentsComponent },
+            { path: 'users',      component: AdminUsersComponent },
+            { path: 'services',   component: ServicesAdminComponent },
+            { path: 'materials',  component: MaterialsAdminComponent },
+            { path: 'reports',    component: AdminReportsComponent },
+            { path: '',           redirectTo: 'dashboard', pathMatch: 'full' },
+        ]
     },
 
     { path: '**', redirectTo: 'login' }

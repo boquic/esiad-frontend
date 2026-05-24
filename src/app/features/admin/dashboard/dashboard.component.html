@@ -1,0 +1,758 @@
+<div class="adm-page">
+
+  <!-- ── Page header ─────────────────────────────────────────────────── -->
+  <div class="adm-page-head">
+    <div>
+      <div class="adm-page-title">Resumen general</div>
+      <div class="adm-page-sub">{{ todayLabel }} · Panel de administración</div>
+    </div>
+    <div class="adm-range">
+      <button *ngFor="let p of periods"
+              [class.on]="selectedPeriod === p.key"
+              (click)="selectPeriod(p.key)">{{ p.label }}</button>
+    </div>
+  </div>
+
+  <!-- ── KPIs ────────────────────────────────────────────────────────── -->
+  <section class="adm-kpis">
+
+    <!-- Ventas del mes -->
+    <div class="adm-kpi">
+      <div class="adm-kpi-head">
+        <div class="adm-kpi-label">Ventas del período</div>
+        <div class="adm-kpi-icon">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/>
+          </svg>
+        </div>
+      </div>
+      <div *ngIf="loadingStats" class="adm-kpi-skeleton"></div>
+      <div *ngIf="!loadingStats" class="adm-kpi-value tnum">
+        <span class="cur">S/</span>{{ sales.total | number:'1.2-2' }}
+      </div>
+      <div *ngIf="!loadingStats" class="adm-kpi-foot">
+        <span class="adm-delta up">↑ aprobados</span>
+        <span>{{ sales.ordersCount }} pedido{{ sales.ordersCount !== 1 ? 's' : '' }}</span>
+      </div>
+    </div>
+
+    <!-- Pedidos activos -->
+    <div class="adm-kpi">
+      <div class="adm-kpi-head">
+        <div class="adm-kpi-label">Pedidos activos</div>
+        <div class="adm-kpi-icon alt">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18l-2 13H5L3 6z"/><path d="M8 6V4a4 4 0 0 1 8 0v2"/>
+          </svg>
+        </div>
+      </div>
+      <div *ngIf="loadingStats" class="adm-kpi-skeleton"></div>
+      <div *ngIf="!loadingStats" class="adm-kpi-value tnum">{{ totalActiveOrders }}</div>
+      <div *ngIf="!loadingStats" class="adm-kpi-foot">
+        <span class="adm-delta flat">{{ ordersInProgress }} proceso · {{ ordersReady }} listos</span>
+      </div>
+    </div>
+
+    <!-- Listos para recoger -->
+    <div class="adm-kpi featured-ok">
+      <div class="adm-kpi-head">
+        <div class="adm-kpi-label">Listos para recoger</div>
+        <div class="adm-kpi-icon ok">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/>
+          </svg>
+        </div>
+      </div>
+      <div *ngIf="loadingStats" class="adm-kpi-skeleton"></div>
+      <div *ngIf="!loadingStats" class="adm-kpi-value tnum">{{ ordersReady }}</div>
+      <div *ngIf="!loadingStats" class="adm-kpi-foot">
+        <a class="adm-pill-link" routerLink="/admin/orders">Gestionar pedidos
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14"/><path d="M13 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Pagos por validar -->
+    <div class="adm-kpi featured-warn">
+      <div class="adm-kpi-head">
+        <div class="adm-kpi-label">Pagos por validar</div>
+        <div class="adm-kpi-icon warn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M9 16h2"/>
+          </svg>
+        </div>
+      </div>
+      <div *ngIf="loadingStats" class="adm-kpi-skeleton"></div>
+      <div *ngIf="!loadingStats" class="adm-kpi-value tnum">{{ pendingPaymentsCount }}</div>
+      <div *ngIf="!loadingStats" class="adm-kpi-foot">
+        <a class="adm-pill-link warn" routerLink="/admin/payments">Requiere acción
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14"/><path d="M13 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── Charts row ──────────────────────────────────────────────────── -->
+  <section class="adm-charts">
+
+    <!-- Servicios más solicitados (barras) -->
+    <div class="adm-card">
+      <div class="adm-card-head">
+        <div>
+          <div class="adm-card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16V11"/><path d="M12 16V8"/><path d="M16 16v-3"/>
+            </svg>
+            Servicios más solicitados
+          </div>
+          <div class="adm-card-sub">Ranking por número de pedidos registrados</div>
+        </div>
+      </div>
+
+      <!-- Skeleton -->
+      <div *ngIf="loadingStats" class="adm-bars-skeleton">
+        <div *ngFor="let _ of [1,2,3,4]" class="adm-bar-skeleton-row">
+          <div class="adm-bar-sk-label"></div>
+          <div class="adm-bar-sk-track"></div>
+        </div>
+      </div>
+
+      <!-- Vacío -->
+      <div *ngIf="!loadingStats && topServices.length === 0" class="adm-empty-mini">
+        Sin datos de servicios aún
+      </div>
+
+      <!-- Barras -->
+      <div *ngIf="!loadingStats && topServices.length > 0" class="adm-bars">
+        <div *ngFor="let item of topServices; let i = index" class="adm-bar-row">
+          <div class="adm-bar-label">
+            <span class="adm-bar-sw" [style.background]="barColors[i % barColors.length]"></span>
+            {{ getServiceLabel(item) }}
+          </div>
+          <div class="adm-bar-track">
+            <div class="adm-bar-fill"
+                 [style.width]="getBarWidthPct(item.count) + '%'"
+                 [style.background]="barColors[i % barColors.length]">
+            </div>
+          </div>
+          <div class="adm-bar-val">
+            <b>{{ +item.count }}</b>
+            <span>·{{ getBarPct(item.count) }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ventas por período (línea) -->
+    <div class="adm-card">
+      <div class="adm-card-head">
+        <div>
+          <div class="adm-card-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>
+            </svg>
+            Ventas — {{ periodLabel }}
+          </div>
+          <div class="adm-card-sub">Ingresos aprobados por día</div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="loadingChart" class="adm-chart-skeleton"></div>
+
+      <!-- Vacío -->
+      <div *ngIf="!loadingChart && !chartError && chartPoints.length === 0" class="adm-empty-mini">
+        Sin ventas en este período
+      </div>
+
+      <!-- SVG chart -->
+      <ng-container *ngIf="!loadingChart && !chartError && chartPoints.length > 0">
+        <div class="adm-chart-wrap">
+          <svg [attr.viewBox]="'0 0 ' + chartW + ' ' + chartH"
+               style="width:100%;height:100%;display:block;overflow:visible;">
+            <defs>
+              <linearGradient id="admAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#3a8f8b" stop-opacity=".28"/>
+                <stop offset="100%" stop-color="#3a8f8b" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Grid lines + Y labels -->
+            <g *ngFor="let gl of chartYLines">
+              <line [attr.x1]="gl.lineX1" [attr.y1]="gl.lineY"
+                    [attr.x2]="gl.lineX2" [attr.y2]="gl.lineY"
+                    stroke="rgba(74,111,109,0.15)" stroke-width="1" stroke-dasharray="3 4"/>
+              <text [attr.x]="gl.labelX" [attr.y]="gl.labelY"
+                    text-anchor="end"
+                    style="font-size:10px;fill:#888;font-family:'JetBrains Mono',monospace;">
+                {{ gl.label }}
+              </text>
+            </g>
+
+            <!-- Area + line -->
+            <path [attr.d]="chartAreaPath" fill="url(#admAreaGrad)"/>
+            <path [attr.d]="chartLinePath"
+                  fill="none" stroke="#3a8f8b" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Dots -->
+            <g *ngFor="let pt of chartPoints; let last = last">
+              <circle [attr.cx]="pt.cx" [attr.cy]="pt.cy"
+                      [attr.r]="last ? 4.5 : 3.5"
+                      [attr.fill]="last ? '#2e7874' : '#fff'"
+                      stroke="#2e7874" stroke-width="2">
+                <title>{{ pt.dateLabel }}: S/ {{ pt.totalFormatted }}</title>
+              </circle>
+            </g>
+
+            <!-- X labels -->
+            <text *ngFor="let xl of chartXLabels"
+                  [attr.x]="xl.x" [attr.y]="xl.y"
+                  text-anchor="middle"
+                  style="font-size:10px;fill:#888;font-family:'Inter',sans-serif;">
+              {{ xl.label }}
+            </text>
+          </svg>
+        </div>
+
+        <div class="adm-chart-foot">
+          <span>Total: <b style="color:#2c2c2c;font-family:'JetBrains Mono',monospace;">S/ {{ chartPeriodTotal | number:'1.2-2' }}</b></span>
+          <span>Promedio: <b style="color:#2c2c2c;font-family:'JetBrains Mono',monospace;">S/ {{ chartDailyAvg | number:'1.2-2' }}/día</b></span>
+        </div>
+      </ng-container>
+
+      <!-- Error -->
+      <div *ngIf="!loadingChart && chartError" class="adm-empty-mini" style="color:#c0392b;">
+        No se pudo cargar el gráfico
+        <button (click)="loadSalesTrend()" style="font-size:12px;color:#3a8f8b;background:none;border:none;cursor:pointer;text-decoration:underline;">Reintentar</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── Últimos pedidos ─────────────────────────────────────────────── -->
+  <section class="adm-table-card">
+    <div class="adm-table-head">
+      <div>
+        <div class="adm-card-title">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/>
+          </svg>
+          Últimos pedidos
+        </div>
+        <div class="adm-card-sub" style="margin-left:26px;">
+          {{ recentOrders.length > 0 ? 'Mostrando ' + recentOrders.length + ' más recientes' : 'Sin pedidos aún' }}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a routerLink="/admin/orders" class="adm-btn primary">Ver todos</a>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loadingOrders" class="adm-table-loading">
+      <div class="adm-spinner"></div>
+    </div>
+
+    <!-- Tabla -->
+    <table *ngIf="!loadingOrders && recentOrders.length > 0">
+      <thead>
+        <tr>
+          <th style="width:110px">Código</th>
+          <th style="width:200px">Cliente</th>
+          <th>Servicio</th>
+          <th style="width:160px">Estado</th>
+          <th style="width:110px">Monto</th>
+          <th style="width:110px">Fecha</th>
+          <th style="width:120px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of recentOrders"
+            [class.warn-row]="o.status === 'PENDING_PAYMENT'">
+          <td>
+            <span class="adm-order-code">#{{ o.shortId.toUpperCase() }}</span>
+          </td>
+          <td>
+            <div class="adm-client">
+              <div class="adm-client-av">{{ clientInitials(o.clientName) }}</div>
+              <div>
+                <div class="adm-client-name">{{ o.clientName }}</div>
+                <div class="adm-client-doc">{{ o.clientDni }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="adm-svc">
+              <span class="adm-sw" [style.background]="serviceColor(o.serviceName)"></span>
+              {{ o.serviceName }}
+              <span *ngIf="o.materialName !== '—'" style="color:#888;font-size:12px;">· {{ o.materialName }}</span>
+            </span>
+          </td>
+          <td>
+            <span class="adm-status" [ngClass]="statusClass(o.status)">
+              {{ statusLabel(o.status) }}
+            </span>
+          </td>
+          <td class="adm-amount">S/ {{ o.estimatedPrice | number:'1.2-2' }}</td>
+          <td class="adm-when">{{ formatDate(o.createdAt) }}</td>
+          <td>
+            <div class="adm-actions-cell">
+              <a [routerLink]="['/admin/orders']"
+                 [queryParams]="{id: o.id}"
+                 class="adm-btn ghost sm">Ver</a>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Vacío -->
+    <div *ngIf="!loadingOrders && recentOrders.length === 0" class="adm-empty-mini" style="padding:40px 24px;">
+      No hay pedidos registrados aún
+    </div>
+  </section>
+
+  <!-- ── Pagos por validar ────────────────────────────────────────────── -->
+  <section *ngIf="pendingPayments.length > 0 || loadingPayments" class="adm-validate-section">
+    <div class="adm-card-head">
+      <div>
+        <div class="adm-card-title">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/>
+          </svg>
+          Pagos por validar
+          <span *ngIf="pendingPayments.length > 0" class="adm-warn-chip">{{ pendingPayments.length }} pendiente{{ pendingPayments.length !== 1 ? 's' : '' }}</span>
+        </div>
+        <div class="adm-card-sub" style="margin-left:26px;">Captura recibida vía Yape · validación &lt; 24h</div>
+      </div>
+      <a class="adm-pill-link" routerLink="/admin/payments" style="font-size:12.5px;">Ver todos
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14"/><path d="M13 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loadingPayments" style="padding:32px 0;text-align:center;">
+      <div class="adm-spinner"></div>
+    </div>
+
+    <!-- Cards -->
+    <div *ngIf="!loadingPayments" class="adm-validate-grid">
+      <div *ngFor="let pay of pendingPayments.slice(0,4)" class="adm-pay-card">
+
+        <!-- Thumbnail Yape mockup -->
+        <div class="adm-pay-thumb">
+          <div class="adm-yape-glyph">Yape</div>
+          <div class="adm-yape-amount">S/ {{ pay.amount | number:'1.2-2' }}</div>
+          <div class="adm-yape-lines">
+            <span></span><span class="mid"></span><span class="short"></span><span></span>
+          </div>
+          <a *ngIf="pay.capture_url" [href]="pay.capture_url" target="_blank"
+             class="adm-pay-thumb-zoom" title="Ver captura completa">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/><path d="M8 11h6M11 8v6"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Body -->
+        <div class="adm-pay-body">
+          <div class="adm-pay-top">
+            <span class="adm-pay-code">#{{ pay.order_id.slice(0,8).toUpperCase() }}</span>
+            <span class="adm-pay-pill">
+              {{ pay.payment_type === 'ADVANCE' ? 'Adelanto 50%' : 'Pago total' }}
+            </span>
+          </div>
+          <div class="adm-pay-client">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+            </svg>
+            <span>
+              <b>{{ clientName(pay) }}</b>
+              <span *ngIf="clientDni(pay)"> · {{ clientDni(pay) }}</span>
+            </span>
+          </div>
+          <div class="adm-pay-amount-row">
+            <span class="adm-pay-amount-label">Monto declarado:</span>
+            <span class="adm-pay-amount-val">
+              <span class="cur">S/</span>{{ pay.amount | number:'1.2-2' }}
+            </span>
+          </div>
+          <div class="adm-pay-meta">{{ timeAgo(pay.created_at) }}</div>
+          <div class="adm-pay-actions">
+            <button class="adm-btn ok sm" style="flex:1" (click)="approvePayment(pay)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12l5 5L20 7"/>
+              </svg>
+              Aprobar
+            </button>
+            <button class="adm-btn danger sm" style="flex:1" (click)="rejectPayment(pay)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 6l12 12M6 18L18 6"/>
+              </svg>
+              Rechazar
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Error banner -->
+  <div *ngIf="statsError" class="adm-error-banner">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/><path d="M12 9v4M12 17h.01"/>
+    </svg>
+    No se pudieron cargar las estadísticas.
+    <button (click)="loadStats()" style="font-size:12px;color:#c0392b;background:none;border:none;cursor:pointer;text-decoration:underline;margin-left:4px;">Reintentar</button>
+  </div>
+
+</div>
+
+<style>
+  /* ── Page shell ──────────────────────────────────────────────────────── */
+  .adm-page {
+    padding: 26px 32px 56px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .adm-page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .adm-page-title { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; color: #2c2c2c; }
+  .adm-page-sub   { font-size: 13.5px; color: #666; margin-top: 5px; }
+
+  .adm-range {
+    display: inline-flex;
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 10px;
+    padding: 3px;
+    font-size: 12.5px;
+    box-shadow: 0 1px 2px rgba(74,111,109,0.08);
+  }
+  .adm-range button {
+    background: transparent; border: 0;
+    color: #666; padding: 7px 14px; border-radius: 7px;
+    font-family: inherit; font-weight: 500; cursor: pointer;
+    transition: background .13s, color .13s;
+  }
+  .adm-range button.on {
+    background: #fff; color: #2e7874;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  /* ── KPIs ────────────────────────────────────────────────────────────── */
+  .adm-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .adm-kpi {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .adm-kpi-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
+  .adm-kpi-label { font-size: 12.5px; color: #666; font-weight: 500; }
+  .adm-kpi-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg,#3a8f8b,#2e7874);
+    color: #fff;
+    box-shadow: 0 6px 14px -6px rgba(58,143,139,0.5);
+  }
+  .adm-kpi-icon.ok   { background: linear-gradient(135deg,#48bb78,#2f855a); box-shadow: 0 6px 14px -6px rgba(72,187,120,0.5); }
+  .adm-kpi-icon.warn { background: linear-gradient(135deg,#d4a04a,#b8860b); box-shadow: 0 6px 14px -6px rgba(212,160,74,0.5); }
+  .adm-kpi-icon.alt  { background: rgba(255,255,255,0.8); color: #2e7874; box-shadow: inset 0 0 0 1px #c8d8d6; }
+
+  .adm-kpi-value { font-size: 30px; font-weight: 600; letter-spacing: -0.025em; color: #2c2c2c; line-height: 1.05; }
+  .adm-kpi-value .cur { color: #888; font-size: 17px; font-weight: 500; margin-right: 3px; vertical-align: 3px; }
+  .adm-kpi-skeleton { height: 38px; border-radius: 8px; background: rgba(224,224,224,0.5); animation: admPulse 1.4s ease infinite; }
+  @keyframes admPulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+
+  .adm-kpi-foot { margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; flex-wrap: wrap; }
+  .adm-delta {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+  }
+  .adm-delta.up   { background: rgba(72,187,120,0.14); color: #2f855a; }
+  .adm-delta.flat { background: rgba(154,163,182,0.12); color: #666; font-weight: 500; }
+
+  .adm-kpi.featured-ok {
+    background: linear-gradient(180deg, rgba(72,187,120,0.10), rgba(255,255,255,0.75) 60%);
+    border-color: rgba(47,133,90,0.30);
+  }
+  .adm-kpi.featured-ok::after {
+    content: ""; position: absolute; top: 0; right: 0; width: 110px; height: 110px;
+    background: radial-gradient(circle at 100% 0%, rgba(72,187,120,0.25), transparent 60%);
+    pointer-events: none;
+  }
+  .adm-kpi.featured-warn {
+    background: linear-gradient(180deg, rgba(212,160,74,0.14), rgba(255,255,255,0.75) 60%);
+    border-color: #f5d39a;
+  }
+  .adm-kpi.featured-warn::after {
+    content: ""; position: absolute; top: 0; right: 0; width: 110px; height: 110px;
+    background: radial-gradient(circle at 100% 0%, rgba(212,160,74,0.30), transparent 60%);
+    pointer-events: none;
+  }
+
+  .adm-pill-link {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11.5px; font-weight: 600; color: #2e7874;
+    text-decoration: none;
+  }
+  .adm-pill-link:hover { color: #3a8f8b; }
+  .adm-pill-link.warn  { color: #b8860b; }
+
+  /* ── Charts ──────────────────────────────────────────────────────────── */
+  .adm-charts {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .adm-card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+  }
+  .adm-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
+  .adm-card-title {
+    font-size: 15px; font-weight: 600; letter-spacing: -0.005em; color: #2c2c2c;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .adm-card-title svg { color: #2e7874; }
+  .adm-card-sub { font-size: 12px; color: #888; margin-top: 3px; }
+
+  /* Bars */
+  .adm-bars { display: flex; flex-direction: column; gap: 16px; }
+  .adm-bar-row { display: grid; grid-template-columns: 130px 1fr 76px; gap: 12px; align-items: center; }
+  .adm-bar-label { font-size: 13px; color: #2c2c2c; display: flex; align-items: center; gap: 7px; font-weight: 500; }
+  .adm-bar-sw { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .adm-bar-track { height: 11px; background: rgba(255,255,255,0.6); border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(224,224,224,0.65); }
+  .adm-bar-fill  { height: 100%; border-radius: 6px; background: #3a8f8b; }
+  .adm-bar-val   { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #888; }
+  .adm-bar-val b { color: #2c2c2c; font-weight: 600; }
+
+  .adm-bars-skeleton { display: flex; flex-direction: column; gap: 18px; }
+  .adm-bar-skeleton-row { display: flex; gap: 12px; align-items: center; }
+  .adm-bar-sk-label { width: 120px; height: 12px; border-radius: 4px; background: rgba(224,224,224,0.5); animation: admPulse 1.4s ease infinite; }
+  .adm-bar-sk-track { flex: 1; height: 11px; border-radius: 6px; background: rgba(224,224,224,0.5); animation: admPulse 1.4s ease infinite; }
+
+  /* Line chart */
+  .adm-chart-wrap { height: 200px; }
+  .adm-chart-skeleton { height: 200px; border-radius: 10px; background: rgba(224,224,224,0.5); animation: admPulse 1.4s ease infinite; }
+  .adm-chart-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 8px; padding-top: 10px;
+    border-top: 1px solid rgba(224,224,224,0.65);
+    font-size: 12px; color: #888;
+  }
+
+  /* ── Table ───────────────────────────────────────────────────────────── */
+  .adm-table-card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    box-shadow: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .adm-table-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px 14px;
+  }
+  .adm-table-loading { padding: 40px 0; text-align: center; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: #888;
+    padding: 10px 22px;
+    background: rgba(255,255,255,0.45);
+    border-top: 1px solid rgba(224,224,224,0.65);
+    border-bottom: 1px solid rgba(224,224,224,0.65);
+  }
+  tbody td { padding: 13px 22px; border-bottom: 1px solid rgba(224,224,224,0.65); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: rgba(255,255,255,0.40); }
+  tbody tr.warn-row { background: rgba(255,247,230,0.6); }
+  tbody tr.warn-row:hover { background: rgba(255,247,230,0.85); }
+
+  .adm-order-code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #2c2c2c; font-weight: 600; }
+  .adm-client { display: flex; align-items: center; gap: 8px; }
+  .adm-client-av {
+    width: 27px; height: 27px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 10px; font-weight: 700;
+    background: rgba(255,255,255,0.7); color: #2e7874;
+    box-shadow: inset 0 0 0 1px #e0e0e0;
+    flex-shrink: 0;
+  }
+  .adm-client-name { font-size: 13px; font-weight: 600; color: #2c2c2c; }
+  .adm-client-doc  { font-size: 11px; color: #888; font-family: 'JetBrains Mono', monospace; }
+  .adm-svc { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: #333; }
+  .adm-sw  { width: 8px; height: 8px; border-radius: 2px; }
+  .adm-amount { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; font-weight: 600; color: #2c2c2c; }
+  .adm-when   { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #888; }
+  .adm-actions-cell { display: flex; gap: 6px; justify-content: flex-end; }
+
+  .adm-status {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; padding: 3px 9px 3px 8px;
+    border-radius: 999px; border: 1px solid transparent;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .adm-status::before { content:""; width:5px; height:5px; border-radius:50%; background:currentColor; }
+  .adm-status.listo   { color:#2f855a; background:rgba(72,187,120,0.14); border-color:rgba(47,133,90,0.30); }
+  .adm-status.proceso { color:#2e7874; background:rgba(58,143,139,0.10); border-color:rgba(58,143,139,0.30); }
+  .adm-status.cola    { color:#666;    background:rgba(136,136,136,0.10); border-color:rgba(136,136,136,0.20); }
+  .adm-status.pago    { color:#b8860b; background:#fff7e6; border-color:#f5d39a; }
+  .adm-status.entregado { color:#666;  background:rgba(136,136,136,0.10); border-color:rgba(136,136,136,0.20); }
+  .adm-status.cancelado { color:#c0392b; background:rgba(192,57,43,0.08); border-color:rgba(192,57,43,0.22); }
+
+  /* ── Pagos por validar ───────────────────────────────────────────────── */
+  .adm-validate-section { margin-bottom: 18px; }
+  .adm-validate-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+
+  .adm-pay-card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 6px 24px -8px rgba(46,120,116,0.18), 0 1px 2px rgba(74,111,109,0.06);
+    display: flex;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .adm-pay-card::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    background: linear-gradient(180deg,#d4a04a,#b8860b);
+  }
+
+  .adm-pay-thumb {
+    width: 88px; height: 112px; border-radius: 10px; flex-shrink: 0;
+    background: #fff; border: 1px solid #e0e0e0;
+    position: relative; overflow: hidden;
+    display: flex; align-items: flex-end; justify-content: center;
+  }
+  .adm-pay-thumb::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, #722f8e 0%, #5b2374 28%, #fff 28%);
+  }
+  .adm-yape-glyph {
+    position: absolute; top: 7px; left: 0; right: 0; text-align: center;
+    color: #fff; font-weight: 800; font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; font-family: 'JetBrains Mono', monospace;
+  }
+  .adm-yape-amount {
+    position: absolute; top: 28px; left: 0; right: 0; text-align: center;
+    color: #fff; font-weight: 700; font-size: 12px; font-family: 'JetBrains Mono', monospace;
+  }
+  .adm-yape-lines {
+    position: absolute; bottom: 8px; left: 8px; right: 8px;
+    display: flex; flex-direction: column; gap: 4px; z-index: 1;
+  }
+  .adm-yape-lines span { height: 4px; background: #ecedf0; border-radius: 2px; }
+  .adm-yape-lines span.mid   { width: 80%; }
+  .adm-yape-lines span.short { width: 55%; }
+  .adm-pay-thumb-zoom {
+    position: absolute; bottom: 5px; right: 5px;
+    width: 20px; height: 20px; border-radius: 5px;
+    background: rgba(255,255,255,0.95); color: #888;
+    display: grid; place-items: center; border: 1px solid #e0e0e0;
+    cursor: pointer; z-index: 2; text-decoration: none;
+  }
+
+  .adm-pay-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+  .adm-pay-top  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .adm-pay-code { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: #2c2c2c; }
+  .adm-pay-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 999px;
+    color: #b8860b; background: #fff7e6; border: 1px solid #f5d39a;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .adm-pay-client { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #888; }
+  .adm-pay-amount-row { display: flex; align-items: baseline; gap: 6px; }
+  .adm-pay-amount-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .adm-pay-amount-val {
+    font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700;
+    color: #2e7874; letter-spacing: -0.01em;
+  }
+  .adm-pay-amount-val .cur { font-size: 11px; opacity: .7; margin-right: 2px; vertical-align: 2px; }
+  .adm-pay-meta { font-size: 10.5px; color: #888; font-family: 'JetBrains Mono', monospace; }
+  .adm-pay-actions { display: flex; gap: 7px; margin-top: auto; padding-top: 4px; }
+
+  /* ── Buttons ─────────────────────────────────────────────────────────── */
+  .adm-btn {
+    font-family: inherit; font-size: 12.5px; font-weight: 600;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border: 1px solid transparent; text-decoration: none;
+    transition: background .14s, filter .14s, transform .08s;
+  }
+  .adm-btn:active { transform: translateY(1px); }
+  .adm-btn.primary { background: linear-gradient(180deg,#3a8f8b,#2e7874); color:#fff; border-color:#2e7874; box-shadow:0 6px 14px -6px rgba(58,143,139,0.55); }
+  .adm-btn.primary:hover { filter: brightness(1.06); }
+  .adm-btn.ghost { background: rgba(255,255,255,0.60); color: #333; border-color: #e0e0e0; }
+  .adm-btn.ghost:hover { background: #fff; border-color: #a8c0be; color: #2e7874; }
+  .adm-btn.ok { background: linear-gradient(180deg,#48bb78,#2f855a); color:#fff; border-color:#2f855a; box-shadow:0 6px 14px -6px rgba(72,187,120,0.55); }
+  .adm-btn.ok:hover { filter: brightness(1.06); }
+  .adm-btn.danger { background: rgba(192,57,43,0.06); color: #c0392b; border-color: #f5c6c6; }
+  .adm-btn.danger:hover { background: rgba(192,57,43,0.12); }
+  .adm-btn.sm { padding: 6px 12px; font-size: 12px; border-radius: 7px; }
+
+  /* ── Misc ────────────────────────────────────────────────────────────── */
+  .adm-warn-chip {
+    margin-left: 8px; font-size: 11.5px; font-weight: 600;
+    color: #b8860b; background: #fff7e6; border: 1px solid #f5d39a;
+    padding: 2px 9px; border-radius: 999px;
+  }
+  .adm-empty-mini { padding: 32px 0; text-align: center; font-size: 13.5px; color: #888; }
+  .adm-spinner {
+    display: inline-block; width: 32px; height: 32px;
+    border-radius: 50%; border: 3px solid #e0e0e0; border-top-color: #3a8f8b;
+    animation: admSpin .75s linear infinite;
+  }
+  @keyframes admSpin { to { transform: rotate(360deg); } }
+  .adm-error-banner {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff0f0; border: 1px solid #f5c6c6;
+    border-radius: 10px; padding: 12px 16px;
+    font-size: 13px; color: #c0392b; margin-top: 16px;
+  }
+  .tnum { font-variant-numeric: tabular-nums; }
+</style>

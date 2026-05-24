@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ClientOrdersService, ClientOrder } from '../orders/orders.service';
@@ -356,6 +356,7 @@ import { ClientOrdersService, ClientOrder } from '../orders/orders.service';
 })
 export class ClientPaymentsListComponent implements OnInit {
   private ordersService = inject(ClientOrdersService);
+  private cd            = inject(ChangeDetectorRef);
 
   isLoading = true;
   error: string | null = null;
@@ -371,10 +372,12 @@ export class ClientPaymentsListComponent implements OnInit {
           o => ['IN_PROGRESS', 'READY', 'DELIVERED'].includes(o.status as string)
         );
         this.isLoading = false;
+        this.cd.markForCheck();
       },
       error: (err) => {
         this.error = 'Error al cargar los pedidos.';
         this.isLoading = false;
+        this.cd.markForCheck();
         console.error(err);
       }
     });

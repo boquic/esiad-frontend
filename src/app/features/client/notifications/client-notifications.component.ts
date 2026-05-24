@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ClientOrdersService, ClientOrder } from '../orders/orders.service';
@@ -529,6 +529,7 @@ function buildNotifications(orders: ClientOrder[]): ClientNotification[] {
 })
 export class ClientNotificationsComponent implements OnInit {
   private ordersService = inject(ClientOrdersService);
+  private cd            = inject(ChangeDetectorRef);
 
   isLoading = true;
   error: string | null = null;
@@ -564,10 +565,12 @@ export class ClientNotificationsComponent implements OnInit {
         const orders = this.ordersService.unwrapCollection(response);
         this.allNotifications = buildNotifications(orders);
         this.isLoading = false;
+        this.cd.markForCheck();
       },
       error: (err) => {
         this.error = 'Error al cargar las notificaciones.';
         this.isLoading = false;
+        this.cd.markForCheck();
         console.error(err);
       }
     });

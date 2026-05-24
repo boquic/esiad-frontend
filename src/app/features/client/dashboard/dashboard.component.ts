@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { getUserName } from '../../../core/utils/jwt.utils';
@@ -45,6 +45,7 @@ function serviceColor(name: string | null | undefined): string {
 export class ClientDashboardComponent implements OnInit {
   private router       = inject(Router);
   private ordersSvc    = inject(ClientOrdersService);
+  private cd           = inject(ChangeDetectorRef);
 
   // ── User ──────────────────────────────────────────────────────────────────
   readonly userName: string = getUserName() || 'Usuario';
@@ -237,17 +238,18 @@ export class ClientDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.ordersSvc.getMyOrders().subscribe({
       next: (res) => {
-        // Ordenar: más recientes primero (por updated_at o created_at)
         this.orders = this.ordersSvc.unwrapCollection(res).sort((a, b) => {
           const da = new Date((a['updated_at'] ?? a['created_at']) as string).getTime();
           const db = new Date((b['updated_at'] ?? b['created_at']) as string).getTime();
           return db - da;
         });
         this.isLoading = false;
+        this.cd.markForCheck();
       },
       error: () => {
         this.loadError = true;
         this.isLoading = false;
+        this.cd.markForCheck();
       }
     });
   }

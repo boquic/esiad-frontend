@@ -20,7 +20,8 @@ import { getUserName } from '../../../core/utils/jwt.utils';
     app-my-orders,
     app-order-detail,
     app-client-payment,
-    app-client-payments-list {
+    app-client-payments-list,
+    app-client-notifications {
       display: block;
       animation: pageSlideIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -60,6 +61,7 @@ export class ClientLayoutComponent implements OnInit {
     if (/\/orders\/.+/.test(this.currentUrl)) return 'Detalle del pedido';
     if (this.currentUrl.includes('/orders')) return 'Mis pedidos';
     if (this.currentUrl.includes('/payments')) return 'Pagos';
+    if (this.currentUrl.includes('/notifications')) return 'Notificaciones';
     return 'Inicio';
   }
 

@@ -1,14 +1,17 @@
-<!-- ── Dashboard · contenido de página (el layout provee sidebar + header) ── -->
+<!-- ── Dashboard · contenido (el layout provee sidebar + header) ── -->
 <div style="padding:28px 36px 56px;max-width:1280px;margin:0 auto;">
 
-  <!-- Page header: greeting + CTA -->
+  <!-- ══ Page header ══ -->
   <div class="flex items-end justify-between flex-wrap" style="gap:18px;margin-bottom:22px;">
     <div>
       <div class="font-semibold leading-none" style="font-size:26px;letter-spacing:-0.025em;color:#2c2c2c;">
         Bienvenido, {{ userFirstName }}
         <span style="font-size:24px;display:inline-block;transform:translateY(-2px);margin-left:2px;">👋</span>
       </div>
-      <div style="font-size:13.5px;color:#666;margin-top:6px;">Martes, 19 de mayo · Esto es lo que pasa con tus pedidos hoy</div>
+      <!-- ✅ Fecha dinámica -->
+      <div style="font-size:13.5px;color:#666;margin-top:6px;">
+        {{ todayLabel }} · Esto es lo que pasa con tus pedidos hoy
+      </div>
     </div>
     <a routerLink="/client/orders/new"
        class="inline-flex items-center justify-center no-underline font-semibold text-white rounded-[10px] cursor-pointer"
@@ -22,192 +25,300 @@
     </a>
   </div>
 
-  <!-- KPIs -->
-  <section class="grid" style="grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px;">
+  <!-- ══ Loading spinner ══ -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center" style="padding:80px 0;">
+    <div style="width:40px;height:40px;border-radius:50%;border:3px solid #e5e7eb;border-top-color:#3a8f8b;animation:spin .75s linear infinite;"></div>
+    <p style="margin-top:14px;font-size:13.5px;color:#6b7280;">Cargando tu información...</p>
+  </div>
 
-    <div class="rounded-[14px] relative overflow-hidden"
-         style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
-      <div class="flex items-center justify-between" style="margin-bottom:14px;">
-        <div style="font-size:13px;color:#666;font-weight:500;">Pedidos activos</div>
-        <div class="grid place-items-center rounded-[10px]"
-             style="width:36px;height:36px;background:linear-gradient(135deg,#3a8f8b 0%,#2e7874 100%);color:#fff;box-shadow:0 6px 14px -6px rgba(58,143,139,0.5);">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18l-2 13H5L3 6z"/><path d="M8 6V4a4 4 0 0 1 8 0v2"/>
-          </svg>
+  <!-- ══ Error ══ -->
+  <div *ngIf="!isLoading && loadError"
+       style="display:flex;align-items:center;gap:10px;background:#fff0f0;border:1px solid #f5c6c6;border-radius:12px;padding:14px 18px;font-size:13.5px;color:#c0392b;margin-bottom:20px;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/><path d="M12 9v4M12 17h.01"/>
+    </svg>
+    No se pudo cargar la información. Intenta recargar la página.
+  </div>
+
+  <!-- ══ Contenido real ══ -->
+  <div *ngIf="!isLoading && !loadError">
+
+    <!-- ── KPIs ───────────────────────────────────────────────── -->
+    <section class="grid" style="grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px;">
+
+      <!-- Pedidos activos -->
+      <div class="rounded-[14px] relative overflow-hidden"
+           style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+        <div class="flex items-center justify-between" style="margin-bottom:14px;">
+          <div style="font-size:13px;color:#666;font-weight:500;">Pedidos activos</div>
+          <div class="grid place-items-center rounded-[10px]"
+               style="width:36px;height:36px;background:linear-gradient(135deg,#3a8f8b 0%,#2e7874 100%);color:#fff;box-shadow:0 6px 14px -6px rgba(58,143,139,0.5);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18l-2 13H5L3 6z"/><path d="M8 6V4a4 4 0 0 1 8 0v2"/>
+            </svg>
+          </div>
         </div>
-      </div>
-      <div class="font-semibold leading-none" style="font-size:34px;letter-spacing:-0.025em;color:#2c2c2c;font-variant-numeric:tabular-nums;">{{ activeOrders }}</div>
-      <div class="flex items-center" style="margin-top:10px;gap:8px;font-size:12.5px;color:#666;">
-        <span class="inline-flex items-center font-semibold uppercase"
-              style="gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:0.04em;color:#2e7874;background:rgba(58,143,139,0.10);border:1px solid rgba(58,143,139,0.30);">
-          <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>En curso
-        </span>
-        <span>1 en proceso · 1 pago pendiente</span>
-      </div>
-    </div>
-
-    <div class="rounded-[14px] relative overflow-hidden"
-         style="background:linear-gradient(180deg,rgba(72,187,120,0.10) 0%,rgba(255,255,255,0.75) 60%);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid rgba(47,133,90,0.30);padding:22px;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
-      <div class="absolute pointer-events-none" style="top:0;right:0;width:120px;height:120px;background:radial-gradient(circle at 100% 0%,rgba(72,187,120,0.30),transparent 60%);"></div>
-      <div class="flex items-center justify-between" style="margin-bottom:14px;">
-        <div style="font-size:13px;color:#666;font-weight:500;">Listos para recoger</div>
-        <div class="grid place-items-center rounded-[10px]"
-             style="width:36px;height:36px;background:linear-gradient(135deg,#48bb78,#2f855a);color:#fff;box-shadow:0 6px 14px -6px rgba(72,187,120,0.55);">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/>
-          </svg>
+        <div class="font-semibold leading-none" style="font-size:34px;letter-spacing:-0.025em;color:#2c2c2c;font-variant-numeric:tabular-nums;">
+          {{ activeOrders }}
         </div>
-      </div>
-      <div class="font-semibold leading-none" style="font-size:34px;letter-spacing:-0.025em;color:#2c2c2c;font-variant-numeric:tabular-nums;">{{ readyOrders }}</div>
-      <div class="flex items-center" style="margin-top:10px;gap:8px;font-size:12.5px;color:#666;">
-        <span class="inline-flex items-center font-semibold uppercase"
-              style="gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:0.04em;color:#2f855a;background:rgba(72,187,120,0.14);border:1px solid rgba(47,133,90,0.30);">
-          <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>¡Urgente!
-        </span>
-        <span>Recógelo en tienda</span>
-      </div>
-    </div>
-
-    <div class="rounded-[14px] relative overflow-hidden"
-         style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
-      <div class="flex items-center justify-between" style="margin-bottom:14px;">
-        <div style="font-size:13px;color:#666;font-weight:500;">Pedidos completados</div>
-        <div class="grid place-items-center rounded-[10px]"
-             style="width:36px;height:36px;background:rgba(255,255,255,0.8);color:#2e7874;box-shadow:inset 0 0 0 1px #c8d8d6;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12l5 5L20 7"/>
-          </svg>
-        </div>
-      </div>
-      <div class="font-semibold leading-none" style="font-size:34px;letter-spacing:-0.025em;color:#2c2c2c;font-variant-numeric:tabular-nums;">{{ completedOrders }}</div>
-      <div class="flex items-center" style="margin-top:10px;gap:8px;font-size:12.5px;color:#666;">
-        <span class="inline-flex items-center font-semibold uppercase"
-              style="gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:0.04em;color:#666;background:rgba(136,136,136,0.10);border:1px solid rgba(136,136,136,0.2);">
-          <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>Historial
-        </span>
-        <span>desde febrero 2026</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Notificación reciente -->
-  <section style="margin-bottom:22px;">
-    <div class="flex items-center justify-between" style="margin-bottom:12px;">
-      <div class="font-semibold" style="font-size:16px;letter-spacing:-0.005em;color:#2c2c2c;">Notificación reciente</div>
-      <a href="#" class="inline-flex items-center no-underline font-semibold" style="color:#2e7874;font-size:12.5px;gap:5px;">
-        Ver todas
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
-      </a>
-    </div>
-
-    <div class="flex items-start relative overflow-hidden rounded-[14px]"
-         style="gap:14px;padding:18px 20px;background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
-      <div class="absolute left-0 top-0 bottom-0" style="width:4px;background:linear-gradient(180deg,#3a8f8b,#2e7874);"></div>
-      <div class="grid place-items-center rounded-[11px] flex-shrink-0 text-white"
-           style="width:42px;height:42px;background:linear-gradient(135deg,#48bb78,#2f855a);box-shadow:0 6px 14px -6px rgba(72,187,120,0.55);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/>
-        </svg>
-      </div>
-      <div class="flex-1">
-        <div class="font-semibold" style="font-size:14px;color:#2c2c2c;margin-bottom:3px;letter-spacing:-0.005em;">
-          Tu pedido <b style="color:#2e7874;font-family:monospace;font-weight:700;">{{ recentNotif.orderCode }}</b> está listo para recoger en tienda
-        </div>
-        <div style="font-size:13px;color:#666;line-height:1.5;">{{ recentNotif.message }}</div>
-        <div class="flex items-center" style="gap:14px;margin-top:8px;font-size:11.5px;color:#888;">
-          <span class="inline-flex items-center" style="gap:5px;">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            {{ recentNotif.timeAgo }}
+        <div class="flex items-center flex-wrap" style="margin-top:10px;gap:8px;font-size:12.5px;color:#666;">
+          <span class="inline-flex items-center font-semibold uppercase"
+                style="gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:0.04em;color:#2e7874;background:rgba(58,143,139,0.10);border:1px solid rgba(58,143,139,0.30);">
+            <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>En curso
           </span>
-          <span style="width:3px;height:3px;border-radius:50%;background:#999;display:inline-block;"></span>
-          <span>Notificación de tienda</span>
+          <span>{{ activeSubtext }}</span>
         </div>
       </div>
-      <a routerLink="/client/orders"
-         class="inline-flex items-center justify-center no-underline font-semibold text-white rounded-[8px] self-center"
-         style="white-space:nowrap;font-size:12.5px;padding:7px 13px;background:linear-gradient(180deg,#3a8f8b,#2e7874);border:1px solid #2e7874;box-shadow:0 10px 22px -8px rgba(58,143,139,0.55);">
-        Ver pedido
-      </a>
-    </div>
-  </section>
 
-  <!-- Pedidos recientes -->
-  <section>
-    <div class="flex items-center justify-between" style="margin-bottom:12px;">
-      <div class="flex items-center font-semibold" style="font-size:16px;letter-spacing:-0.005em;color:#2c2c2c;gap:8px;">
-        Pedidos recientes
-        <span class="font-medium" style="font-size:12px;color:#666;background:rgba(255,255,255,0.5);padding:2px 9px;border-radius:999px;border:1px solid #e0e0e0;">Últimos 4</span>
+      <!-- Listos para recoger -->
+      <div class="rounded-[14px] relative overflow-hidden"
+           style="background:linear-gradient(180deg,rgba(72,187,120,0.10) 0%,rgba(255,255,255,0.75) 60%);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid rgba(47,133,90,0.30);padding:22px;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+        <div class="absolute pointer-events-none" style="top:0;right:0;width:120px;height:120px;background:radial-gradient(circle at 100% 0%,rgba(72,187,120,0.30),transparent 60%);"></div>
+        <div class="flex items-center justify-between" style="margin-bottom:14px;">
+          <div style="font-size:13px;color:#666;font-weight:500;">Listos para recoger</div>
+          <div class="grid place-items-center rounded-[10px]"
+               style="width:36px;height:36px;background:linear-gradient(135deg,#48bb78,#2f855a);color:#fff;box-shadow:0 6px 14px -6px rgba(72,187,120,0.55);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/>
+            </svg>
+          </div>
+        </div>
+        <div class="font-semibold leading-none" style="font-size:34px;letter-spacing:-0.025em;color:#2c2c2c;font-variant-numeric:tabular-nums;">
+          {{ readyOrders }}
+        </div>
+        <div class="flex items-center" style="margin-top:10px;gap:8px;font-size:12.5px;color:#666;">
+          <span *ngIf="readyOrders > 0"
+                class="inline-flex items-center font-semibold uppercase"
+                style="gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:0.04em;color:#2f855a;background:rgba(72,187,120,0.14);border:1px solid rgba(47,133,90,0.30);">
+            <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>¡Urgente!
+          </span>
+          <span *ngIf="readyOrders > 0">Recógelo en tienda</span>
+          <span *ngIf="readyOrders === 0" style="color:#aaa;">Sin pedidos listos ahora</span>
+        </div>
       </div>
-      <a routerLink="/client/orders" class="inline-flex items-center no-underline font-semibold" style="color:#2e7874;font-size:12.5px;gap:5px;">
-        Ver todos
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
-      </a>
-    </div>
 
-    <div class="overflow-hidden rounded-[14px]"
-         style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
-      <table class="w-full" style="border-collapse:collapse;font-size:13px;">
-        <thead>
-          <tr>
-            <th class="text-left font-semibold uppercase" style="width:120px;font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Código</th>
-            <th class="text-left font-semibold uppercase" style="font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Servicio</th>
-            <th class="text-left font-semibold uppercase" style="font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Material</th>
-            <th class="text-left font-semibold uppercase" style="width:170px;font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Estado</th>
-            <th class="text-left font-semibold uppercase" style="width:170px;font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Fecha estimada</th>
-            <th style="width:130px;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let order of recentOrders; let last = last"
-              [style.background]="order.status === 'listo' ? 'rgba(72,187,120,0.10)' : ''">
-            <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
-              <span style="font-family:monospace;font-size:13px;color:#2c2c2c;font-weight:600;">{{ order.code }}</span>
-            </td>
-            <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
-              <span class="inline-flex items-center" style="gap:8px;font-size:13px;color:#333;font-weight:500;">
-                <span class="rounded-[2px] flex-shrink-0" [style.background]="order.serviceColor" style="width:9px;height:9px;display:inline-block;"></span>
-                {{ order.service }}
-              </span>
-            </td>
-            <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
-              <span style="font-size:12.5px;color:#666;">{{ order.material }}</span>
-            </td>
-            <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
-              <ng-container *ngIf="order.status === 'listo'">
-                <span class="inline-flex items-center font-semibold uppercase" style="gap:6px;font-size:11.5px;padding:4px 10px 4px 9px;border-radius:999px;letter-spacing:0.04em;color:#2f855a;background:rgba(72,187,120,0.14);border:1px solid rgba(47,133,90,0.30);">
-                  <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Listo para recoger
+      <!-- Completados -->
+      <div class="rounded-[14px] relative overflow-hidden"
+           style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;padding:22px;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+        <div class="flex items-center justify-between" style="margin-bottom:14px;">
+          <div style="font-size:13px;color:#666;font-weight:500;">Pedidos completados</div>
+          <div class="grid place-items-center rounded-[10px]"
+               style="width:36px;height:36px;background:rgba(255,255,255,0.8);color:#2e7874;box-shadow:inset 0 0 0 1px #c8d8d6;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12l5 5L20 7"/>
+            </svg>
+          </div>
+        </div>
+        <div class="font-semibold leading-none" style="font-size:34px;letter-spacing:-0.025em;color:#2c2c2c;font-variant-numeric:tabular-nums;">
+          {{ completedOrders }}
+        </div>
+        <div class="flex items-center" style="margin-top:10px;gap:8px;font-size:12.5px;color:#666;">
+          <span class="inline-flex items-center font-semibold uppercase"
+                style="gap:5px;font-size:11px;padding:3px 9px;border-radius:999px;letter-spacing:0.04em;color:#666;background:rgba(136,136,136,0.10);border:1px solid rgba(136,136,136,0.2);">
+            <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>Historial
+          </span>
+          <span *ngIf="completedSinceLabel">{{ completedSinceLabel }}</span>
+          <span *ngIf="!completedSinceLabel">Sin entregas aún</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── Notificación reciente ───────────────────────────────── -->
+    <section style="margin-bottom:22px;">
+      <div class="flex items-center justify-between" style="margin-bottom:12px;">
+        <div class="font-semibold" style="font-size:16px;letter-spacing:-0.005em;color:#2c2c2c;">Notificación reciente</div>
+        <a routerLink="/client/notifications" class="inline-flex items-center no-underline font-semibold" style="color:#2e7874;font-size:12.5px;gap:5px;">
+          Ver todas
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <!-- Con notificación -->
+      <div *ngIf="recentNotif"
+           class="flex items-start relative overflow-hidden rounded-[14px]"
+           style="gap:14px;padding:18px 20px;background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+        <!-- Barra lateral de color según tipo -->
+        <div class="absolute left-0 top-0 bottom-0" style="width:4px;"
+             [style.background]="recentNotif!.type === 'ready' ? 'linear-gradient(180deg,#48bb78,#2f855a)'
+                               : recentNotif!.type === 'payment' ? 'linear-gradient(180deg,#722f8e,#5b2374)'
+                               : 'linear-gradient(180deg,#3a8f8b,#2e7874)'">
+        </div>
+        <!-- Ícono -->
+        <div class="grid place-items-center rounded-[11px] flex-shrink-0 text-white"
+             style="width:42px;height:42px;box-shadow:0 6px 14px -6px rgba(72,187,120,0.55);"
+             [style.background]="recentNotif!.type === 'ready'   ? 'linear-gradient(135deg,#48bb78,#2f855a)'
+                               : recentNotif!.type === 'payment' ? 'linear-gradient(135deg,#722f8e,#5b2374)'
+                               : 'linear-gradient(135deg,#3a8f8b,#2e7874)'">
+          <svg *ngIf="recentNotif!.type === 'ready'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <svg *ngIf="recentNotif!.type === 'payment'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/>
+          </svg>
+          <svg *ngIf="recentNotif!.type === 'progress' || recentNotif!.type === 'budget'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/>
+          </svg>
+        </div>
+        <!-- Texto -->
+        <div class="flex-1">
+          <div class="font-semibold" style="font-size:14px;color:#2c2c2c;margin-bottom:3px;letter-spacing:-0.005em;">
+            {{ recentNotif!.title }}
+          </div>
+          <div style="font-size:13px;color:#666;line-height:1.5;">{{ recentNotif!.message }}</div>
+          <div class="flex items-center" style="gap:14px;margin-top:8px;font-size:11.5px;color:#888;">
+            <span class="inline-flex items-center" style="gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              {{ recentNotif!.timeAgo }}
+            </span>
+            <span style="width:3px;height:3px;border-radius:50%;background:#999;display:inline-block;"></span>
+            <span>Notificación automática</span>
+          </div>
+        </div>
+        <!-- CTA -->
+        <a [routerLink]="recentNotif!.actionRoute"
+           class="inline-flex items-center justify-center no-underline font-semibold text-white rounded-[8px] self-center"
+           style="white-space:nowrap;font-size:12.5px;padding:7px 13px;background:linear-gradient(180deg,#3a8f8b,#2e7874);border:1px solid #2e7874;box-shadow:0 10px 22px -8px rgba(58,143,139,0.55);">
+          {{ recentNotif!.type === 'payment' ? 'Pagar ahora' : 'Ver pedido' }}
+        </a>
+      </div>
+
+      <!-- Sin notificaciones -->
+      <div *ngIf="!recentNotif"
+           class="flex items-center rounded-[14px]"
+           style="gap:14px;padding:18px 20px;background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;box-shadow:0 6px 24px -8px rgba(46,120,116,0.12);">
+        <div class="grid place-items-center rounded-[11px] flex-shrink-0"
+             style="width:42px;height:42px;background:rgba(58,143,139,0.08);color:#3a8f8b;border:1px solid rgba(58,143,139,0.18);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#374151;">Todo al día</div>
+          <div style="font-size:13px;color:#6b7280;margin-top:2px;">No tienes notificaciones pendientes en este momento.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Pedidos recientes ───────────────────────────────────── -->
+    <section>
+      <div class="flex items-center justify-between" style="margin-bottom:12px;">
+        <div class="flex items-center font-semibold" style="font-size:16px;letter-spacing:-0.005em;color:#2c2c2c;gap:8px;">
+          Pedidos recientes
+          <span class="font-medium" style="font-size:12px;color:#666;background:rgba(255,255,255,0.5);padding:2px 9px;border-radius:999px;border:1px solid #e0e0e0;">
+            Últimos {{ recentOrders.length }}
+          </span>
+        </div>
+        <a routerLink="/client/orders" class="inline-flex items-center no-underline font-semibold" style="color:#2e7874;font-size:12.5px;gap:5px;">
+          Ver todos
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <!-- Sin pedidos -->
+      <div *ngIf="recentOrders.length === 0"
+           class="rounded-[14px] flex flex-col items-center"
+           style="padding:48px 32px;text-align:center;background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;box-shadow:0 6px 24px -8px rgba(46,120,116,0.12);">
+        <div style="width:52px;height:52px;border-radius:13px;background:rgba(58,143,139,0.08);color:#3a8f8b;display:grid;place-items:center;margin-bottom:14px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/>
+          </svg>
+        </div>
+        <p style="font-size:15px;font-weight:600;color:#374151;margin-bottom:6px;">Aún no tienes pedidos</p>
+        <p style="font-size:13.5px;color:#6b7280;margin-bottom:20px;">Crea tu primer pedido y lo verás aquí.</p>
+        <a routerLink="/client/orders/new"
+           class="inline-flex items-center no-underline font-semibold text-white rounded-[9px]"
+           style="gap:8px;font-size:13.5px;padding:10px 20px;background:linear-gradient(180deg,#3a8f8b,#2e7874);border:1px solid #2e7874;box-shadow:0 8px 18px -8px rgba(58,143,139,0.55);">
+          Crear pedido
+        </a>
+      </div>
+
+      <!-- Tabla con data real -->
+      <div *ngIf="recentOrders.length > 0"
+           class="overflow-hidden rounded-[14px]"
+           style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;box-shadow:0 6px 24px -8px rgba(46,120,116,0.18),0 1px 2px rgba(74,111,109,0.06);">
+        <table class="w-full" style="border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr>
+              <th class="text-left font-semibold uppercase" style="width:130px;font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Código</th>
+              <th class="text-left font-semibold uppercase" style="font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Servicio</th>
+              <th class="text-left font-semibold uppercase" style="font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Material</th>
+              <th class="text-left font-semibold uppercase" style="width:175px;font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Estado</th>
+              <th class="text-left font-semibold uppercase" style="width:150px;font-size:11.5px;letter-spacing:0.06em;color:#888;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);">Fecha</th>
+              <th style="width:130px;padding:13px 20px;background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(224,224,224,0.65);"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of recentOrders; let last = last"
+                [style.background]="o.status === 'READY' ? 'rgba(72,187,120,0.07)' : ''">
+
+              <!-- Código -->
+              <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#2c2c2c;font-weight:600;">
+                  {{ orderCode(o.id) }}
                 </span>
-              </ng-container>
-              <span *ngIf="order.status === 'proceso'" class="inline-flex items-center font-semibold uppercase" style="gap:6px;font-size:11.5px;padding:4px 10px 4px 9px;border-radius:999px;letter-spacing:0.04em;color:#2e7874;background:rgba(58,143,139,0.10);border:1px solid rgba(58,143,139,0.30);">
-                <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>En proceso
-              </span>
-              <span *ngIf="order.status === 'pago'" class="inline-flex items-center font-semibold uppercase" style="gap:6px;font-size:11.5px;padding:4px 10px 4px 9px;border-radius:999px;letter-spacing:0.04em;color:#b8860b;background:#fff7e6;border:1px solid #f5d39a;">
-                <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Pendiente de pago
-              </span>
-              <span *ngIf="order.status === 'entregado'" class="inline-flex items-center font-semibold uppercase" style="gap:6px;font-size:11.5px;padding:4px 10px 4px 9px;border-radius:999px;letter-spacing:0.04em;color:#666;background:rgba(136,136,136,0.10);border:1px solid rgba(136,136,136,0.20);">
-                <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Entregado
-              </span>
-            </td>
-            <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
-              <span style="font-family:monospace;font-size:12.5px;color:#666;">{{ order.datePre }}<b style="color:#2c2c2c;font-weight:500;">{{ order.dateBold }}</b>{{ order.datePost }}</span>
-            </td>
-            <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
-              <a *ngIf="order.status !== 'pago'" routerLink="/client/orders"
-                 class="inline-flex items-center justify-center no-underline font-semibold rounded-[8px]"
-                 style="font-size:12.5px;padding:7px 13px;color:#333;border:1px solid #e0e0e0;background:rgba(255,255,255,0.55);">
-                Ver detalle
-              </a>
-              <a *ngIf="order.status === 'pago'" routerLink="/client/orders"
-                 class="inline-flex items-center justify-center no-underline font-semibold text-white rounded-[8px]"
-                 style="font-size:12.5px;padding:7px 13px;background:linear-gradient(180deg,#3a8f8b,#2e7874);border:1px solid #2e7874;box-shadow:0 10px 22px -8px rgba(58,143,139,0.55);">
-                Pagar ahora
-              </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+              </td>
+
+              <!-- Servicio -->
+              <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
+                <span class="inline-flex items-center" style="gap:8px;font-size:13px;color:#333;font-weight:500;">
+                  <span class="rounded-[2px] flex-shrink-0" [style.background]="serviceColor(o)" style="width:9px;height:9px;display:inline-block;"></span>
+                  {{ serviceName(o) }}
+                </span>
+              </td>
+
+              <!-- Material -->
+              <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
+                <span style="font-size:12.5px;color:#666;">{{ materialName(o) }}</span>
+              </td>
+
+              <!-- Estado -->
+              <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
+                <span class="inline-flex items-center font-semibold uppercase"
+                      style="gap:6px;font-size:11px;padding:4px 10px 4px 9px;border-radius:999px;letter-spacing:0.04em;"
+                      [style.color]="statusMeta(o.status).color"
+                      [style.background]="statusMeta(o.status).bg"
+                      [style.border]="'1px solid ' + statusMeta(o.status).border">
+                  <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+                  {{ statusMeta(o.status).label }}
+                </span>
+              </td>
+
+              <!-- Fecha -->
+              <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#666;">
+                  {{ orderDateLabel(o) }}
+                </span>
+              </td>
+
+              <!-- Acción -->
+              <td [style.padding]="'14px 20px'" [style.border-bottom]="last ? '0' : '1px solid rgba(224,224,224,0.65)'" style="vertical-align:middle;">
+                <a *ngIf="o.status !== 'PENDING_PAYMENT'"
+                   [routerLink]="['/client/orders', o.id]"
+                   class="inline-flex items-center justify-center no-underline font-semibold rounded-[8px]"
+                   style="font-size:12.5px;padding:7px 13px;color:#333;border:1px solid #e0e0e0;background:rgba(255,255,255,0.55);">
+                  Ver detalle
+                </a>
+                <a *ngIf="o.status === 'PENDING_PAYMENT'"
+                   [routerLink]="['/client/orders', o.id, 'payment']"
+                   class="inline-flex items-center justify-center no-underline font-semibold text-white rounded-[8px]"
+                   style="font-size:12.5px;padding:7px 13px;background:linear-gradient(180deg,#3a8f8b,#2e7874);border:1px solid #2e7874;box-shadow:0 8px 18px -8px rgba(58,143,139,0.55);">
+                  Pagar ahora
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+  <!-- fin contenido real -->
 
 </div>
+
+<!-- Animación del spinner -->
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>

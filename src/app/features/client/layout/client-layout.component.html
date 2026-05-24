@@ -1,5 +1,5 @@
 <!-- ══════════════════════════════════════════════════════════════
-     SIGEPED · Client Layout  — sidebar colapsable + header persistentes
+     SIGEPED · Client Layout
      ══════════════════════════════════════════════════════════════ -->
 
 <div class="grid min-h-screen relative"
@@ -8,7 +8,7 @@
             background: linear-gradient(160deg,#f8faf9 0%,#f1f6f4 55%,#eaf1ee 100%);
             background-attachment:fixed;">
 
-  <!-- Blur orbs (fixed, decorativos) -->
+  <!-- Blur orbs decorativos -->
   <div class="fixed rounded-full pointer-events-none"
        style="width:500px;height:500px;background:#b8d8d4;top:-160px;right:-100px;opacity:.18;filter:blur(90px);z-index:0;"></div>
   <div class="fixed rounded-full pointer-events-none"
@@ -18,163 +18,145 @@
   <aside class="sticky top-0 flex flex-col overflow-hidden"
          [style.width]="sidebarCollapsed ? '56px' : '200px'"
          style="height:100vh;z-index:10;transition:width 0.25s ease;
-                background:rgba(30,75,72,0.92);
+                background:rgba(22,58,55,0.94);
                 backdrop-filter:blur(18px) saturate(140%);
                 -webkit-backdrop-filter:blur(18px) saturate(140%);
                 color:#e6f0ee;
-                box-shadow:inset -1px 0 0 rgba(255,255,255,0.05);">
+                box-shadow:inset -1px 0 0 rgba(255,255,255,0.05), 2px 0 20px rgba(0,0,0,0.15);">
 
     <!-- Brand row -->
-    <div class="flex items-center h-16"
+    <div class="flex items-center h-16 flex-shrink-0"
          [style.justify-content]="sidebarCollapsed ? 'center' : 'flex-start'"
-         [style.padding]="sidebarCollapsed ? '0' : '0 18px'"
-         style="border-bottom:1px solid rgba(255,255,255,0.08);transition:padding 0.25s ease;">
+         [style.padding]="sidebarCollapsed ? '0 12px' : '0 16px'"
+         style="border-bottom:1px solid rgba(255,255,255,0.07);transition:padding 0.25s ease;">
 
-      <!-- Logo icon — always visible -->
-      <div class="grid place-items-center rounded-[8px] flex-shrink-0"
-           style="width:30px;height:30px;
-                  background:linear-gradient(135deg,#3a8f8b,#2e7874);
-                  box-shadow:0 0 0 1px rgba(255,255,255,0.18) inset,0 4px 14px -4px rgba(58,143,139,0.5);">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/>
-          <path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/>
+      <!-- Logo ESIAD (solo el trazo blanco sobre fondo oscuro) -->
+      <div class="flex-shrink-0 flex items-center justify-center"
+           style="width:30px;height:30px;">
+        <svg viewBox="0 0 428 451" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill="rgba(255,255,255,0.90)"
+            d="M338.218 86.729C353.860 151.409 369.416 215.681 384.971 279.952C387.940 292.221 390.840 304.508 393.925 316.748C394.662 319.674 394.106 321.339 391.516 323.246C342.890 359.051 294.371 395.001 245.789 430.866C244.406 431.887 242.581 432.900 240.955 432.912C221.480 433.052 202.004 433.003 182.064 433.003C182.064 369.741 182.064 306.693 182.064 243.220C156.523 243.220 131.441 243.220 105.659 243.220C107.631 233.666 109.492 224.650 111.443 215.205C134.681 215.205 157.935 215.205 181.566 215.205C181.566 166.065 181.566 117.367 181.566 68.412C164.103 68.412 146.678 68.412 128.856 68.412C106.826 160.919 84.787 253.467 62.575 346.739C52.509 338.510 43.019 330.505 33.228 322.886C29.935 320.323 28.894 318.131 29.946 313.833C53.059 219.445 75.997 125.015 98.886 30.573C99.523 27.944 100.184 26.613 103.295 26.620C148.621 26.727 193.947 26.697 239.273 26.709C239.928 26.709 240.584 26.842 241.638 26.956C241.638 144.742 241.638 262.488 241.638 381.252C249.964 375.502 257.571 370.299 265.125 365.020C292.395 345.965 319.630 326.860 346.938 307.860C349.227 306.268 350.237 305.024 349.516 301.891C331.779 224.821 314.193 147.716 296.482 70.186C286.269 70.186 276.011 70.186 265.410 70.186C265.410 55.538 265.410 41.333 265.410 26.911C284.804 26.911 304.074 26.911 323.830 26.911C328.591 46.687 333.361 66.504 338.218 86.729Z"/>
         </svg>
       </div>
 
-      <!-- Brand text — hidden when collapsed -->
-      <div *ngIf="!sidebarCollapsed" class="flex-1 ml-[11px]">
-        <div class="font-semibold text-white" style="font-size:15px;letter-spacing:-0.01em;">SIGEPED</div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px;">Cliente</div>
+      <!-- Texto marca — oculto al colapsar -->
+      <div *ngIf="!sidebarCollapsed" class="ml-[10px] flex-1 min-w-0">
+        <div style="font-family:'Inter',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.06em;color:#fff;text-transform:uppercase;line-height:1.2;">
+          ESIAD ARQ
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-top:1px;letter-spacing:0.04em;font-weight:500;">
+          Portal Cliente
+        </div>
       </div>
     </div>
 
-    <!-- Nav label — hidden when collapsed -->
-    <div *ngIf="!sidebarCollapsed"
-         class="uppercase font-semibold"
-         style="font-size:10.5px;letter-spacing:0.10em;color:rgba(255,255,255,0.45);padding:18px 18px 8px;">
-      Mi cuenta
-    </div>
-    <div *ngIf="sidebarCollapsed" style="height:14px;"></div>
-
-    <!-- Nav links -->
-    <nav class="flex flex-col" [style.padding]="sidebarCollapsed ? '0 6px' : '0 8px'" style="gap:2px;">
+    <!-- ── Nav links ── -->
+    <nav class="flex flex-col flex-1 overflow-y-auto overflow-x-hidden"
+         [style.padding]="sidebarCollapsed ? '12px 6px' : '12px 8px'"
+         style="gap:2px;">
 
       <!-- Inicio -->
       <a routerLink="/client/dashboard"
-         class="flex items-center no-underline transition-colors duration-150 rounded-[8px]"
+         class="nav-link"
+         [class.nav-link-active]="isActive('/client/dashboard')"
          [style.justify-content]="sidebarCollapsed ? 'center' : 'flex-start'"
-         [style.gap]="sidebarCollapsed ? '0' : '11px'"
-         [style.padding]="sidebarCollapsed ? '10px 0' : '10px 12px'"
-         [style.background]="isActive('/client/dashboard') ? 'rgba(58,143,139,0.35)' : 'transparent'"
-         [style.color]="isActive('/client/dashboard') ? '#fff' : 'rgba(255,255,255,0.75)'"
-         [style.font-weight]="isActive('/client/dashboard') ? '600' : '500'"
+         [style.gap]="sidebarCollapsed ? '0' : '10px'"
+         [style.padding]="sidebarCollapsed ? '10px 0' : '9px 11px'"
          [title]="sidebarCollapsed ? 'Inicio' : ''">
-        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>
         </svg>
-        <span *ngIf="!sidebarCollapsed" style="font-size:13.5px;">Inicio</span>
+        <span *ngIf="!sidebarCollapsed" class="nav-label">Inicio</span>
       </a>
 
       <!-- Nuevo pedido -->
       <a routerLink="/client/orders/new"
-         class="flex items-center no-underline transition-colors duration-150 rounded-[8px]"
+         class="nav-link"
+         [class.nav-link-active]="isActive('/client/orders/new')"
          [style.justify-content]="sidebarCollapsed ? 'center' : 'flex-start'"
-         [style.gap]="sidebarCollapsed ? '0' : '11px'"
-         [style.padding]="sidebarCollapsed ? '10px 0' : '10px 12px'"
-         [style.background]="isActive('/client/orders/new') ? 'rgba(58,143,139,0.35)' : 'transparent'"
-         [style.color]="isActive('/client/orders/new') ? '#fff' : 'rgba(255,255,255,0.75)'"
-         [style.font-weight]="isActive('/client/orders/new') ? '600' : '500'"
+         [style.gap]="sidebarCollapsed ? '0' : '10px'"
+         [style.padding]="sidebarCollapsed ? '10px 0' : '9px 11px'"
          [title]="sidebarCollapsed ? 'Nuevo pedido' : ''">
-        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>
         </svg>
-        <span *ngIf="!sidebarCollapsed" style="font-size:13.5px;">Nuevo pedido</span>
+        <span *ngIf="!sidebarCollapsed" class="nav-label">Nuevo pedido</span>
       </a>
 
       <!-- Mis pedidos -->
       <a routerLink="/client/orders"
-         class="flex items-center no-underline transition-colors duration-150 rounded-[8px]"
+         class="nav-link"
+         [class.nav-link-active]="isOrdersActive()"
          [style.justify-content]="sidebarCollapsed ? 'center' : 'flex-start'"
-         [style.gap]="sidebarCollapsed ? '0' : '11px'"
-         [style.padding]="sidebarCollapsed ? '10px 0' : '10px 12px'"
-         [style.background]="isOrdersActive() ? 'rgba(58,143,139,0.35)' : 'transparent'"
-         [style.color]="isOrdersActive() ? '#fff' : 'rgba(255,255,255,0.75)'"
-         [style.font-weight]="isOrdersActive() ? '600' : '500'"
+         [style.gap]="sidebarCollapsed ? '0' : '10px'"
+         [style.padding]="sidebarCollapsed ? '10px 0' : '9px 11px'"
          [title]="sidebarCollapsed ? 'Mis pedidos' : ''">
-        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M6 2h9l5 5v15H6V2z"/><path d="M14 2v6h6"/>
+          <path d="M9 13h6M9 17h6"/>
         </svg>
-        <span *ngIf="!sidebarCollapsed" style="font-size:13.5px;">Mis pedidos</span>
+        <span *ngIf="!sidebarCollapsed" class="nav-label">Mis pedidos</span>
       </a>
 
       <!-- Pagos -->
       <a routerLink="/client/payments"
-         class="flex items-center no-underline transition-colors duration-150 rounded-[8px]"
+         class="nav-link"
+         [class.nav-link-active]="isPaymentsActive()"
          [style.justify-content]="sidebarCollapsed ? 'center' : 'flex-start'"
-         [style.gap]="sidebarCollapsed ? '0' : '11px'"
-         [style.padding]="sidebarCollapsed ? '10px 0' : '10px 12px'"
-         [style.background]="isPaymentsActive() ? 'rgba(58,143,139,0.35)' : 'transparent'"
-         [style.color]="isPaymentsActive() ? '#fff' : 'rgba(255,255,255,0.75)'"
-         [style.font-weight]="isPaymentsActive() ? '600' : '500'"
+         [style.gap]="sidebarCollapsed ? '0' : '10px'"
+         [style.padding]="sidebarCollapsed ? '10px 0' : '9px 11px'"
          [title]="sidebarCollapsed ? 'Pagos' : ''">
-        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><path d="M6 15h3"/>
         </svg>
-        <span *ngIf="!sidebarCollapsed" style="font-size:13.5px;">Pagos</span>
+        <span *ngIf="!sidebarCollapsed" class="nav-label">Pagos</span>
       </a>
 
       <!-- Notificaciones -->
       <a routerLink="/client/notifications"
-         class="flex items-center no-underline transition-colors duration-150 rounded-[8px]"
+         class="nav-link"
+         [class.nav-link-active]="isActive('/client/notifications')"
          [style.justify-content]="sidebarCollapsed ? 'center' : 'flex-start'"
-         [style.gap]="sidebarCollapsed ? '0' : '11px'"
-         [style.padding]="sidebarCollapsed ? '10px 0' : '10px 12px'"
-         [style.background]="isActive('/client/notifications') ? 'rgba(58,143,139,0.35)' : 'transparent'"
-         [style.color]="isActive('/client/notifications') ? '#fff' : 'rgba(255,255,255,0.75)'"
-         [style.font-weight]="isActive('/client/notifications') ? '600' : '500'"
+         [style.gap]="sidebarCollapsed ? '0' : '10px'"
+         [style.padding]="sidebarCollapsed ? '10px 0' : '9px 11px'"
          [title]="sidebarCollapsed ? 'Notificaciones' : ''">
-        <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24"
-             fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/>
           <path d="M10 21a2 2 0 0 0 4 0"/>
         </svg>
-        <span *ngIf="!sidebarCollapsed" style="font-size:13.5px;">Notificaciones</span>
+        <span *ngIf="!sidebarCollapsed" class="nav-label">Notificaciones</span>
       </a>
     </nav>
 
-    <!-- Sidebar footer: user pill -->
-    <div class="mt-auto"
-         [style.padding]="sidebarCollapsed ? '14px 8px' : '18px'"
-         style="border-top:1px solid rgba(255,255,255,0.08);transition:padding 0.25s ease;">
+    <!-- ── Sidebar footer: user pill ── -->
+    <div class="flex-shrink-0"
+         [style.padding]="sidebarCollapsed ? '12px 8px' : '14px'"
+         style="border-top:1px solid rgba(255,255,255,0.07);transition:padding 0.25s ease;">
 
-      <!-- Expanded: full pill -->
+      <!-- Expandido -->
       <div *ngIf="!sidebarCollapsed"
-           class="flex items-center p-[10px] rounded-[10px]"
-           style="gap:10px;background:rgba(255,255,255,0.05);">
-        <div class="grid place-items-center rounded-full font-semibold text-white"
-             style="width:34px;height:34px;flex-shrink:0;
+           class="flex items-center rounded-[10px]"
+           style="gap:9px;padding:9px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.07);">
+        <div class="grid place-items-center rounded-full font-semibold text-white flex-shrink-0"
+             style="width:32px;height:32px;
                     background:linear-gradient(135deg,#3a8f8b,#2e7874);
-                    font-size:12px;
-                    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2);">
+                    font-size:12px;font-family:'Inter',sans-serif;
+                    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18);">
           {{ userInitials }}
         </div>
-        <div>
-          <div class="font-semibold text-white" style="font-size:12.5px;line-height:1.2;">{{ userName }}</div>
-          <div style="font-size:10.5px;color:rgba(255,255,255,0.55);">Cliente</div>
+        <div class="min-w-0">
+          <div class="truncate font-semibold text-white" style="font-size:12px;line-height:1.3;">{{ userName }}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.45);letter-spacing:0.02em;">Cliente</div>
         </div>
       </div>
 
-      <!-- Collapsed: avatar only -->
+      <!-- Colapsado: solo avatar -->
       <div *ngIf="sidebarCollapsed"
            class="grid place-items-center rounded-full font-semibold text-white"
            style="width:34px;height:34px;margin:0 auto;
                   background:linear-gradient(135deg,#3a8f8b,#2e7874);
-                  font-size:12px;
-                  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.2);"
+                  font-size:12px;font-family:'Inter',sans-serif;
+                  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18);"
            [title]="userName">
         {{ userInitials }}
       </div>
@@ -185,74 +167,161 @@
   <main class="flex flex-col min-h-screen" style="min-width:0;">
 
     <!-- Header sticky -->
-    <header class="sticky top-0 flex items-center text-white h-16"
-            style="z-index:5;padding:0 28px 0 16px;gap:12px;
-                   background:rgba(42,100,97,0.95);
-                   backdrop-filter:blur(16px) saturate(140%);
-                   -webkit-backdrop-filter:blur(16px) saturate(140%);
-                   box-shadow:0 1px 0 rgba(255,255,255,0.06) inset,0 8px 20px -16px rgba(0,0,0,0.4);">
+    <header class="sticky top-0 flex items-center text-white h-16 flex-shrink-0"
+            style="z-index:20;padding:0 24px 0 14px;gap:10px;
+                   background:rgba(30,68,65,0.96);
+                   backdrop-filter:blur(16px) saturate(150%);
+                   -webkit-backdrop-filter:blur(16px) saturate(150%);
+                   box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 4px 20px -8px rgba(0,0,0,0.35);">
 
-      <!-- Toggle button — izquierda del header, separado del sidebar -->
+      <!-- Toggle sidebar -->
       <button (click)="toggleSidebar()"
-              class="grid place-items-center rounded-[9px] border-0 cursor-pointer flex-shrink-0"
-              style="width:34px;height:34px;color:rgba(255,255,255,0.75);
-                     background:rgba(255,255,255,0.08);
-                     border:1px solid rgba(255,255,255,0.10);
-                     transition:background 0.15s ease;"
+              class="grid place-items-center rounded-[8px] border-0 cursor-pointer flex-shrink-0"
+              style="width:34px;height:34px;color:rgba(255,255,255,0.65);
+                     background:rgba(255,255,255,0.07);
+                     border:1px solid rgba(255,255,255,0.09);
+                     transition:background 0.15s;"
               [title]="sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 6h18M3 12h18M3 18h18"/>
         </svg>
       </button>
 
       <!-- Separador -->
-      <div style="width:1px;height:20px;background:rgba(255,255,255,0.12);flex-shrink:0;"></div>
+      <div style="width:1px;height:18px;background:rgba(255,255,255,0.10);flex-shrink:0;"></div>
 
       <!-- Breadcrumb -->
-      <div class="flex items-center" style="gap:8px;font-size:13px;color:rgba(255,255,255,0.7);">
-        <span>Mi cuenta</span>
-        <span style="color:rgba(255,255,255,0.4);">/</span>
-        <span class="font-semibold text-white">{{ pageTitle }}</span>
+      <div class="flex items-center" style="gap:7px;font-size:13px;font-family:'Inter',sans-serif;">
+        <span style="color:rgba(255,255,255,0.50);font-weight:400;">Mi cuenta</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.35;">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+        <span style="color:#fff;font-weight:600;letter-spacing:-0.01em;">{{ pageTitle }}</span>
       </div>
 
-      <!-- Right actions -->
-      <div class="ml-auto flex items-center" style="gap:10px;">
-        <!-- Avatar chip -->
-        <div class="flex items-center rounded-full"
-             style="gap:10px;padding:4px 14px 4px 4px;
-                    background:rgba(255,255,255,0.10);
-                    border:1px solid rgba(255,255,255,0.1);">
-          <div class="grid place-items-center rounded-full font-bold text-white"
-               style="width:32px;height:32px;
+      <!-- Spacer -->
+      <div class="ml-auto"></div>
+
+      <!-- ── Avatar chip + dropdown ── -->
+      <div class="relative" style="z-index:50;">
+
+        <!-- Chip clickable -->
+        <button class="flex items-center rounded-full cursor-pointer border-0"
+                style="gap:9px;padding:4px 12px 4px 4px;
+                       background:rgba(255,255,255,0.09);
+                       border:1px solid rgba(255,255,255,0.10);
+                       transition:background 0.15s;"
+                (click)="toggleUserMenu()"
+                [style.background]="showUserMenu ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.09)'">
+          <!-- Avatar -->
+          <div class="grid place-items-center rounded-full font-bold text-white flex-shrink-0"
+               style="width:30px;height:30px;
                       background:linear-gradient(135deg,#3a8f8b,#2e7874);
-                      font-size:12px;
-                      box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25);">
+                      font-size:11px;font-family:'Inter',sans-serif;
+                      box-shadow:inset 0 0 0 1px rgba(255,255,255,0.22);">
             {{ userInitials }}
           </div>
-          <div>
-            <div class="font-semibold text-white" style="font-size:13px;line-height:1.1;">{{ userName }}</div>
-            <div style="font-size:10.5px;color:rgba(255,255,255,0.65);">Cliente</div>
+          <!-- Nombre + rol -->
+          <div style="text-align:left;">
+            <div style="font-size:12.5px;font-weight:600;color:#fff;line-height:1.2;font-family:'Inter',sans-serif;letter-spacing:-0.01em;">
+              {{ userName }}
+            </div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.50);font-weight:400;">
+              Cliente
+            </div>
           </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" style="opacity:.7;"><path d="M6 9l6 6 6-6"/></svg>
-        </div>
-
-        <!-- Logout -->
-        <button (click)="logout()"
-                class="grid place-items-center rounded-[10px] border-0 cursor-pointer"
-                style="width:38px;height:38px;color:#fff;
-                       background:rgba(255,255,255,0.08);
-                       border:1px solid rgba(255,255,255,0.08);"
-                title="Cerrar sesión">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>
+          <!-- Chevron -->
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               style="opacity:.55;transition:transform 0.2s;flex-shrink:0;"
+               [style.transform]="showUserMenu ? 'rotate(180deg)' : 'rotate(0deg)'">
+            <path d="M6 9l6 6 6-6"/>
           </svg>
         </button>
+
+        <!-- Backdrop para cerrar al hacer clic fuera -->
+        <div *ngIf="showUserMenu"
+             class="fixed inset-0"
+             style="z-index:40;"
+             (click)="closeUserMenu()">
+        </div>
+
+        <!-- Dropdown menu -->
+        <div *ngIf="showUserMenu"
+             class="absolute right-0 user-dropdown"
+             style="top:calc(100% + 10px);min-width:220px;z-index:50;">
+
+          <!-- Encabezado del menú -->
+          <div class="user-dropdown-header">
+            <div class="grid place-items-center rounded-full font-bold text-white flex-shrink-0"
+                 style="width:38px;height:38px;
+                        background:linear-gradient(135deg,#3a8f8b,#2e7874);
+                        font-size:13px;font-family:'Inter',sans-serif;
+                        box-shadow:inset 0 0 0 1px rgba(255,255,255,0.22), 0 4px 10px rgba(58,143,139,0.4);">
+              {{ userInitials }}
+            </div>
+            <div class="min-w-0">
+              <div class="font-semibold truncate" style="font-size:13px;color:#1a1a1a;letter-spacing:-0.01em;">{{ userName }}</div>
+              <div style="font-size:11px;color:#3a8f8b;font-weight:500;margin-top:1px;">Cliente · ESIAD ARQ</div>
+            </div>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <!-- Opciones -->
+          <div class="dropdown-section">
+            <button class="dropdown-item" (click)="closeUserMenu()">
+              <div class="dropdown-item-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+              </div>
+              <div>
+                <div class="dropdown-item-label">Ver mi perfil</div>
+                <div class="dropdown-item-sub">Datos personales y cuenta</div>
+              </div>
+            </button>
+
+            <button class="dropdown-item" (click)="closeUserMenu()">
+              <div class="dropdown-item-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+              </div>
+              <div>
+                <div class="dropdown-item-label">Preferencias</div>
+                <div class="dropdown-item-sub">Notificaciones y apariencia</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <!-- Cerrar sesión -->
+          <div class="dropdown-section">
+            <button class="dropdown-item dropdown-item-danger" (click)="logout()">
+              <div class="dropdown-item-icon dropdown-item-icon-danger">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>
+                </svg>
+              </div>
+              <div>
+                <div class="dropdown-item-label">Cerrar sesión</div>
+                <div class="dropdown-item-sub">Salir de tu cuenta</div>
+              </div>
+            </button>
+          </div>
+
+        </div>
+        <!-- fin dropdown -->
       </div>
+      <!-- fin avatar + dropdown -->
+
     </header>
 
-    <!-- Contenido de la página hija -->
+    <!-- Página hija -->
     <router-outlet></router-outlet>
 
   </main>

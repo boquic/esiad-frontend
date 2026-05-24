@@ -11,6 +11,7 @@ import { NewOrderComponent } from './features/client/orders/new-order.component'
 import { MyOrdersComponent } from './features/client/orders/my-orders.component';
 import { OrderDetailComponent } from './features/client/orders/order-detail.component';
 import { ClientPaymentComponent } from './features/client/payments/client-payment.component';
+import { ClientPaymentsListComponent } from './features/client/payments/client-payments-list.component';
 
 // Operator
 import { OperatorDashboardComponent } from './features/operator/dashboard/dashboard.component';
@@ -49,6 +50,7 @@ export const routes: Routes = [
             { path: 'orders/:id/payment',   component: ClientPaymentComponent },
             { path: 'orders/:id',           component: OrderDetailComponent },
             { path: 'orders',               component: MyOrdersComponent },
+            { path: 'payments',             component: ClientPaymentsListComponent },
             { path: '',                     redirectTo: 'dashboard', pathMatch: 'full' },
         ]
     },

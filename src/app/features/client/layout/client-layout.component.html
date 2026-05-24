@@ -116,9 +116,9 @@
          [style.justify-content]="sidebarCollapsed ? 'center' : 'flex-start'"
          [style.gap]="sidebarCollapsed ? '0' : '11px'"
          [style.padding]="sidebarCollapsed ? '10px 0' : '10px 12px'"
-         [style.background]="isActive('/client/payments') ? 'rgba(58,143,139,0.35)' : 'transparent'"
-         [style.color]="isActive('/client/payments') ? '#fff' : 'rgba(255,255,255,0.75)'"
-         [style.font-weight]="isActive('/client/payments') ? '600' : '500'"
+         [style.background]="isPaymentsActive() ? 'rgba(58,143,139,0.35)' : 'transparent'"
+         [style.color]="isPaymentsActive() ? '#fff' : 'rgba(255,255,255,0.75)'"
+         [style.font-weight]="isPaymentsActive() ? '600' : '500'"
          [title]="sidebarCollapsed ? 'Pagos' : ''">
         <svg style="flex-shrink:0;opacity:.85;" width="17" height="17" viewBox="0 0 24 24"
              fill="none" stroke="currentColor" stroke-width="2">

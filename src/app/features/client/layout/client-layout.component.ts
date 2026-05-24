@@ -18,7 +18,9 @@ import { getUserName } from '../../../core/utils/jwt.utils';
     app-client-dashboard,
     app-new-order,
     app-my-orders,
-    app-order-detail {
+    app-order-detail,
+    app-client-payment,
+    app-client-payments-list {
       display: block;
       animation: pageSlideIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -54,8 +56,10 @@ export class ClientLayoutComponent implements OnInit {
 
   get pageTitle(): string {
     if (this.currentUrl.includes('/orders/new')) return 'Nuevo pedido';
-    if (/\/orders\/\d+/.test(this.currentUrl)) return 'Detalle del pedido';
+    if (/\/orders\/.+\/payment/.test(this.currentUrl)) return 'Realizar pago';
+    if (/\/orders\/.+/.test(this.currentUrl)) return 'Detalle del pedido';
     if (this.currentUrl.includes('/orders')) return 'Mis pedidos';
+    if (this.currentUrl.includes('/payments')) return 'Pagos';
     return 'Inicio';
   }
 
@@ -66,7 +70,15 @@ export class ClientLayoutComponent implements OnInit {
   isOrdersActive(): boolean {
     return (
       this.currentUrl.startsWith('/client/orders') &&
-      !this.currentUrl.includes('/orders/new')
+      !this.currentUrl.includes('/orders/new') &&
+      !this.currentUrl.includes('/payment')
+    );
+  }
+
+  isPaymentsActive(): boolean {
+    return (
+      this.currentUrl.startsWith('/client/payments') ||
+      /\/orders\/.+\/payment/.test(this.currentUrl)
     );
   }
 

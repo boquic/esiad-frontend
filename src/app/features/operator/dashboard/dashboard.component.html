@@ -167,24 +167,24 @@
 
         <!-- Pending: can start -->
         <ng-container *ngIf="order.status === 'PENDING'">
-          <button class="op-btn primary" (click)="startOrder(order)" [disabled]="order['_loading']">
-            <svg *ngIf="!order['_loading']" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <button class="op-btn primary" (click)="startOrder(order)" [disabled]="isOrderLoading(order)">
+            <svg *ngIf="!isOrderLoading(order)" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M5 3l14 9-14 9V3z"/>
             </svg>
-            <span *ngIf="order['_loading']" class="op-spin-sm"></span>
-            {{ order['_loading'] ? 'Iniciando...' : 'Iniciar' }}
+            <span *ngIf="isOrderLoading(order)" class="op-spin-sm"></span>
+            {{ isOrderLoading(order) ? 'Iniciando...' : 'Iniciar' }}
           </button>
           <a [routerLink]="['/operator/orders', order.id]" class="op-btn ghost">Ver detalle</a>
         </ng-container>
 
         <!-- In progress: mark ready -->
         <ng-container *ngIf="order.status === 'IN_PROGRESS'">
-          <button class="op-btn success" (click)="markReady(order)" [disabled]="order['_loading']">
-            <svg *ngIf="!order['_loading']" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <button class="op-btn success" (click)="markReady(order)" [disabled]="isOrderLoading(order)">
+            <svg *ngIf="!isOrderLoading(order)" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M5 12l5 5L20 7"/>
             </svg>
-            <span *ngIf="order['_loading']" class="op-spin-sm"></span>
-            {{ order['_loading'] ? 'Guardando...' : 'Marcar como listo' }}
+            <span *ngIf="isOrderLoading(order)" class="op-spin-sm"></span>
+            {{ isOrderLoading(order) ? 'Guardando...' : 'Marcar como listo' }}
           </button>
           <a [routerLink]="['/operator/orders', order.id]" class="op-btn ghost">Ver detalle</a>
         </ng-container>

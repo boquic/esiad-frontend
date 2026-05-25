@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export interface OperatorOrder {
   id: string;
   status: string;
+  quantity?: number | string | null;
   client_id?: string;
   operator_id?: string;
   service_type_id?: string;

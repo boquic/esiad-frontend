@@ -477,6 +477,7 @@ export class OperatorDashboardComponent implements OnInit {
 
   userName  = getUserName() || 'Operario';
   orders: OperatorOrder[] = [];
+  private loadingOrderId: string | null = null;
   isLoading = true;
   error: string | null = null;
 
@@ -594,16 +595,20 @@ export class OperatorDashboardComponent implements OnInit {
     return map[status] ?? '';
   }
 
+  isOrderLoading(order: OperatorOrder): boolean {
+    return this.loadingOrderId === order.id;
+  }
+
   // ── Actions ──────────────────────────────────────────────────
   startOrder(order: OperatorOrder): void {
-    (order as any)['_loading'] = true;
+    this.loadingOrderId = order.id;
     this.operatorService.updateOrderStatus(order.id, 'IN_PROGRESS').subscribe({
       next: () => {
         order.status = 'IN_PROGRESS';
-        (order as any)['_loading'] = false;
+        this.loadingOrderId = null;
       },
       error: () => {
-        (order as any)['_loading'] = false;
+        this.loadingOrderId = null;
         this.error = 'No se pudo iniciar el pedido.';
       }
     });
@@ -621,15 +626,15 @@ export class OperatorDashboardComponent implements OnInit {
     if (!this.confirmOrder) return;
     const order = this.confirmOrder;
     this.confirmOrder = null;
-    (order as any)['_loading'] = true;
+    this.loadingOrderId = order.id;
 
     this.operatorService.updateOrderStatus(order.id, 'READY').subscribe({
       next: () => {
         order.status = 'READY';
-        (order as any)['_loading'] = false;
+        this.loadingOrderId = null;
       },
       error: () => {
-        (order as any)['_loading'] = false;
+        this.loadingOrderId = null;
         this.error = 'No se pudo cambiar el estado del pedido.';
       }
     });

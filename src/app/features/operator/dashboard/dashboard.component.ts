@@ -469,6 +469,55 @@ type UrgencyLevel = 'overdue' | 'urgent' | 'soon' | 'ok';
       width: 100%;
     }
     .op-modal-actions .op-btn { flex: 1; padding: 11px 16px; }
+
+    @media (max-width: 1200px) {
+      .op-order {
+        grid-template-columns: 6px 1fr;
+      }
+      .op-order-actions {
+        grid-column: 2;
+        min-width: 0;
+        border-left: 0;
+        border-top: 1px solid rgba(224,224,224,0.65);
+        padding: 16px 22px 18px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+      .op-order-actions .op-btn,
+      .op-order-actions .op-ready-hint {
+        flex: 1 1 160px;
+      }
+      .op-order-detail {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .op-detail-value {
+        white-space: normal;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .op-page {
+        padding: 20px 18px 40px;
+      }
+      .op-page-head {
+        gap: 14px;
+      }
+      .op-order-body {
+        grid-template-columns: 1fr;
+      }
+      .op-svc-icon {
+        width: 42px;
+        height: 42px;
+      }
+      .op-order-main {
+        gap: 10px;
+      }
+      .op-order-actions {
+        padding: 16px 18px 18px;
+      }
+    }
   `],
 })
 export class OperatorDashboardComponent implements OnInit {

@@ -471,6 +471,52 @@ import { OperatorService, OperatorOrder } from '../operator.service';
       display:flex; gap:10px; margin-top:8px; width:100%;
     }
     .opd-modal-actions .opd-btn { flex:1; padding:11px 16px; }
+
+    @media (max-width: 1200px) {
+      .opd-grid {
+        grid-template-columns: 1fr;
+      }
+      .opd-specs-table {
+        grid-template-columns: 1fr;
+      }
+      .opd-specs-table > div {
+        padding: 10px 0;
+      }
+      .opd-specs-table .v,
+      .opd-specs-table .v.mono {
+        white-space: normal;
+      }
+      .opd-order-header,
+      .opd-client-box,
+      .opd-file-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .opd-order-actions {
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .opd-page {
+        padding: 18px 16px 40px;
+      }
+      .opd-page-head {
+        gap: 14px;
+      }
+      .opd-card {
+        padding: 18px 16px;
+      }
+      .opd-specs-table {
+        gap: 0;
+      }
+      .opd-specs-table > div {
+        font-size: 13px;
+      }
+      .opd-status-pill {
+        width: fit-content;
+      }
+    }
   `],
 })
 export class OperatorOrderDetailComponent implements OnInit {

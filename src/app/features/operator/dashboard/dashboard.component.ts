@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -523,6 +523,7 @@ type UrgencyLevel = 'overdue' | 'urgent' | 'soon' | 'ok';
 export class OperatorDashboardComponent implements OnInit {
   private router          = inject(Router);
   private operatorService = inject(OperatorService);
+  private cd              = inject(ChangeDetectorRef);
 
   userName  = getUserName() || 'Operario';
   orders: OperatorOrder[] = [];
@@ -585,10 +586,12 @@ export class OperatorDashboardComponent implements OnInit {
           });
 
         this.isLoading = false;
+        this.cd.markForCheck();
       },
       error: () => {
         this.error = 'No se pudieron cargar los pedidos asignados.';
         this.isLoading = false;
+        this.cd.markForCheck();
       }
     });
   }

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -522,6 +522,7 @@ import { OperatorService, OperatorOrder } from '../operator.service';
 export class OperatorOrderDetailComponent implements OnInit {
   private route           = inject(ActivatedRoute);
   private operatorService = inject(OperatorService);
+  private cd              = inject(ChangeDetectorRef);
 
   orderId: string | null      = null;
   order: OperatorOrder | null = null;
@@ -543,6 +544,7 @@ export class OperatorOrderDetailComponent implements OnInit {
     } else {
       this.error     = 'No se proporcionó un ID de pedido.';
       this.isLoading = false;
+      this.cd.markForCheck();
     }
   }
 
@@ -555,10 +557,12 @@ export class OperatorOrderDetailComponent implements OnInit {
         this.order        = (response?.data !== undefined ? response.data : response) as OperatorOrder;
         this.internalNotes = this.order?.operator_notes || this.order?.notes || '';
         this.isLoading    = false;
+        this.cd.markForCheck();
       },
       error: () => {
         this.error     = 'Error al cargar los detalles del pedido.';
         this.isLoading = false;
+        this.cd.markForCheck();
       }
     });
   }

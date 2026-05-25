@@ -43,7 +43,7 @@ import { AdminStatsService } from '../dashboard/admin-stats.service';
 
     /* ── Sidebar ─────────────────────────────────────────────── */
     .admin-sidebar {
-      background: rgba(30,75,72,0.94);
+      background: rgba(22,58,55,0.94);
       backdrop-filter: blur(18px) saturate(140%);
       -webkit-backdrop-filter: blur(18px) saturate(140%);
       color: #e6f0ee;
@@ -52,7 +52,7 @@ import { AdminStatsService } from '../dashboard/admin-stats.service';
       position: sticky;
       top: 0;
       height: 100vh;
-      box-shadow: inset -1px 0 0 rgba(255,255,255,0.05);
+      box-shadow: inset -1px 0 0 rgba(255,255,255,0.05), 2px 0 20px rgba(0,0,0,0.15);
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -63,29 +63,30 @@ import { AdminStatsService } from '../dashboard/admin-stats.service';
       gap: 11px;
       padding: 18px;
       height: 64px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
       flex-shrink: 0;
     }
-    .admin-brand-mark {
+    .admin-brand-logo {
       width: 30px; height: 30px;
-      border-radius: 8px;
-      background: linear-gradient(135deg,#3a8f8b,#2e7874);
-      display: grid;
-      place-items: center;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -4px rgba(58,143,139,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
     }
     .admin-brand-name {
-      font-weight: 600;
-      letter-spacing: -0.01em;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       font-size: 14px;
       color: #fff;
       line-height: 1.2;
+      text-transform: uppercase;
     }
     .admin-brand-sub {
-      font-size: 10.5px;
-      color: rgba(255,255,255,0.50);
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
       margin-top: 1px;
+      letter-spacing: 0.04em;
+      font-weight: 500;
     }
 
     .admin-nav-label {
@@ -108,24 +109,21 @@ import { AdminStatsService } from '../dashboard/admin-stats.service';
       gap: 10px;
       padding: 9px 12px;
       border-radius: 8px;
-      color: rgba(255,255,255,0.70);
+      color: rgba(255,255,255,0.60);
       text-decoration: none;
       font-size: 13px;
       font-weight: 500;
       font-family: 'Inter', sans-serif;
-      border-left: 3px solid transparent;
       transition: background .14s, color .14s;
     }
     .admin-nav-link:hover {
-      background: rgba(255,255,255,0.06);
-      color: #fff;
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.90);
     }
     .admin-nav-link.active {
-      background: rgba(58,143,139,0.22);
+      background: rgba(58,143,139,0.28);
       color: #fff;
-      border-left-color: #3a8f8b;
-      border-radius: 0 8px 8px 0;
-      padding-left: 14px;
+      box-shadow: inset 2px 0 0 #3a8f8b;
       font-weight: 600;
     }
     .admin-nav-icon {
@@ -156,7 +154,7 @@ import { AdminStatsService } from '../dashboard/admin-stats.service';
     .admin-side-foot {
       margin-top: auto;
       padding: 16px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      border-top: 1px solid rgba(255,255,255,0.07);
       flex-shrink: 0;
     }
     .admin-health-card {
@@ -225,30 +223,30 @@ import { AdminStatsService } from '../dashboard/admin-stats.service';
     /* ── Header ──────────────────────────────────────────────── */
     .admin-navbar {
       height: 64px;
-      background: rgba(42,100,97,0.96);
-      backdrop-filter: blur(16px) saturate(140%);
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      background: rgba(30,68,65,0.96);
+      backdrop-filter: blur(16px) saturate(150%);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
       color: #fff;
       display: flex;
       align-items: center;
-      padding: 0 28px;
-      gap: 20px;
+      padding: 0 24px 0 14px;
+      gap: 10px;
       position: sticky;
       top: 0;
       z-index: 5;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset, 0 8px 20px -16px rgba(0,0,0,0.4);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.05) inset, 0 4px 20px -8px rgba(0,0,0,0.35);
     }
 
     .admin-crumbs {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       font-size: 13px;
-      color: rgba(255,255,255,0.65);
+      font-family: 'Inter', sans-serif;
       flex-shrink: 0;
     }
-    .admin-crumbs .sep { color: rgba(255,255,255,0.35); }
-    .admin-crumbs .here { color: #fff; font-weight: 600; }
+    .admin-crumbs span:first-child { color: rgba(255,255,255,0.50); font-weight: 400; }
+    .admin-crumbs .here { color: #fff; font-weight: 600; letter-spacing: -0.01em; }
 
     .admin-nav-right {
       margin-left: auto;
@@ -387,20 +385,19 @@ import { AdminStatsService } from '../dashboard/admin-stats.service';
 
     /* ── Collapse button (in header) ────────────────────────── */
     .admin-collapse-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px; height: 36px;
-      border-radius: 9px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.08);
-      color: rgba(255,255,255,0.75);
+      display: grid;
+      place-items: center;
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.65);
       cursor: pointer;
       flex-shrink: 0;
-      transition: background .13s, color .13s;
+      transition: background .15s;
     }
     .admin-collapse-btn:hover {
-      background: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.13);
       color: #fff;
     }
 
@@ -428,6 +425,7 @@ import { AdminStatsService } from '../dashboard/admin-stats.service';
     }
     .admin-sidebar.collapsed .admin-nav-link.active {
       padding-left: 8px;
+      box-shadow: none;
     }
     .admin-sidebar.collapsed .admin-nav-text,
     .admin-sidebar.collapsed .admin-nav-badge {

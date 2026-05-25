@@ -14,6 +14,10 @@ import { OperatorService } from '../operator.service';
   imports: [CommonModule, RouterLink, RouterOutlet],
   encapsulation: ViewEncapsulation.None,
   template: `
+<!-- Orbs decorativos de fondo -->
+<div class="op-orb-tr"></div>
+<div class="op-orb-bl"></div>
+
 <div class="op-shell" [class.collapsed]="sidebarCollapsed">
 
   <!-- ============ SIDEBAR ============ -->
@@ -21,14 +25,14 @@ import { OperatorService } from '../operator.service';
 
     <!-- Brand -->
     <div class="op-brand">
-      <div class="op-brand-mark">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M2 2h4v4H2zM8 2h4v4H8zM2 8h4v4H2z" fill="white" fill-opacity=".95"/>
-          <path d="M8 8h4v4H8z" fill="white" fill-opacity=".55"/>
+      <div class="op-brand-logo">
+        <svg viewBox="0 0 428 451" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill="rgba(255,255,255,0.90)"
+            d="M338.218 86.729C353.860 151.409 369.416 215.681 384.971 279.952C387.940 292.221 390.840 304.508 393.925 316.748C394.662 319.674 394.106 321.339 391.516 323.246C342.890 359.051 294.371 395.001 245.789 430.866C244.406 431.887 242.581 432.900 240.955 432.912C221.480 433.052 202.004 433.003 182.064 433.003C182.064 369.741 182.064 306.693 182.064 243.220C156.523 243.220 131.441 243.220 105.659 243.220C107.631 233.666 109.492 224.650 111.443 215.205C134.681 215.205 157.935 215.205 181.566 215.205C181.566 166.065 181.566 117.367 181.566 68.412C164.103 68.412 146.678 68.412 128.856 68.412C106.826 160.919 84.787 253.467 62.575 346.739C52.509 338.510 43.019 330.505 33.228 322.886C29.935 320.323 28.894 318.131 29.946 313.833C53.059 219.445 75.997 125.015 98.886 30.573C99.523 27.944 100.184 26.613 103.295 26.620C148.621 26.727 193.947 26.697 239.273 26.709C239.928 26.709 240.584 26.842 241.638 26.956C241.638 144.742 241.638 262.488 241.638 381.252C249.964 375.502 257.571 370.299 265.125 365.020C292.395 345.965 319.630 326.860 346.938 307.860C349.227 306.268 350.237 305.024 349.516 301.891C331.779 224.821 314.193 147.716 296.482 70.186C286.269 70.186 276.011 70.186 265.410 70.186C265.410 55.538 265.410 41.333 265.410 26.911C284.804 26.911 304.074 26.911 323.830 26.911C328.591 46.687 333.361 66.504 338.218 86.729Z"/>
         </svg>
       </div>
-      <div class="op-brand-text">
-        <div class="op-brand-name">SIGEPED</div>
+      <div *ngIf="!sidebarCollapsed">
+        <div class="op-brand-name">ESIAD ARQ</div>
         <div class="op-brand-sub">Operario</div>
       </div>
     </div>
@@ -101,17 +105,20 @@ import { OperatorService } from '../operator.service';
       <button class="op-collapse-btn"
               (click)="toggleSidebar()"
               [title]="sidebarCollapsed ? 'Expandir sidebar' : 'Contraer sidebar'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             [style.transform]="sidebarCollapsed ? 'rotate(180deg)' : 'rotate(0deg)'"
-             style="transition:transform .22s ease;">
-          <path d="M3 12h18M3 6h18M3 18h18"/>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M3 12h18M3 18h18"/>
         </svg>
       </button>
+
+      <!-- Separador -->
+      <div style="width:1px;height:18px;background:rgba(255,255,255,0.10);flex-shrink:0;"></div>
 
       <!-- Breadcrumbs -->
       <div class="op-crumbs">
         <span>Operario</span>
-        <span class="sep">›</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.35;">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
         <span class="here">{{ pageTitle }}</span>
       </div>
 
@@ -200,22 +207,33 @@ import { OperatorService } from '../operator.service';
   styles: [`
     /* ── Background ────────────────────────────────────────────── */
     body {
-      background:
-        radial-gradient(1100px 700px at 90% -10%, rgba(200,216,214,0.55), transparent 60%),
-        radial-gradient(900px 600px at -5% 110%, rgba(168,192,190,0.40), transparent 60%),
-        linear-gradient(160deg,#b8c4c2 0%,#8fa8a5 35%,#6b8f8c 70%,#4a6f6d 100%);
+      background: linear-gradient(160deg,#f8faf9 0%,#f1f6f4 55%,#eaf1ee 100%);
       background-attachment: fixed;
       min-height: 100vh;
     }
-    body::before {
-      content:""; position:fixed; border-radius:50%; pointer-events:none;
-      filter:blur(80px); opacity:.45; z-index:0;
-      width:360px; height:360px; background:#c8d8d6; top:-100px; right:-80px;
+
+    /* Orbs decorativos (mismo estilo que client y admin) */
+    .op-orb-tr {
+      position: fixed;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: #b8d8d4;
+      top: -160px; right: -100px;
+      opacity: .18;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
     }
-    body::after {
-      content:""; position:fixed; border-radius:50%; pointer-events:none;
-      filter:blur(80px); opacity:.30; z-index:0;
-      width:420px; height:420px; background:#3d8c89; bottom:-140px; left:-120px;
+    .op-orb-bl {
+      position: fixed;
+      width: 480px; height: 480px;
+      border-radius: 50%;
+      background: #7ab8b4;
+      bottom: -160px; left: -120px;
+      opacity: .13;
+      filter: blur(90px);
+      pointer-events: none;
+      z-index: 0;
     }
 
     /* ── Page enter animation ──────────────────────────────────── */
@@ -246,7 +264,7 @@ import { OperatorService } from '../operator.service';
 
     /* ── Sidebar ─────────────────────────────────────────────────── */
     .op-sidebar {
-      background: rgba(30,75,72,0.92);
+      background: rgba(22,58,55,0.94);
       backdrop-filter: blur(18px) saturate(140%);
       -webkit-backdrop-filter: blur(18px) saturate(140%);
       color: #e6f0ee;
@@ -255,7 +273,7 @@ import { OperatorService } from '../operator.service';
       position: sticky;
       top: 0;
       height: 100vh;
-      box-shadow: inset -1px 0 0 rgba(255,255,255,0.05);
+      box-shadow: inset -1px 0 0 rgba(255,255,255,0.05), 2px 0 20px rgba(0,0,0,0.15);
       overflow-y: auto;
       overflow-x: hidden;
       transition: width .22s cubic-bezier(0.4,0,0.2,1);
@@ -268,27 +286,30 @@ import { OperatorService } from '../operator.service';
       gap: 11px;
       padding: 18px;
       height: 64px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
       flex-shrink: 0;
     }
-    .op-brand-mark {
+    .op-brand-logo {
       width: 30px; height: 30px;
-      border-radius: 8px;
-      background: linear-gradient(135deg,#3a8f8b,#2e7874);
-      display: grid; place-items: center;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.18) inset, 0 4px 14px -4px rgba(58,143,139,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-shrink: 0;
     }
     .op-brand-name {
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      font-size: 14px;
       color: #fff;
+      text-transform: uppercase;
+      line-height: 1.2;
     }
     .op-brand-sub {
-      font-size: 11px;
-      color: rgba(255,255,255,0.55);
+      font-size: 10px;
+      color: rgba(255,255,255,0.45);
       margin-top: 1px;
+      letter-spacing: 0.04em;
+      font-weight: 500;
     }
 
     /* Nav label */
@@ -312,28 +333,26 @@ import { OperatorService } from '../operator.service';
     .op-nav-link {
       display: flex;
       align-items: center;
-      gap: 11px;
-      padding: 10px 12px;
+      gap: 10px;
+      padding: 9px 12px;
       border-radius: 8px;
-      color: rgba(255,255,255,0.75);
+      color: rgba(255,255,255,0.60);
       text-decoration: none;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 500;
-      border-left: 3px solid transparent;
+      font-family: 'Inter', sans-serif;
       transition: background .14s, color .14s;
       white-space: nowrap;
       overflow: hidden;
     }
     .op-nav-link:hover {
-      background: rgba(255,255,255,0.06);
-      color: #fff;
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.90);
     }
     .op-nav-link.active {
-      background: rgba(58,143,139,0.22);
+      background: rgba(58,143,139,0.28);
       color: #fff;
-      border-left-color: #3a8f8b;
-      border-radius: 0 8px 8px 0;
-      padding-left: 14px;
+      box-shadow: inset 2px 0 0 #3a8f8b;
       font-weight: 600;
     }
     .op-nav-icon {
@@ -360,7 +379,7 @@ import { OperatorService } from '../operator.service';
     .op-side-foot {
       margin-top: auto;
       padding: 18px;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      border-top: 1px solid rgba(255,255,255,0.07);
       flex-shrink: 0;
     }
     .op-specs-label {
@@ -447,10 +466,11 @@ import { OperatorService } from '../operator.service';
     }
     .op-sidebar.collapsed .op-nav-link {
       justify-content: center;
-      padding: 10px 8px;
+      padding: 9px 8px;
     }
     .op-sidebar.collapsed .op-nav-link.active {
       padding-left: 8px;
+      box-shadow: none;
     }
     .op-sidebar.collapsed .op-side-foot {
       padding: 12px 6px;
@@ -463,14 +483,14 @@ import { OperatorService } from '../operator.service';
     /* ── Navbar ──────────────────────────────────────────────────── */
     .op-navbar {
       height: 64px;
-      background: rgba(42,100,97,0.95);
-      backdrop-filter: blur(16px) saturate(140%);
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      background: rgba(30,68,65,0.96);
+      backdrop-filter: blur(16px) saturate(150%);
+      -webkit-backdrop-filter: blur(16px) saturate(150%);
       color: #fff;
       display: flex;
       align-items: center;
-      padding: 0 28px;
-      gap: 20px;
+      padding: 0 24px 0 14px;
+      gap: 10px;
       position: sticky;
       top: 0;
       z-index: 5;
@@ -479,20 +499,19 @@ import { OperatorService } from '../operator.service';
 
     /* Collapse button */
     .op-collapse-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px; height: 36px;
-      border-radius: 9px;
-      border: 1px solid rgba(255,255,255,0.10);
-      background: rgba(255,255,255,0.08);
-      color: rgba(255,255,255,0.75);
+      display: grid;
+      place-items: center;
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(255,255,255,0.07);
+      color: rgba(255,255,255,0.65);
       cursor: pointer;
       flex-shrink: 0;
-      transition: background .13s, color .13s;
+      transition: background .15s;
     }
     .op-collapse-btn:hover {
-      background: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.13);
       color: #fff;
     }
 
@@ -500,13 +519,13 @@ import { OperatorService } from '../operator.service';
     .op-crumbs {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       font-size: 13px;
-      color: rgba(255,255,255,0.65);
+      font-family: 'Inter', sans-serif;
       flex-shrink: 0;
     }
-    .op-crumbs .sep { color: rgba(255,255,255,0.35); }
-    .op-crumbs .here { color: #fff; font-weight: 600; }
+    .op-crumbs span:first-child { color: rgba(255,255,255,0.50); font-weight: 400; }
+    .op-crumbs .here { color: #fff; font-weight: 600; letter-spacing: -0.01em; }
 
     /* Right side */
     .op-nav-right {

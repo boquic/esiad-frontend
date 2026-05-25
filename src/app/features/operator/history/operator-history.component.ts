@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { OperatorService, OperatorOrder } from '../operator.service';
@@ -138,6 +138,7 @@ import { OperatorService, OperatorOrder } from '../operator.service';
 })
 export class OperatorHistoryComponent implements OnInit {
   private operatorService = inject(OperatorService);
+  private cd              = inject(ChangeDetectorRef);
 
   historyOrders: OperatorOrder[] = [];
   isLoading = true;
@@ -158,10 +159,12 @@ export class OperatorHistoryComponent implements OnInit {
           (o: OperatorOrder) => o.status === 'READY' || o.status === 'DELIVERED'
         );
         this.isLoading = false;
+        this.cd.markForCheck();
       },
       error: () => {
         this.error = 'Error al cargar el historial de pedidos.';
         this.isLoading = false;
+        this.cd.markForCheck();
       }
     });
   }

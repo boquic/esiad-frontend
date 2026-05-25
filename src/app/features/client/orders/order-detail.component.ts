@@ -30,6 +30,11 @@ export class OrderDetailComponent {
   order: ClientOrderDetail | null = null;
   loading = false;
   error = '';
+  
+  confirmingPickup = false;
+  showPickupModal = false;
+  pickupSuccessMessage = '';
+  downloadingFileId: string | null = null;
 
   readonly userName: string = getUserName() || 'Usuario';
 
@@ -53,23 +58,81 @@ export class OrderDetailComponent {
     this.loadOrder(orderId);
   }
 
-  loadOrder(orderId: string): void {
-    this.loading = true;
+  loadOrder(orderId: string, silent = false): void {
+    if (!silent) this.loading = true;
     this.error = '';
     this.ordersService.getOrderById(orderId).subscribe({
       next: (response) => {
         this.order = this.ordersService.unwrapResource(response);
-        this.loading = false;
+        if (!silent) this.loading = false;
         if (!this.order) {
           this.error = 'No se encontro el detalle del pedido.';
         }
         this.cd.detectChanges();
       },
       error: (error: { error?: { message?: string } }) => {
-        this.loading = false;
+        if (!silent) this.loading = false;
         this.error = error.error?.message ?? 'No se pudo cargar el detalle del pedido.';
         this.cd.detectChanges();
       },
+    });
+  }
+
+  openPickupModal(): void {
+    if (this.order?.status !== 'READY') return;
+    this.showPickupModal = true;
+  }
+
+  closePickupModal(): void {
+    if (!this.confirmingPickup) {
+      this.showPickupModal = false;
+    }
+  }
+
+  confirmPickup(): void {
+    if (!this.order || this.order.status !== 'READY') return;
+    
+    this.confirmingPickup = true;
+    this.error = '';
+    this.pickupSuccessMessage = '';
+    
+    console.log('pickup_confirm_attempt', { orderId: this.order.id });
+
+    this.ordersService.confirmPickup(this.order.id).subscribe({
+      next: (response) => {
+        console.log('pickup_confirm_success', { orderId: this.order?.id });
+        this.confirmingPickup = false;
+        this.showPickupModal = false;
+        
+        if (this.order) {
+          this.pickupSuccessMessage = 'Pedido entregado';
+          this.loadOrder(this.order.id, true);
+        } else {
+          this.cd.detectChanges();
+        }
+      },
+      error: (error: any) => {
+        console.log('pickup_confirm_fail', { orderId: this.order?.id, error });
+        this.confirmingPickup = false;
+        this.showPickupModal = false;
+
+        if (error.status === 401 || error.status === 403) {
+            this.router.navigate(['/login']);
+            return;
+        }
+
+        if (error.status === 404) {
+            this.error = 'Pedido no encontrado';
+        } else {
+            this.error = error.error?.message ?? 'No se puede confirmar la recogida: estado inválido';
+        }
+        
+        if (this.order) {
+            this.loadOrder(this.order.id);
+        } else {
+            this.cd.detectChanges();
+        }
+      }
     });
   }
 
@@ -78,6 +141,47 @@ export class OrderDetailComponent {
       localStorage.removeItem('token');
     }
     this.router.navigate(['/login']);
+  }
+
+  downloadFile(file: OrderFile): void {
+    if (!this.order || !file.id) return;
+    this.downloadingFileId = file.id;
+    
+    this.ordersService.downloadOrderFile(this.order.id, file.id).subscribe({
+      next: (blob) => {
+        this.downloadingFileId = null;
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const fileName = (file.file_url ?? file.fileUrl ?? 'archivo').split('/').pop() || `archivo-${file.id}`;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        this.downloadingFileId = null;
+        this.error = 'No se pudo descargar el archivo.';
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  getOperatorName(op: any): string {
+    if (!op) return 'Operario asignado';
+    const first = op.first_name || op.firstName || '';
+    const last = op.last_name || op.lastName || '';
+    return `${first} ${last}`.trim() || op.name || 'Operario asignado';
+  }
+
+  getOperatorInitials(op: any): string {
+    const name = this.getOperatorName(op);
+    const parts = name.trim().split(/\s+/);
+    const a = (parts[0]?.[0] ?? '').toUpperCase();
+    const b = (parts[1]?.[0] ?? '').toUpperCase();
+    return a + b;
   }
 
   getStatusMeta(status: string | null | undefined): OrderStatusMeta {

@@ -59,6 +59,13 @@ export type ClientOrder = {
   material?: {
     name?: string | null;
   } | null;
+  operator?: {
+    first_name?: string | null;
+    firstName?: string | null;
+    last_name?: string | null;
+    lastName?: string | null;
+    name?: string | null;
+  } | null;
   [key: string]: unknown;
 };
 
@@ -155,6 +162,14 @@ export class ClientOrdersService {
 
   confirmOrder(orderId: string): Observable<ConfirmOrderResponse> {
     return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/confirm`, {});
+  }
+
+  confirmPickup(orderId: string): Observable<ConfirmOrderResponse> {
+    return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/confirm-pickup`, {});
+  }
+
+  downloadOrderFile(orderId: string, fileId: string): Observable<Blob> {
+    return this.http.get(`/api/orders/${orderId}/files/${fileId}/download`, { responseType: 'blob' });
   }
 
   normalizePricingModel(service: ServiceOption | null | undefined): PricingModel {

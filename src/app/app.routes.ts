@@ -15,9 +15,11 @@ import { ClientPaymentsListComponent } from './features/client/payments/client-p
 import { ClientNotificationsComponent } from './features/client/notifications/client-notifications.component';
 
 // Operator
+import { OperatorLayoutComponent } from './features/operator/layout/operator-layout.component';
 import { OperatorDashboardComponent } from './features/operator/dashboard/dashboard.component';
 import { OperatorOrderDetailComponent } from './features/operator/order-detail/order-detail.component';
 import { OperatorHistoryComponent } from './features/operator/history/operator-history.component';
+import { OperatorProfileComponent } from './features/operator/profile/operator-profile.component';
 
 // Admin layout + pages
 import { AdminLayoutComponent } from './features/admin/layout/admin-layout.component';
@@ -58,24 +60,19 @@ export const routes: Routes = [
         ]
     },
 
-    // ── Operador ─────────────────────────────────────────────────────────────
+    // ── Operador (layout compartido) ─────────────────────────────────────────
     {
-        path: 'operator/dashboard',
-        component: OperatorDashboardComponent,
+        path: 'operator',
+        component: OperatorLayoutComponent,
         canActivate: [authGuard, roleGuard],
-        data: { roles: ['OPERATOR'] }
-    },
-    {
-        path: 'operator/orders/:id',
-        component: OperatorOrderDetailComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['OPERATOR'] }
-    },
-    {
-        path: 'operator/history',
-        component: OperatorHistoryComponent,
-        canActivate: [authGuard, roleGuard],
-        data: { roles: ['OPERATOR'] }
+        data: { roles: ['OPERATOR'] },
+        children: [
+            { path: 'dashboard',      component: OperatorDashboardComponent },
+            { path: 'orders/:id',     component: OperatorOrderDetailComponent },
+            { path: 'history',        component: OperatorHistoryComponent },
+            { path: 'profile',        component: OperatorProfileComponent },
+            { path: '',               redirectTo: 'dashboard', pathMatch: 'full' },
+        ]
     },
 
     // ── Admin (layout compartido) ─────────────────────────────────────────

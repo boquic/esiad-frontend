@@ -1,87 +1,87 @@
-<div class="min-h-screen font-sans bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="mb-8">
-      <a routerLink="/operator/dashboard" class="text-teal-600 hover:text-teal-800 flex items-center text-sm mb-4 transition-colors">
-        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Volver a la Cola de Trabajo
-      </a>
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Mi Historial de Producción</h1>
-          <p class="mt-2 text-sm text-gray-500">Listado de todos los pedidos que has finalizado exitosamente.</p>
-        </div>
+<div class="oph-page">
+
+  <!-- Page header -->
+  <div class="oph-page-head">
+    <div>
+      <div class="oph-title-row">
+        <h1 class="oph-page-title">Historial de producción</h1>
+        <span *ngIf="!isLoading" class="oph-count-badge">
+          {{ completedCount }} pedido{{ completedCount !== 1 ? 's' : '' }} completado{{ completedCount !== 1 ? 's' : '' }}
+        </span>
       </div>
-    </div>
-
-    <!-- Stats Overview -->
-    <div *ngIf="!isLoading" class="mb-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
-      <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-100">
-        <div class="px-4 py-5 sm:p-6">
-          <dt class="text-sm font-medium text-gray-500 truncate">Total Pedidos Completados</dt>
-          <dd class="mt-1 text-3xl font-semibold text-teal-600">{{ completedCount }}</dd>
-        </div>
-      </div>
-      <!-- Pueden agregarse más métricas como "Tiempo promedio" si se procesan las fechas -->
-    </div>
-
-    <!-- Messages -->
-    <div *ngIf="error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-r-md">
-      <p class="text-sm text-red-700">{{ error }}</p>
-    </div>
-
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="flex justify-center py-12">
-      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600"></div>
-    </div>
-
-    <!-- Empty State -->
-    <div *ngIf="!isLoading && historyOrders.length === 0" class="bg-white shadow overflow-hidden sm:rounded-lg py-12 text-center">
-      <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </div>
-      <h3 class="mt-2 text-lg font-medium text-gray-900">Sin historial aún</h3>
-      <p class="mt-1 text-sm text-gray-500">Cuando marques pedidos como LISTOS, aparecerán aquí.</p>
-    </div>
-
-    <!-- History Table -->
-    <div *ngIf="!isLoading && historyOrders.length > 0" class="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-100">
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Pedido</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Servicio</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado Actual</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acción</th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr *ngFor="let order of historyOrders" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.id.slice(0, 8) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.service_type?.name }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.material?.name }}</td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                      [ngClass]="{
-                        'bg-green-100 text-green-800': order.status === 'READY',
-                        'bg-blue-100 text-blue-800': order.status === 'DELIVERED'
-                      }">
-                  {{ order.status === 'READY' ? 'Listo (En local)' : 'Entregado al Cliente' }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <a [routerLink]="['/operator/orders', order.id]" class="text-teal-600 hover:text-teal-900">Ver Detalles</a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <p class="oph-page-sub">Pedidos que marcaste como listos o que fueron entregados al cliente</p>
     </div>
   </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="oph-alert-error">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.01"/>
+    </svg>
+    {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="oph-loading">
+    <div class="oph-spinner"></div>
+    <p>Cargando historial...</p>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!isLoading && historyOrders.length === 0" class="oph-empty">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+      <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+    </svg>
+    <p class="oph-empty-title">Sin historial aún</p>
+    <p class="oph-empty-sub">Cuando marques pedidos como LISTOS, aparecerán aquí.</p>
+  </div>
+
+  <!-- Table card -->
+  <div *ngIf="!isLoading && historyOrders.length > 0" class="oph-card">
+
+    <div class="oph-table-wrap">
+      <table class="oph-table">
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Servicio</th>
+            <th>Material</th>
+            <th>Cliente</th>
+            <th>Entrega estimada</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of historyOrders">
+            <td>
+              <span class="oph-code">#{{ order.id.slice(0,8).toUpperCase() }}</span>
+            </td>
+            <td class="oph-cell-main">{{ order.service_type?.name || '—' }}</td>
+            <td class="oph-cell-muted">{{ order.material?.name || '—' }}</td>
+            <td class="oph-cell-main">
+              {{ order.client?.first_name }} {{ order.client?.last_name }}
+            </td>
+            <td class="oph-cell-mono">
+              {{ order.estimated_delivery_at ? (order.estimated_delivery_at | date:'dd/MM/yyyy') : '—' }}
+            </td>
+            <td>
+              <span class="oph-badge" [class]="order.status === 'READY' ? 'ready' : 'delivered'">
+                {{ order.status === 'READY' ? 'Listo (en local)' : 'Entregado al cliente' }}
+              </span>
+            </td>
+            <td>
+              <a [routerLink]="['/operator/orders', order.id]" class="oph-link-btn">
+                Ver detalle
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>

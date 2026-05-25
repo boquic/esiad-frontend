@@ -40,7 +40,7 @@ export class AdminPaymentsComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        this.error = 'Error al cargar pagos pendientes.';
+        this.error = `Error al cargar pagos pendientes: ${err.status} ${err.statusText || err.message || ''}`;
         this.isLoading = false;
         console.error(err);
       }

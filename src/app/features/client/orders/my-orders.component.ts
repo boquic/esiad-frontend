@@ -72,11 +72,15 @@ export class MyOrdersComponent {
 
     switch (normalizedStatus) {
       case 'BUDGETED':
-        return { label: 'Presupuestado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
+        return { label: 'Presupuesto generado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
+      case 'CLIENT_REVIEW_PENDING':
+        return { label: 'Revisión del cliente pendiente', classes: 'border-orange-300 bg-orange-50 text-orange-700' };
+      case 'OPERATOR_REVIEW_PENDING':
+        return { label: 'En revisión del operario', classes: 'border-indigo-300 bg-indigo-50 text-indigo-700' };
       case 'PENDING_PAYMENT':
         return { label: 'Pendiente de pago', classes: 'border-purple-300 bg-purple-50 text-purple-700' };
       case 'IN_PROGRESS':
-        return { label: 'En proceso', classes: 'border-blue-300 bg-blue-50 text-blue-700' };
+        return { label: 'En producción', classes: 'border-blue-300 bg-blue-50 text-blue-700' };
       case 'READY':
         return { label: 'Listo para recoger', classes: 'border-green-300 bg-green-50 text-green-700' };
       case 'DELIVERED':
@@ -84,7 +88,7 @@ export class MyOrdersComponent {
       case 'CANCELLED':
         return { label: 'Cancelado', classes: 'border-red-300 bg-red-50 text-red-700' };
       case 'EXPIRED':
-        return { label: 'Expirado', classes: 'border-gray-300 bg-gray-100 text-gray-500' };
+        return { label: 'Presupuesto vencido', classes: 'border-gray-300 bg-gray-100 text-gray-500' };
       default:
         return { label: normalizedStatus || 'Desconocido', classes: 'border-gray-300 bg-gray-100 text-gray-500' };
     }

@@ -35,6 +35,8 @@ export type MaterialOption = {
 
 export type OrderStatus =
   | 'BUDGETED'
+  | 'CLIENT_REVIEW_PENDING'
+  | 'OPERATOR_REVIEW_PENDING'
   | 'PENDING_PAYMENT'
   | 'IN_PROGRESS'
   | 'READY'
@@ -47,9 +49,19 @@ export type ClientOrder = {
   status: OrderStatus | string;
   payment_condition?: string | null;
   estimated_price?: number | string | null;
+  final_price?: number | string | null;
   advance_amount?: number | string | null;
   budget_expires_at?: string | null;
   created_at?: string | null;
+  estimated_delivery_at?: string | null;
+  client_review_notes?: string | null;
+  client_reviewed_at?: string | null;
+  operator_notes?: string | null;
+  operator_reviewed_at?: string | null;
+  operator_price_adjustment_reason?: string | null;
+  production_time_estimate?: string | null;
+  production_started_at?: string | null;
+  production_ready_at?: string | null;
   service_type?: {
     name?: string | null;
   } | null;
@@ -164,6 +176,15 @@ export class ClientOrdersService {
     return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/confirm`, {});
   }
 
+  confirmReview(orderId: string, notes?: string): Observable<ConfirmOrderResponse> {
+    const body = notes ? { notes } : {};
+    return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/confirm-review`, body);
+  }
+
+  sendObservation(orderId: string, observation: string): Observable<ConfirmOrderResponse> {
+    return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/observations`, { observation });
+  }
+
   confirmPickup(orderId: string): Observable<ConfirmOrderResponse> {
     return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/confirm-pickup`, {});
   }
@@ -254,6 +275,28 @@ export class ClientOrdersService {
     const rawPrice = order?.estimated_price;
     const parsed = typeof rawPrice === 'number' ? rawPrice : Number(rawPrice ?? 0);
     return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  getOrderFinalPrice(order: ClientOrder | null | undefined): number | null {
+    const rawPrice = order?.final_price;
+    if (rawPrice === null || rawPrice === undefined) return null;
+    const parsed = typeof rawPrice === 'number' ? rawPrice : Number(rawPrice);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  /** Monto requerido para pago: advance_amount > final_price > estimated_price */
+  getPaymentRequiredAmount(order: ClientOrder | null | undefined): number {
+    const adv = order?.advance_amount;
+    if (adv !== null && adv !== undefined) {
+      const p = typeof adv === 'number' ? adv : Number(adv);
+      if (Number.isFinite(p) && p > 0) return p;
+    }
+    const fin = order?.final_price;
+    if (fin !== null && fin !== undefined) {
+      const p = typeof fin === 'number' ? fin : Number(fin);
+      if (Number.isFinite(p) && p > 0) return p;
+    }
+    return this.getOrderEstimatedPrice(order);
   }
 
   getPaymentAmount(payment: OrderPayment | null | undefined): number {

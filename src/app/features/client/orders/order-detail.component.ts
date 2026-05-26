@@ -1,6 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { getUserName } from '../../../core/utils/jwt.utils';
 import {
   ClientOrderDetail,
@@ -18,7 +19,7 @@ type OrderStatusMeta = {
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe],
+  imports: [CommonModule, RouterLink, DatePipe, FormsModule],
   templateUrl: './order-detail.component.html',
 })
 export class OrderDetailComponent {
@@ -30,11 +31,26 @@ export class OrderDetailComponent {
   order: ClientOrderDetail | null = null;
   loading = false;
   error = '';
-  
+
+  // Pickup
   confirmingPickup = false;
   showPickupModal = false;
   pickupSuccessMessage = '';
   downloadingFileId: string | null = null;
+
+  // Confirm review (BUDGETED / CLIENT_REVIEW_PENDING)
+  confirmingReview = false;
+  confirmReviewNotes = '';
+  showConfirmReviewModal = false;
+
+  // Send observation
+  submittingObservation = false;
+  observationText = '';
+  observationError = '';
+  observationSuccess = '';
+
+  // Generic success message
+  actionSuccessMessage = '';
 
   readonly userName: string = getUserName() || 'Usuario';
 
@@ -136,6 +152,71 @@ export class OrderDetailComponent {
     });
   }
 
+  // ── Confirm Review ──────────────────────────────────────────────────────
+  openConfirmReviewModal(): void {
+    const s = this.order?.status;
+    if (s !== 'BUDGETED' && s !== 'CLIENT_REVIEW_PENDING') return;
+    this.confirmReviewNotes = '';
+    this.showConfirmReviewModal = true;
+  }
+
+  closeConfirmReviewModal(): void {
+    if (!this.confirmingReview) {
+      this.showConfirmReviewModal = false;
+    }
+  }
+
+  confirmReview(): void {
+    if (!this.order) return;
+    this.confirmingReview = true;
+    this.error = '';
+    this.actionSuccessMessage = '';
+
+    this.ordersService.confirmReview(this.order.id, this.confirmReviewNotes || undefined).subscribe({
+      next: () => {
+        this.confirmingReview = false;
+        this.showConfirmReviewModal = false;
+        this.actionSuccessMessage = 'Revisión confirmada correctamente.';
+        if (this.order) this.loadOrder(this.order.id, true);
+        else this.cd.detectChanges();
+      },
+      error: (err: any) => {
+        this.confirmingReview = false;
+        this.showConfirmReviewModal = false;
+        this.error = err?.error?.message ?? 'No se pudo confirmar la revisión.';
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  // ── Send Observation ─────────────────────────────────────────────────────
+  submitObservation(): void {
+    if (!this.order) return;
+    const text = this.observationText.trim();
+    if (!text) {
+      this.observationError = 'La observación no puede estar vacía.';
+      return;
+    }
+    this.submittingObservation = true;
+    this.observationError = '';
+    this.observationSuccess = '';
+
+    this.ordersService.sendObservation(this.order.id, text).subscribe({
+      next: () => {
+        this.submittingObservation = false;
+        this.observationSuccess = 'Observación enviada correctamente.';
+        this.observationText = '';
+        if (this.order) this.loadOrder(this.order.id, true);
+        else this.cd.detectChanges();
+      },
+      error: (err: any) => {
+        this.submittingObservation = false;
+        this.observationError = err?.error?.message ?? 'No se pudo enviar la observación.';
+        this.cd.detectChanges();
+      },
+    });
+  }
+
   logout(): void {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
@@ -188,11 +269,15 @@ export class OrderDetailComponent {
     const normalizedStatus = String(status ?? '').trim().toUpperCase() as OrderStatus;
     switch (normalizedStatus) {
       case 'BUDGETED':
-        return { label: 'Presupuestado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
+        return { label: 'Presupuesto generado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
+      case 'CLIENT_REVIEW_PENDING':
+        return { label: 'Revisión del cliente pendiente', classes: 'border-orange-300 bg-orange-50 text-orange-700' };
+      case 'OPERATOR_REVIEW_PENDING':
+        return { label: 'En revisión del operario', classes: 'border-indigo-300 bg-indigo-50 text-indigo-700' };
       case 'PENDING_PAYMENT':
         return { label: 'Pendiente de pago', classes: 'border-purple-300 bg-purple-50 text-purple-700' };
       case 'IN_PROGRESS':
-        return { label: 'En proceso', classes: 'border-blue-300 bg-blue-50 text-blue-700' };
+        return { label: 'En producción', classes: 'border-blue-300 bg-blue-50 text-blue-700' };
       case 'READY':
         return { label: 'Listo para recoger', classes: 'border-green-300 bg-green-50 text-green-700' };
       case 'DELIVERED':
@@ -200,7 +285,7 @@ export class OrderDetailComponent {
       case 'CANCELLED':
         return { label: 'Cancelado', classes: 'border-red-300 bg-red-50 text-red-700' };
       case 'EXPIRED':
-        return { label: 'Expirado', classes: 'border-gray-300 bg-gray-100 text-gray-500' };
+        return { label: 'Presupuesto vencido', classes: 'border-gray-300 bg-gray-100 text-gray-500' };
       default:
         return { label: normalizedStatus || 'Desconocido', classes: 'border-gray-300 bg-gray-100 text-gray-500' };
     }
@@ -216,6 +301,19 @@ export class OrderDetailComponent {
 
   getEstimatedPrice(): number {
     return this.ordersService.getOrderEstimatedPrice(this.order);
+  }
+
+  getFinalPrice(): number | null {
+    return this.ordersService.getOrderFinalPrice(this.order);
+  }
+
+  getPaymentRequiredAmount(): number {
+    return this.ordersService.getPaymentRequiredAmount(this.order);
+  }
+
+  hasPriceAdjustment(): boolean {
+    const fp = this.getFinalPrice();
+    return fp !== null && !!this.order?.operator_price_adjustment_reason;
   }
 
   getOrderFiles(): OrderFile[] {

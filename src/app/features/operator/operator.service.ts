@@ -16,6 +16,17 @@ export interface OperatorOrder {
   updated_at?: string;
   notes?: string;
   operator_notes?: string | null;
+  // Nuevos campos del flujo de revisión
+  estimated_price?: number | string | null;
+  final_price?: number | string | null;
+  advance_amount?: number | string | null;
+  client_review_notes?: string | null;
+  client_reviewed_at?: string | null;
+  operator_reviewed_at?: string | null;
+  operator_price_adjustment_reason?: string | null;
+  production_time_estimate?: string | null;
+  production_started_at?: string | null;
+  production_ready_at?: string | null;
   client?: {
     id: string;
     first_name: string;
@@ -84,5 +95,21 @@ export class OperatorService {
 
   updateOrderNotes(orderId: string, notes: string): Observable<GenericResponse> {
     return this.http.patch<GenericResponse>(`/api/operator/orders/${orderId}/notes`, { notes });
+  }
+
+  reviewOrder(orderId: string, action: 'APPROVE' | 'RETURN_TO_CLIENT' | 'REJECT', notes?: string): Observable<GenericResponse> {
+    const body: Record<string, string> = { action };
+    if (notes) body['notes'] = notes;
+    return this.http.post<GenericResponse>(`/api/operator/orders/${orderId}/review`, body);
+  }
+
+  adjustOrderPrice(orderId: string, final_price: number, reason: string): Observable<GenericResponse> {
+    return this.http.patch<GenericResponse>(`/api/operator/orders/${orderId}/price`, { final_price, reason });
+  }
+
+  updateProductionTime(orderId: string, production_time_estimate: string, estimated_delivery_at?: string): Observable<GenericResponse> {
+    const body: Record<string, string> = { production_time_estimate };
+    if (estimated_delivery_at) body['estimated_delivery_at'] = estimated_delivery_at;
+    return this.http.patch<GenericResponse>(`/api/operator/orders/${orderId}/production-time`, body);
   }
 }

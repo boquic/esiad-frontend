@@ -29,8 +29,11 @@
       <label>Estado</label>
       <select class="op-select" [(ngModel)]="filterStatus">
         <option value="">Todos</option>
-        <option value="PENDING">Pendiente</option>
-        <option value="IN_PROGRESS">En proceso</option>
+        <option value="BUDGETED">Presupuestado</option>
+        <option value="CLIENT_REVIEW_PENDING">Revisión cliente</option>
+        <option value="OPERATOR_REVIEW_PENDING">Pendiente revisión ★</option>
+        <option value="PENDING_PAYMENT">Pago pendiente</option>
+        <option value="IN_PROGRESS">En producción</option>
         <option value="READY">Listo</option>
       </select>
     </div>
@@ -165,14 +168,33 @@
       <!-- Actions -->
       <div class="op-order-actions">
 
-        <!-- Pending: can start -->
-        <ng-container *ngIf="order.status === 'PENDING'">
+        <!-- OPERATOR_REVIEW_PENDING: acción principal -->
+        <ng-container *ngIf="order.status === 'OPERATOR_REVIEW_PENDING'">
+          <a [routerLink]="['/operator/orders', order.id]" class="op-btn primary">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Revisar ahora
+          </a>
+          <div *ngIf="order.client_review_notes" class="op-ready-hint" style="color:#9a3412;font-size:11px;text-align:left;">
+            Obs: {{ order.client_review_notes | slice:0:40 }}{{ order.client_review_notes.length > 40 ? '…' : '' }}
+          </div>
+        </ng-container>
+
+        <!-- CLIENT_REVIEW_PENDING: esperando cliente -->
+        <ng-container *ngIf="order.status === 'CLIENT_REVIEW_PENDING'">
+          <a [routerLink]="['/operator/orders', order.id]" class="op-btn ghost">Ver detalle</a>
+          <div class="op-ready-hint" style="color:#92400e;">Esperando al cliente</div>
+        </ng-container>
+
+        <!-- PENDING_PAYMENT: esperando pago -->
+        <ng-container *ngIf="order.status === 'PENDING_PAYMENT'">
           <button class="op-btn primary" (click)="startOrder(order)" [disabled]="isOrderLoading(order)">
             <svg *ngIf="!isOrderLoading(order)" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M5 3l14 9-14 9V3z"/>
             </svg>
             <span *ngIf="isOrderLoading(order)" class="op-spin-sm"></span>
-            {{ isOrderLoading(order) ? 'Iniciando...' : 'Iniciar' }}
+            {{ isOrderLoading(order) ? 'Iniciando...' : 'Iniciar producción' }}
           </button>
           <a [routerLink]="['/operator/orders', order.id]" class="op-btn ghost">Ver detalle</a>
         </ng-container>
@@ -200,8 +222,8 @@
           </div>
         </ng-container>
 
-        <!-- Other statuses -->
-        <ng-container *ngIf="order.status !== 'PENDING' && order.status !== 'IN_PROGRESS' && order.status !== 'READY'">
+        <!-- BUDGETED / otros: solo ver detalle -->
+        <ng-container *ngIf="order.status !== 'OPERATOR_REVIEW_PENDING' && order.status !== 'CLIENT_REVIEW_PENDING' && order.status !== 'PENDING_PAYMENT' && order.status !== 'IN_PROGRESS' && order.status !== 'READY'">
           <a [routerLink]="['/operator/orders', order.id]" class="op-btn ghost">Ver detalle</a>
         </ng-container>
 

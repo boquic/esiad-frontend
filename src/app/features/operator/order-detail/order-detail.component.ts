@@ -536,6 +536,24 @@ export class OperatorOrderDetailComponent implements OnInit {
   isChangingStatus = false;
   showReadyModal   = false;
 
+  // ── Review (OPERATOR_REVIEW_PENDING) ────────────────────────────────────
+  showReviewPanel      = false;
+  reviewAction: 'APPROVE' | 'RETURN_TO_CLIENT' | 'REJECT' | '' = '';
+  reviewNotes          = '';
+  isSubmittingReview   = false;
+
+  // ── Adjust Price ─────────────────────────────────────────────────────────
+  showPricePanel       = false;
+  priceAdjustValue: number | null = null;
+  priceAdjustReason    = '';
+  isSubmittingPrice    = false;
+
+  // ── Production Time ──────────────────────────────────────────────────────
+  showProductionTimePanel   = false;
+  productionTimeValue       = '';
+  estimatedDeliveryAtValue  = '';
+  isSubmittingProductionTime = false;
+
   // ── Lifecycle ─────────────────────────────────────────────────
   ngOnInit(): void {
     this.orderId = this.route.snapshot.paramMap.get('id');
@@ -597,10 +615,15 @@ export class OperatorOrderDetailComponent implements OnInit {
 
   statusLabel(status: string): string {
     const map: Record<string, string> = {
-      PENDING:     'Pendiente',
-      IN_PROGRESS: 'En proceso',
-      READY:       'Listo para recoger',
-      DELIVERED:   'Entregado',
+      BUDGETED:                 'Presupuestado',
+      CLIENT_REVIEW_PENDING:    'Revisión del cliente',
+      OPERATOR_REVIEW_PENDING:  'Pendiente de revisión',
+      PENDING_PAYMENT:          'Pendiente de pago',
+      IN_PROGRESS:              'En producción',
+      READY:                    'Listo para recoger',
+      DELIVERED:                'Entregado',
+      CANCELLED:                'Cancelado',
+      EXPIRED:                  'Vencido',
     };
     return map[status] ?? status;
   }
@@ -611,7 +634,10 @@ export class OperatorOrderDetailComponent implements OnInit {
   }
 
   // ── Stepper ──────────────────────────────────────────────────
-  private readonly statusOrder = ['PENDING', 'IN_PROGRESS', 'READY', 'DELIVERED'];
+  private readonly statusOrder = [
+    'BUDGETED', 'CLIENT_REVIEW_PENDING', 'OPERATOR_REVIEW_PENDING',
+    'PENDING_PAYMENT', 'IN_PROGRESS', 'READY', 'DELIVERED'
+  ];
 
   stepDone(step: string): boolean {
     if (!this.order) return false;
@@ -683,6 +709,104 @@ export class OperatorOrderDetailComponent implements OnInit {
       error: () => {
         this.error = 'No se pudieron guardar las notas.';
         this.isSavingNotes = false;
+      }
+    });
+  }
+
+  // ── Review ────────────────────────────────────────────────────
+  get reviewNotesRequired(): boolean {
+    return this.reviewAction === 'RETURN_TO_CLIENT' || this.reviewAction === 'REJECT';
+  }
+
+  submitReview(): void {
+    if (!this.orderId || !this.reviewAction) return;
+    if (this.reviewNotesRequired && !this.reviewNotes.trim()) {
+      this.error = 'Debes ingresar una nota para esta acción.';
+      return;
+    }
+    this.isSubmittingReview = true;
+    this.error = null; this.success = null;
+
+    this.operatorService.reviewOrder(this.orderId, this.reviewAction as 'APPROVE' | 'RETURN_TO_CLIENT' | 'REJECT', this.reviewNotes.trim() || undefined).subscribe({
+      next: () => {
+        const msg: Record<string, string> = {
+          APPROVE:           'Revisión aprobada. El pedido avanzó al siguiente estado.',
+          RETURN_TO_CLIENT:  'Pedido devuelto al cliente.',
+          REJECT:            'Pedido rechazado/cancelado.',
+        };
+        this.success = msg[this.reviewAction] ?? 'Acción realizada.';
+        this.isSubmittingReview = false;
+        this.showReviewPanel = false;
+        this.reviewAction = '';
+        this.reviewNotes = '';
+        if (this.orderId) this.loadOrder(this.orderId);
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message ?? 'No se pudo procesar la revisión.';
+        this.isSubmittingReview = false;
+      }
+    });
+  }
+
+  // ── Adjust Price ──────────────────────────────────────────────
+  submitPriceAdjust(): void {
+    if (!this.orderId) return;
+    if (!this.priceAdjustValue || this.priceAdjustValue <= 0) {
+      this.error = 'El precio final debe ser mayor a 0.';
+      return;
+    }
+    if (!this.priceAdjustReason.trim()) {
+      this.error = 'El motivo del ajuste es requerido.';
+      return;
+    }
+    this.isSubmittingPrice = true;
+    this.error = null; this.success = null;
+
+    this.operatorService.adjustOrderPrice(this.orderId, this.priceAdjustValue, this.priceAdjustReason.trim()).subscribe({
+      next: () => {
+        this.success = 'Precio ajustado. El pedido volvió a revisión del cliente.';
+        this.isSubmittingPrice = false;
+        this.showPricePanel = false;
+        this.priceAdjustValue = null;
+        this.priceAdjustReason = '';
+        if (this.orderId) this.loadOrder(this.orderId);
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message ?? 'No se pudo ajustar el precio.';
+        this.isSubmittingPrice = false;
+      }
+    });
+  }
+
+  // ── Production Time ───────────────────────────────────────────
+  submitProductionTime(): void {
+    if (!this.orderId) return;
+    if (!this.productionTimeValue.trim()) {
+      this.error = 'El tiempo estimado es requerido.';
+      return;
+    }
+    this.isSubmittingProductionTime = true;
+    this.error = null; this.success = null;
+
+    this.operatorService.updateProductionTime(
+      this.orderId,
+      this.productionTimeValue.trim(),
+      this.estimatedDeliveryAtValue.trim() || undefined
+    ).subscribe({
+      next: () => {
+        this.success = 'Tiempo de producción registrado.';
+        this.isSubmittingProductionTime = false;
+        this.showProductionTimePanel = false;
+        if (this.order) {
+          this.order.production_time_estimate = this.productionTimeValue.trim();
+          if (this.estimatedDeliveryAtValue) this.order.estimated_delivery_at = this.estimatedDeliveryAtValue;
+        }
+        this.productionTimeValue = '';
+        this.estimatedDeliveryAtValue = '';
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message ?? 'No se pudo registrar el tiempo.';
+        this.isSubmittingProductionTime = false;
       }
     });
   }

@@ -290,6 +290,21 @@ type UrgencyLevel = 'overdue' | 'urgent' | 'soon' | 'ok';
       background: rgba(72,187,120,0.14);
       border-color: rgba(47,133,90,0.30);
     }
+    .op-badge.revision {
+      color: #3730a3;
+      background: rgba(99,102,241,0.14);
+      border-color: rgba(99,102,241,0.35);
+      animation: opdPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes opdPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+      50% { box-shadow: 0 0 0 4px rgba(99,102,241,0.22); }
+    }
+    .op-badge.pago {
+      color: #6d28d9;
+      background: rgba(139,92,246,0.12);
+      border-color: rgba(139,92,246,0.30);
+    }
     .op-badge.urgent {
       color: #c0392b;
       background: #fff0f0;
@@ -577,9 +592,16 @@ export class OperatorDashboardComponent implements OnInit {
           ? response
           : (response?.data || []);
 
+        const activeStatuses = new Set([
+          'BUDGETED', 'CLIENT_REVIEW_PENDING', 'OPERATOR_REVIEW_PENDING',
+          'PENDING_PAYMENT', 'IN_PROGRESS', 'READY'
+        ]);
         this.orders = all
-          .filter(o => o.status !== 'DELIVERED')
+          .filter(o => activeStatuses.has(o.status))
           .sort((a, b) => {
+            // OPERATOR_REVIEW_PENDING primero
+            if (a.status === 'OPERATOR_REVIEW_PENDING' && b.status !== 'OPERATOR_REVIEW_PENDING') return -1;
+            if (b.status === 'OPERATOR_REVIEW_PENDING' && a.status !== 'OPERATOR_REVIEW_PENDING') return 1;
             const tA = a.estimated_delivery_at ? new Date(a.estimated_delivery_at).getTime() : Infinity;
             const tB = b.estimated_delivery_at ? new Date(b.estimated_delivery_at).getTime() : Infinity;
             return tA - tB;
@@ -630,19 +652,26 @@ export class OperatorDashboardComponent implements OnInit {
   // ── Status ────────────────────────────────────────────────────
   statusLabel(status: string): string {
     const map: Record<string, string> = {
-      PENDING:     'Pendiente',
-      IN_PROGRESS: 'En proceso',
-      READY:       'Listo',
-      DELIVERED:   'Entregado',
+      BUDGETED:                'Presupuestado',
+      CLIENT_REVIEW_PENDING:   'Revisión cliente',
+      OPERATOR_REVIEW_PENDING: 'Pendiente revisión',
+      PENDING_PAYMENT:         'Pago pendiente',
+      IN_PROGRESS:             'En producción',
+      READY:                   'Listo',
+      DELIVERED:               'Entregado',
+      CANCELLED:               'Cancelado',
     };
     return map[status] ?? status;
   }
 
   statusClass(status: string): string {
     const map: Record<string, string> = {
-      PENDING:     'pendiente',
-      IN_PROGRESS: 'proceso',
-      READY:       'listo',
+      BUDGETED:                'pendiente',
+      CLIENT_REVIEW_PENDING:   'pendiente',
+      OPERATOR_REVIEW_PENDING: 'revision',
+      PENDING_PAYMENT:         'pago',
+      IN_PROGRESS:             'proceso',
+      READY:                   'listo',
     };
     return map[status] ?? '';
   }

@@ -101,7 +101,7 @@ export class AdminUsersComponent implements OnInit {
       finalize(() => {
         this.isLoading = false;
         // Forzar deteccion de cambios para garantizar re-render
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       })
     ).subscribe({
       next: ({ operators, clients }) => {
@@ -119,7 +119,7 @@ export class AdminUsersComponent implements OnInit {
     this.usersService.getOperators().subscribe({
       next: (res) => {
         this.operators = res.data || [];
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

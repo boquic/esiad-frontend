@@ -482,7 +482,7 @@ export class AdminLayoutComponent implements OnInit {
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((e) => {
         this.currentUrl = (e as NavigationEnd).urlAfterRedirects;
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       });
 
     // Load sidebar badge counts

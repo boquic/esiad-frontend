@@ -52,6 +52,12 @@ export class OrderDetailComponent {
   // Generic success message
   actionSuccessMessage = '';
 
+  // Payment voucher upload (PENDING_PAYMENT)
+  selectedPaymentFile: File | null = null;
+  uploadingPayment = false;
+  paymentUploadError = '';
+  paymentUploadSuccess = '';
+
   readonly userName: string = getUserName() || 'Usuario';
 
   get userInitials(): string {
@@ -80,16 +86,20 @@ export class OrderDetailComponent {
     this.ordersService.getOrderById(orderId).subscribe({
       next: (response) => {
         this.order = this.ordersService.unwrapResource(response);
+        // DEBUG: ver estructura del operario en consola
+        if (this.order?.operator) {
+          console.log('[order-detail] operator data:', JSON.stringify(this.order.operator, null, 2));
+        }
         if (!silent) this.loading = false;
         if (!this.order) {
           this.error = 'No se encontro el detalle del pedido.';
         }
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
       error: (error: { error?: { message?: string } }) => {
         if (!silent) this.loading = false;
         this.error = error.error?.message ?? 'No se pudo cargar el detalle del pedido.';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
     });
   }
@@ -124,7 +134,7 @@ export class OrderDetailComponent {
           this.pickupSuccessMessage = 'Pedido entregado';
           this.loadOrder(this.order.id, true);
         } else {
-          this.cd.detectChanges();
+          this.cd.markForCheck();
         }
       },
       error: (error: any) => {
@@ -146,7 +156,7 @@ export class OrderDetailComponent {
         if (this.order) {
             this.loadOrder(this.order.id);
         } else {
-            this.cd.detectChanges();
+            this.cd.markForCheck();
         }
       }
     });
@@ -178,13 +188,13 @@ export class OrderDetailComponent {
         this.showConfirmReviewModal = false;
         this.actionSuccessMessage = 'Revisión confirmada correctamente.';
         if (this.order) this.loadOrder(this.order.id, true);
-        else this.cd.detectChanges();
+        else this.cd.markForCheck();
       },
       error: (err: any) => {
         this.confirmingReview = false;
         this.showConfirmReviewModal = false;
         this.error = err?.error?.message ?? 'No se pudo confirmar la revisión.';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
     });
   }
@@ -207,12 +217,12 @@ export class OrderDetailComponent {
         this.observationSuccess = 'Observación enviada correctamente.';
         this.observationText = '';
         if (this.order) this.loadOrder(this.order.id, true);
-        else this.cd.detectChanges();
+        else this.cd.markForCheck();
       },
       error: (err: any) => {
         this.submittingObservation = false;
         this.observationError = err?.error?.message ?? 'No se pudo enviar la observación.';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
     });
   }
@@ -240,29 +250,51 @@ export class OrderDetailComponent {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
       error: (err) => {
         this.downloadingFileId = null;
         this.error = 'No se pudo descargar el archivo.';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       }
     });
   }
 
   getOperatorName(op: any): string {
     if (!op) return 'Operario asignado';
-    const first = op.first_name || op.firstName || '';
-    const last = op.last_name || op.lastName || '';
-    return `${first} ${last}`.trim() || op.name || 'Operario asignado';
+
+    // Si el operario tiene subobjeto user (patrón NestJS relacional)
+    const u = op.user ?? op;
+
+    const first =
+      u.first_name  ?? u.firstName  ??
+      op.first_name ?? op.firstName ?? '';
+
+    const last =
+      u.last_name  ?? u.lastName  ??
+      op.last_name ?? op.lastName ?? '';
+
+    const fullFromParts = `${first} ${last}`.trim();
+    if (fullFromParts) return fullFromParts;
+
+    // Campos de nombre completo directos
+    return (
+      u.full_name  ?? u.fullName  ??
+      op.full_name ?? op.fullName ??
+      u.name       ?? op.name     ??
+      u.username   ?? op.username ??
+      u.email      ?? op.email    ??
+      'Operario asignado'
+    );
   }
 
   getOperatorInitials(op: any): string {
     const name = this.getOperatorName(op);
+    if (name === 'Operario asignado') return 'OP';
     const parts = name.trim().split(/\s+/);
     const a = (parts[0]?.[0] ?? '').toUpperCase();
     const b = (parts[1]?.[0] ?? '').toUpperCase();
-    return a + b;
+    return a + b || 'OP';
   }
 
   getStatusMeta(status: string | null | undefined): OrderStatusMeta {
@@ -334,5 +366,34 @@ export class OrderDetailComponent {
 
   getFileType(file: OrderFile): string {
     return this.ordersService.getFileType(file);
+  }
+
+  // ── Payment voucher ──────────────────────────────────────────────────────
+  onPaymentFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedPaymentFile = input.files?.[0] ?? null;
+    this.paymentUploadError = '';
+  }
+
+  uploadPaymentVoucher(): void {
+    if (!this.order || !this.selectedPaymentFile) return;
+    this.uploadingPayment = true;
+    this.paymentUploadError = '';
+    this.paymentUploadSuccess = '';
+
+    this.ordersService.uploadPaymentVoucher(this.order.id, this.selectedPaymentFile).subscribe({
+      next: () => {
+        this.uploadingPayment = false;
+        this.paymentUploadSuccess = '¡Comprobante enviado! El operario revisará tu pago y comenzará la producción.';
+        this.selectedPaymentFile = null;
+        if (this.order) this.loadOrder(this.order.id, true);
+        else this.cd.markForCheck();
+      },
+      error: (err: any) => {
+        this.uploadingPayment = false;
+        this.paymentUploadError = err?.error?.message ?? 'No se pudo enviar el comprobante. Intenta de nuevo.';
+        this.cd.markForCheck();
+      },
+    });
   }
 }

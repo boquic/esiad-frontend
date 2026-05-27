@@ -120,12 +120,12 @@ export class AdminOrdersComponent implements OnInit {
         next: (orders) => {
           this.orders  = orders;
           this.loading = false;
-          this.cd.detectChanges();
+          this.cd.markForCheck();
         },
         error: () => {
           this.loading = false;
           this.error   = true;
-          this.cd.detectChanges();
+          this.cd.markForCheck();
         },
       });
   }

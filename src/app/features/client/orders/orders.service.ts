@@ -193,6 +193,12 @@ export class ClientOrdersService {
     return this.http.get(`/api/orders/${orderId}/files/${fileId}/download`, { responseType: 'blob' });
   }
 
+  uploadPaymentVoucher(orderId: string, file: File): Observable<ConfirmOrderResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/payments/voucher`, formData);
+  }
+
   normalizePricingModel(service: ServiceOption | null | undefined): PricingModel {
     const rawValue = service?.pricing_model ?? service?.pricingModel;
     const normalized = String(rawValue ?? '')

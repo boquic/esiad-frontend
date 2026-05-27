@@ -678,9 +678,23 @@ export class ClientPaymentComponent implements OnInit {
         }, 2500);
       },
       error: (err) => {
-        this.error = err.error?.message || 'Error al subir la captura de pago.';
+        // El backend puede devolver el mensaje en distintas formas
+        const serverMsg = err.error?.message
+          || err.error?.error
+          || (typeof err.error === 'string' ? err.error : null);
+
+        if (err.status === 409) {
+          this.error = serverMsg || 'Ya existe un pago registrado para este pedido o el estado del pedido no permite el pago.';
+        } else if (err.status === 400) {
+          this.error = serverMsg || 'Datos de pago inválidos. Revisa el archivo e intenta de nuevo.';
+        } else if (err.status === 404) {
+          this.error = 'Pedido no encontrado.';
+        } else {
+          this.error = serverMsg || 'Error al subir la captura de pago. Intenta de nuevo.';
+        }
+
         this.isSubmitting = false;
-        console.error(err);
+        console.error('[payments] upload error:', err.status, err.error);
       }
     });
   }

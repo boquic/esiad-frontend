@@ -182,12 +182,12 @@ export class NewOrderComponent {
         if (firstId !== undefined) {
           this.orderForm.controls.serviceTypeId.setValue(String(firstId));
         }
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
       error: (err: { error?: { message?: string } }) => {
         this.loadingServices = false;
         this.servicesError = err.error?.message ?? 'No se pudieron cargar los servicios.';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
     });
   }
@@ -265,25 +265,25 @@ export class NewOrderComponent {
             next: () => {
               this.submitting = false;
               this.submitSuccess = 'Pedido creado y plano técnico subido correctamente.';
-              this.cd.detectChanges();
+              this.cd.markForCheck();
             },
             error: (err: { error?: { message?: string } }) => {
               this.submitting = false;
               this.submitSuccess = 'Pedido creado, pero no se pudo subir el plano técnico.';
               this.submitError = err.error?.message ?? 'No se pudo subir el archivo.';
-              this.cd.detectChanges();
+              this.cd.markForCheck();
             }
           });
         } else {
           this.submitting = false;
           this.submitSuccess = 'Pedido creado y presupuesto generado correctamente.';
-          this.cd.detectChanges();
+          this.cd.markForCheck();
         }
       },
       error: (err: { error?: { message?: string } }) => {
         this.submitting = false;
         this.submitError = err.error?.message ?? 'No se pudo crear el pedido.';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
     });
   }
@@ -318,12 +318,12 @@ export class NewOrderComponent {
         } else {
           this.recalculatePreview();
         }
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
       error: (err: { error?: { message?: string } }) => {
         this.loadingMaterials = false;
         this.materialsError = err.error?.message ?? 'No se pudieron cargar los materiales.';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
     });
   }

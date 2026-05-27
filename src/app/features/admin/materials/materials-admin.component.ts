@@ -60,13 +60,13 @@ export class MaterialsAdminComponent {
   openDeleteModal(item: MaterialItem) {
     this.deleteTarget    = item;
     this.showDeleteModal = true;
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   closeDeleteModal() {
     this.showDeleteModal = false;
     this.deleteTarget    = null;
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   confirmDelete() {
@@ -111,11 +111,11 @@ export class MaterialsAdminComponent {
           this.selectedServiceId = this.services[0].id;
           this.loadMaterials();
         }
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
       error: (err) => {
         this.error = err?.error?.message || 'No se pudieron cargar los servicios';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       }
     });
   }
@@ -128,12 +128,12 @@ export class MaterialsAdminComponent {
       next: (res) => {
         this.materials = Array.isArray(res) ? res : (res?.data || []);
         this.loading   = false;
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
       error: (err) => {
         this.loading = false;
         this.error   = err?.error?.message || 'No se pudieron cargar los materiales';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       }
     });
   }
@@ -142,13 +142,13 @@ export class MaterialsAdminComponent {
   openToggleModal(item: MaterialItem) {
     this.toggleTarget = item;
     this.showToggleModal = true;
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   closeToggleModal() {
     this.showToggleModal = false;
     this.toggleTarget    = null;
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   confirmToggle() {
@@ -176,14 +176,14 @@ export class MaterialsAdminComponent {
     this.editPrice  = Number(item.unit_price);
     this.editError  = '';
     this.showEditModal = true;
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   closeEditModal() {
     this.showEditModal = false;
     this.editTarget    = null;
     this.editError     = '';
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   confirmEdit() {
@@ -202,14 +202,14 @@ export class MaterialsAdminComponent {
       next: () => {
         this.editSaving = false;
         this.editError  = '';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
         this.closeEditModal();
         this.loadMaterials();
       },
       error: (e) => {
         this.editSaving = false;
         this.editError  = e?.error?.message || 'No se pudo actualizar el material';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       }
     });
   }
@@ -222,13 +222,13 @@ export class MaterialsAdminComponent {
     this.newServiceId = this.selectedServiceId;
     this.createError  = '';
     this.showCreateModal = true;
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   closeCreateModal() {
     this.showCreateModal = false;
     this.createError     = '';
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   submitCreate() {
@@ -261,7 +261,7 @@ export class MaterialsAdminComponent {
       error: (e) => {
         this.creating    = false;
         this.createError = e?.error?.message || 'No se pudo crear el material.';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       }
     });
   }
@@ -270,12 +270,12 @@ export class MaterialsAdminComponent {
   openAlert(msg: string) {
     this.alertMsg      = msg;
     this.showAlertModal = true;
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 
   closeAlert() {
     this.showAlertModal = false;
     this.alertMsg       = '';
-    this.cd.detectChanges();
+    this.cd.markForCheck();
   }
 }

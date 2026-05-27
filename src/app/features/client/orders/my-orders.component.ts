@@ -50,12 +50,12 @@ export class MyOrdersComponent {
       next: (response) => {
         this.orders = this.ordersService.unwrapCollection(response);
         this.loading = false;
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
       error: (error: { error?: { message?: string } }) => {
         this.loading = false;
         this.error = error.error?.message ?? 'No se pudieron cargar tus pedidos.';
-        this.cd.detectChanges();
+        this.cd.markForCheck();
       },
     });
   }

@@ -83,10 +83,21 @@ import { OperatorService, OperatorOrder } from '../operator.service';
       border-radius:50%; background:currentColor;
       box-shadow:0 0 0 3px rgba(58,143,139,0.20);
     }
-    .opd-status-pill.s-pending     { color:#666;    background:rgba(102,102,102,0.10); border:1px solid rgba(102,102,102,0.25); }
-    .opd-status-pill.s-in_progress { color:#2e7874; background:rgba(58,143,139,0.10); border:1px solid rgba(58,143,139,0.30); }
-    .opd-status-pill.s-ready       { color:#2f855a; background:rgba(72,187,120,0.14); border:1px solid rgba(47,133,90,0.30); }
-    .opd-status-pill.s-delivered   { color:#1a5c7a; background:rgba(26,92,122,0.10);  border:1px solid rgba(26,92,122,0.25); }
+    .opd-status-pill.s-budgeted        { color:#92400e; background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.35); }
+    .opd-status-pill.s-client-review   { color:#9a3412; background:rgba(234,88,12,0.10);  border:1px solid rgba(234,88,12,0.30); }
+    .opd-status-pill.s-operator-review { color:#3730a3; background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.35);
+                                         animation: opdPulse 1.8s ease-in-out infinite; }
+    @keyframes opdPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+      50%      { box-shadow: 0 0 0 5px rgba(99,102,241,0.18); }
+    }
+    .opd-status-pill.s-payment         { color:#6d28d9; background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.30); }
+    .opd-status-pill.s-pending         { color:#666;    background:rgba(102,102,102,0.10); border:1px solid rgba(102,102,102,0.25); }
+    .opd-status-pill.s-in_progress     { color:#1d4ed8; background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.30); }
+    .opd-status-pill.s-ready           { color:#2f855a; background:rgba(72,187,120,0.14); border:1px solid rgba(47,133,90,0.30); }
+    .opd-status-pill.s-delivered       { color:#1a5c7a; background:rgba(26,92,122,0.10);  border:1px solid rgba(26,92,122,0.25); }
+    .opd-status-pill.s-cancelled       { color:#b91c1c; background:rgba(239,68,68,0.10);  border:1px solid rgba(239,68,68,0.28); }
+    .opd-status-pill.s-expired         { color:#666;    background:rgba(102,102,102,0.10); border:1px solid rgba(102,102,102,0.22); }
 
     .opd-back-btn {
       display: inline-flex;
@@ -326,37 +337,75 @@ import { OperatorService, OperatorOrder } from '../operator.service';
 
     /* ── Stepper ───────────────────────────────────────────────── */
     .opd-stepper {
-      display:flex; align-items:center; justify-content:space-between;
-      position:relative; padding:6px 0 22px; margin:6px 0 6px;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      position:relative; padding:10px 0 24px; margin:4px 0 8px;
     }
-    .opd-step-line {
-      position:absolute; top:18px; left:0; right:0;
-      height:3px; border-radius:2px; z-index:0;
+    .opd-step-track {
+      position:absolute; top:22px; left:16px; right:16px;
+      height:3px; background:#e8e8e8; border-radius:2px; z-index:0;
+    }
+    .opd-step-fill {
+      height:100%; border-radius:2px;
+      background:linear-gradient(90deg,#48bb78,#3a8f8b);
+      transition:width .4s ease;
     }
     .opd-step {
       display:flex; flex-direction:column; align-items:center;
-      gap:8px; z-index:1; flex:1;
+      gap:7px; z-index:1; flex:1; position:relative;
     }
     .opd-step-dot {
-      width:32px; height:32px; border-radius:50%;
+      width:34px; height:34px; border-radius:50%;
       display:grid; place-items:center;
       font-size:12px; font-weight:700;
-      background:#f0f0f0; color:#999;
-      border:2px solid #e0e0e0;
-      transition:all .15s;
+      background:#f0f0f0; color:#aaa;
+      border:2.5px solid #e0e0e0;
+      transition:all .2s;
+      box-shadow:0 2px 6px rgba(0,0,0,0.06);
     }
-    .opd-step.done .opd-step-dot  { background:#48bb78; color:#fff; border-color:#2f855a; }
-    .opd-step.active .opd-step-dot {
-      background:#3a8f8b; color:#fff; border-color:#2e7874;
-      box-shadow:0 0 0 5px rgba(58,143,139,0.18);
-    }
+    .opd-step.done .opd-step-dot   { background:#48bb78; color:#fff; border-color:#2f855a; box-shadow:0 2px 8px rgba(72,187,120,0.35); }
+    .opd-step.active .opd-step-dot { background:#3a8f8b; color:#fff; border-color:#2e7874; box-shadow:0 0 0 5px rgba(58,143,139,0.18); }
     .opd-step-label {
-      font-size:11px; font-weight:600; color:#999;
+      font-size:10.5px; font-weight:600; color:#bbb;
       text-transform:uppercase; letter-spacing:0.04em;
-      text-align:center; line-height:1.3;
+      text-align:center; line-height:1.3; max-width:64px;
     }
-    .opd-step.done .opd-step-label   { color:#666; }
+    .opd-step.done .opd-step-label   { color:#2f855a; }
     .opd-step.active .opd-step-label { color:#2e7874; }
+
+    /* ── Review panel ──────────────────────────────────────────── */
+    .opd-review-actions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .opd-review-btn {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:9px 14px; border-radius:9px; border:1.5px solid;
+      font-size:13px; font-weight:600; cursor:pointer;
+      font-family:inherit; transition:all .14s;
+      background:transparent;
+    }
+    .opd-review-btn.approve { color:#2f855a; border-color:#a7f3d0; }
+    .opd-review-btn.approve.sel, .opd-review-btn.approve:hover { background:#48bb78; color:#fff; border-color:#2f855a; }
+    .opd-review-btn.return  { color:#92400e; border-color:#fcd34d; }
+    .opd-review-btn.return.sel, .opd-review-btn.return:hover  { background:#f59e0b; color:#fff; border-color:#b45309; }
+    .opd-review-btn.reject  { color:#b91c1c; border-color:#fca5a5; }
+    .opd-review-btn.reject.sel, .opd-review-btn.reject:hover  { background:#ef4444; color:#fff; border-color:#b91c1c; }
+
+    .opd-price-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+    .opd-price-box {
+      padding:11px 14px; border-radius:10px;
+      border:1px solid #e0e0e0; background:rgba(255,255,255,0.7);
+    }
+    .opd-price-box.adjusted { border-color:#fca5a5; background:rgba(254,242,242,0.5); }
+    .opd-price-label { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#9ca3af; margin-bottom:4px; }
+    .opd-price-label.red { color:#dc2626; }
+    .opd-price-val { font-size:17px; font-weight:800; font-family:'Geist Mono','Courier New',monospace; color:#2c2c2c; }
+    .opd-price-val.red { color:#dc2626; }
+
+    .opd-client-notes {
+      display:flex; gap:8px; align-items:flex-start;
+      padding:10px 13px; border-radius:9px; margin-bottom:14px;
+      background:rgba(255,247,237,0.85); border:1px solid #fdba74;
+      font-size:13px; color:#92400e; line-height:1.45;
+    }
+    .opd-client-notes svg { flex:0 0 15px; margin-top:1px; color:#d97706; }
 
     /* ── State explain ─────────────────────────────────────────── */
     .opd-state-explain {
@@ -633,25 +682,88 @@ export class OperatorOrderDetailComponent implements OnInit {
     return file.file_type.replace('PLAN_', '').toUpperCase();
   }
 
+  // ── Status pill CSS class ────────────────────────────────────
+  statusPillClass(status: string): string {
+    const map: Record<string, string> = {
+      BUDGETED:                's-budgeted',
+      CLIENT_REVIEW_PENDING:   's-client-review',
+      OPERATOR_REVIEW_PENDING: 's-operator-review',
+      PENDING_PAYMENT:         's-payment',
+      IN_PROGRESS:             's-in_progress',
+      READY:                   's-ready',
+      DELIVERED:               's-delivered',
+      CANCELLED:               's-cancelled',
+      EXPIRED:                 's-expired',
+    };
+    return map[status] ?? 's-budgeted';
+  }
+
   // ── Stepper ──────────────────────────────────────────────────
+  // 4 pasos visibles: Revisión | Producción | Listo | Entregado
   private readonly statusOrder = [
     'BUDGETED', 'CLIENT_REVIEW_PENDING', 'OPERATOR_REVIEW_PENDING',
     'PENDING_PAYMENT', 'IN_PROGRESS', 'READY', 'DELIVERED'
   ];
 
-  stepDone(step: string): boolean {
-    if (!this.order) return false;
-    const curIdx  = this.statusOrder.indexOf(this.order.status);
-    const stepIdx = this.statusOrder.indexOf(step);
-    return curIdx > stepIdx;
+  // Mapa de estado → índice de paso (0-based, de 4 pasos)
+  private readonly stepMap: Record<string, number> = {
+    BUDGETED: 0, CLIENT_REVIEW_PENDING: 0, OPERATOR_REVIEW_PENDING: 0,
+    PENDING_PAYMENT: 1, IN_PROGRESS: 1,
+    READY: 2,
+    DELIVERED: 3,
+    CANCELLED: -1, EXPIRED: -1,
+  };
+
+  get currentStep(): number {
+    return this.stepMap[this.order?.status ?? ''] ?? 0;
   }
 
-  get stepLineGradient(): string {
-    if (!this.order) return `linear-gradient(90deg, #e0e0e0, #e0e0e0)`;
-    const pct = this.order.status === 'PENDING'     ? 0
-              : this.order.status === 'IN_PROGRESS' ? 50
-              : 100;
-    return `linear-gradient(90deg, #48bb78 0%, #48bb78 ${pct}%, #e0e0e0 ${pct}%, #e0e0e0 100%)`;
+  stepState(step: number): 'done' | 'active' | 'pending' {
+    const cur = this.currentStep;
+    if (step < cur) return 'done';
+    if (step === cur) return 'active';
+    return 'pending';
+  }
+
+  get stepLineWidth(): string {
+    const pct = [0, 33, 67, 100];
+    return `${pct[Math.min(this.currentStep, 3)]}%`;
+  }
+
+  // ── Timeline helpers ─────────────────────────────────────────
+  get timelineEvents(): Array<{ when: string | null; what: string; isLatest?: boolean }> {
+    if (!this.order) return [];
+    const s = this.order.status;
+    const events: Array<{ when: string | null; what: string; isLatest?: boolean }> = [];
+
+    events.push({ when: this.order.created_at ?? null, what: 'Pedido <b>creado</b> por el cliente' });
+
+    if (['CLIENT_REVIEW_PENDING','OPERATOR_REVIEW_PENDING','PENDING_PAYMENT','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
+      events.push({ when: this.order.client_reviewed_at ?? null, what: 'Cliente <b>confirmó</b> la revisión' });
+    }
+    if (['OPERATOR_REVIEW_PENDING','PENDING_PAYMENT','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
+      // Solo si llegó a revisión del operario
+      events.push({ when: null, what: 'En <b>revisión del operario</b>' });
+    }
+    if (['PENDING_PAYMENT','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
+      events.push({ when: this.order.operator_reviewed_at ?? null, what: 'Operario <b>aprobó</b> la revisión' });
+    }
+    if (['IN_PROGRESS','READY','DELIVERED'].includes(s)) {
+      events.push({ when: this.order.production_started_at ?? null, what: 'Producción <b>iniciada</b>' });
+    }
+    if (['READY','DELIVERED'].includes(s)) {
+      events.push({ when: this.order.production_ready_at ?? null, what: 'Pedido marcado como <b>listo</b>' });
+    }
+    if (s === 'DELIVERED') {
+      events.push({ when: null, what: 'Pedido <b>entregado</b> al cliente' });
+    }
+    if (s === 'CANCELLED') {
+      events.push({ when: null, what: 'Pedido <b>cancelado</b>' });
+    }
+
+    // Marcar el último como latest
+    if (events.length > 0) events[events.length - 1].isLatest = true;
+    return events;
   }
 
   // ── Actions ──────────────────────────────────────────────────

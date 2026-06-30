@@ -1,0 +1,21 @@
+name: CI
+
+# Valida que la imagen Docker del frontend se construya (incluye el build de
+# producción de Angular: compilación, budgets e inlining de fuentes).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  docker-build:
+    name: Build de la imagen Docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Construir imagen del frontend
+        run: docker build -t esiad-frontend .

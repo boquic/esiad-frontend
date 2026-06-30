@@ -4,21 +4,37 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
+import QRCode from 'qrcode';
 import { getRoleFromToken } from '../../../core/utils/jwt.utils';
 
-type LoginResponse = {
+type AuthUser = {
+  id: string;
+  dni: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  role: string;
+  completed_orders_count: number;
+  is_frequent: boolean;
+  created_at: string;
+};
+
+// El login (paso 1) puede devolver: token directo (legacy), reto de enrolamiento
+// 2FA (con QR) o reto de verificación 2FA (ya enrolado).
+type LoginStep1 = {
+  data: Partial<{
+    token: string;
+    user: AuthUser;
+    requires_2fa_setup: boolean;
+    requires_2fa: boolean;
+    otpauth_url: string;
+    secret: string;
+  }>;
+};
+
+type VerifyResponse = {
   data: {
-    user: {
-      id: string;
-      dni: string;
-      first_name: string;
-      last_name: string;
-      phone: string;
-      role: string;
-      completed_orders_count: number;
-      is_frequent: boolean;
-      created_at: string;
-    };
+    user: AuthUser;
     token: string;
   };
 };
@@ -35,13 +51,26 @@ export class LoginComponent {
   private router = inject(Router);
 
   loginForm: FormGroup = this.fb.group({
-    identifier: ['', [Validators.required, Validators.pattern('^[0-9]{8,9}$')]], // Puede ser DNI (8) o celular (9)
+    identifier: ['', [Validators.required, Validators.pattern('^[0-9]{8,9}$')]], // DNI (8) o celular (9)
     password: ['', [Validators.required, Validators.minLength(6)]]
+  });
+
+  codeForm: FormGroup = this.fb.group({
+    code: ['', [Validators.required, Validators.pattern('^[0-9]{6}$')]]
   });
 
   isLoading = signal(false);
   errorMessage = signal('');
   showPassword = signal(false);
+
+  // Flujo 2FA
+  step = signal<'credentials' | 'twofa'>('credentials');
+  twoFaMode = signal<'setup' | 'verify'>('verify'); // 'setup' muestra el QR
+  qrDataUrl = signal<string>('');
+  secret = signal<string>('');
+
+  // Credenciales validadas en el paso 1 (en memoria, para el paso 2).
+  private pending: { identifier: string; password: string } | null = null;
 
   onSubmit() {
     if (this.loginForm.invalid) {
@@ -53,65 +82,114 @@ export class LoginComponent {
     this.errorMessage.set('');
 
     const { identifier, password } = this.loginForm.getRawValue();
-    const payload = {
+    const creds = {
       identifier: String(identifier ?? '').trim(),
       password: String(password ?? '')
     };
 
-    console.info('[Auth/Login] Request payload', {
-      identifier: payload.identifier,
-      passwordLength: payload.password.length
-    });
-
-    const url = '/api/auth/login';
-    this.http.post<LoginResponse>(url, payload).pipe(
-      finalize(() => {
-        this.isLoading.set(false);
-      })
+    this.http.post<LoginStep1>('/api/auth/login', creds).pipe(
+      finalize(() => this.isLoading.set(false))
     ).subscribe({
       next: (res) => {
-        const token = res?.data?.token;
-        const user = res?.data?.user;
+        const data = res?.data ?? {};
 
-        if (!token) {
-          this.errorMessage.set('La respuesta de login no incluyo un token valido.');
+        // Compatibilidad: si el backend devolviera token directo.
+        if (data.token) {
+          this.handleAuthSuccess(data.token, data.user);
           return;
         }
 
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('token', token);
-          if (user?.first_name && user?.last_name) {
-            localStorage.setItem('userName', `${user.first_name} ${user.last_name}`);
+        this.pending = creds;
+
+        if (data.requires_2fa_setup) {
+          this.twoFaMode.set('setup');
+          this.secret.set(data.secret ?? '');
+          if (data.otpauth_url) {
+            QRCode.toDataURL(data.otpauth_url)
+              .then((url) => this.qrDataUrl.set(url))
+              .catch(() => this.qrDataUrl.set(''));
           }
-        }
-
-        const role = getRoleFromToken(token);
-
-        switch (role) {
-          case 'ADMIN':
-            this.router.navigate(['/admin/dashboard']);
-            break;
-          case 'OPERATOR':
-            this.router.navigate(['/operator/dashboard']);
-            break;
-          case 'CLIENT':
-          default:
-            this.router.navigate(['/client/dashboard']);
-            break;
+          this.step.set('twofa');
+        } else if (data.requires_2fa) {
+          this.twoFaMode.set('verify');
+          this.step.set('twofa');
+        } else {
+          this.errorMessage.set('Respuesta de login inesperada del servidor.');
         }
       },
       error: (err) => {
-        console.error('[Auth/Login] Error response', {
-          status: err?.status,
-          message: err?.error?.message ?? err?.message,
-          error: err?.error
-        });
-        this.errorMessage.set(err.error?.message || 'Credenciales inválidas. Por favor verifique sus datos e intente nuevamente.');
+        this.errorMessage.set(err.error?.message || 'Credenciales inválidas. Verifique sus datos e intente nuevamente.');
       }
     });
   }
 
+  verifyCode() {
+    if (this.codeForm.invalid || !this.pending) {
+      this.codeForm.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    const payload = {
+      ...this.pending,
+      code: String(this.codeForm.getRawValue().code ?? '').trim()
+    };
+
+    this.http.post<VerifyResponse>('/api/auth/login/verify', payload).pipe(
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: (res) => {
+        const token = res?.data?.token;
+        if (!token) {
+          this.errorMessage.set('La verificación no devolvió un token válido.');
+          return;
+        }
+        this.handleAuthSuccess(token, res.data.user);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.error?.message || 'Código inválido. Intente nuevamente.');
+      }
+    });
+  }
+
+  backToCredentials() {
+    this.step.set('credentials');
+    this.errorMessage.set('');
+    this.codeForm.reset();
+    this.qrDataUrl.set('');
+    this.pending = null;
+  }
+
+  private handleAuthSuccess(token: string, user?: AuthUser) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('token', token);
+      if (user?.first_name && user?.last_name) {
+        localStorage.setItem('userName', `${user.first_name} ${user.last_name}`);
+      }
+    }
+
+    const role = getRoleFromToken(token);
+    switch (role) {
+      case 'ADMIN':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'OPERATOR':
+        this.router.navigate(['/operator/dashboard']);
+        break;
+      case 'CLIENT':
+      default:
+        this.router.navigate(['/client/dashboard']);
+        break;
+    }
+  }
+
   get f() {
     return this.loginForm.controls;
+  }
+
+  get c() {
+    return this.codeForm.controls;
   }
 }

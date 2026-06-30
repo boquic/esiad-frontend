@@ -119,7 +119,7 @@ export class AdminUsersComponent implements OnInit {
     this.usersService.getOperators().subscribe({
       next: (res) => {
         this.operators = res.data || [];
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -234,26 +234,23 @@ export class AdminUsersComponent implements OnInit {
     const targetId = this.editTarget.id;
 
     this.usersService.updateOperator(targetId, payload).pipe(
-      finalize(() => this.editing = false)
+      finalize(() => {
+        this.editing = false;
+        this.cdr.detectChanges();
+      })
     ).subscribe({
       next: () => {
-        // Actualizar localmente sin recargar toda la lista
-        const idx = this.operators.findIndex(o => o.id === targetId);
-        if (idx !== -1 && this.operators[idx].user) {
-          this.operators[idx].user!.first_name = first_name.trim();
-          this.operators[idx].user!.last_name  = last_name.trim();
-          this.operators[idx].specialties      = selectedSpecs;
-          // Crear nueva referencia de array para que Angular detecte el cambio
-          this.operators = [...this.operators];
-        }
         this.closeEditModal();
         this.success = 'Operario actualizado exitosamente.';
-        setTimeout(() => this.success = null, 4000);
+        this.reloadOperators();
+        setTimeout(() => { this.success = null; this.cdr.detectChanges(); }, 4000);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.editError = err?.name === 'TimeoutError'
           ? 'La operacion tardo demasiado. Intenta nuevamente.'
           : (err?.error?.message || 'No se pudo actualizar el operario.');
+        this.cdr.detectChanges();
       }
     });
   }

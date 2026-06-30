@@ -1,0 +1,30 @@
+# Build / dependencias
+node_modules
+dist
+.angular
+
+# Tests / cobertura
+coverage
+
+# VCS y editor
+.git
+.gitignore
+.vscode
+.idea
+
+# Entornos y secretos
+.env
+.env.*
+
+# Logs y temporales
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prototipos / mockups que no son parte del build
+prototypes
+*.html
+!src/**/*.html

@@ -9,6 +9,7 @@ import {
   OrderFile,
   OrderPayment,
   OrderStatus,
+  ServiceOption,
 } from './orders.service';
 
 type OrderStatusMeta = {
@@ -51,6 +52,24 @@ export class OrderDetailComponent {
 
   // Generic success message
   actionSuccessMessage = '';
+
+  // ── Borrador (DRAFT) ─────────────────────────────────────────────────────
+  submittingDraft = false;
+  draftSuccessMessage = '';
+  draftError = '';
+
+  editingDraft = false;
+  savingDraft = false;
+  draftServices: ServiceOption[] = [];
+  loadingDraftServices = false;
+  draftForm = { serviceTypeId: '', notes: '' };
+
+  showDeleteDraftModal = false;
+  deletingDraft = false;
+
+  get isDraft(): boolean {
+    return this.order?.status === 'DRAFT';
+  }
 
   // Payment voucher upload (PENDING_PAYMENT)
   selectedPaymentFile: File | null = null;
@@ -99,6 +118,133 @@ export class OrderDetailComponent {
       error: (error: { error?: { message?: string } }) => {
         if (!silent) this.loading = false;
         this.error = error.error?.message ?? 'No se pudo cargar el detalle del pedido.';
+        this.cd.markForCheck();
+      },
+    });
+  }
+
+  // ── Borrador: enviar a cotización ────────────────────────────────────────
+
+  submitDraft(): void {
+    if (!this.order || !this.isDraft || this.submittingDraft) return;
+
+    this.submittingDraft = true;
+    this.draftError = '';
+    this.draftSuccessMessage = '';
+    const orderId = this.order.id;
+
+    this.ordersService.submitDraft(orderId).subscribe({
+      next: () => {
+        this.submittingDraft = false;
+        this.editingDraft = false;
+        this.draftSuccessMessage = 'Tu pedido fue enviado, el operario te cotizará pronto.';
+        this.loadOrder(orderId, true);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.submittingDraft = false;
+        this.draftError = err.error?.message ?? 'No se pudo enviar el pedido a cotización.';
+        this.cd.markForCheck();
+      },
+    });
+  }
+
+  // ── Borrador: editar ─────────────────────────────────────────────────────
+
+  startEditDraft(): void {
+    if (!this.order || !this.isDraft) return;
+
+    this.draftForm = {
+      serviceTypeId: String(this.order['service_type_id'] ?? ''),
+      notes: this.order.notes ?? '',
+    };
+    this.editingDraft = true;
+    this.draftError = '';
+
+    if (this.draftServices.length === 0) {
+      this.loadDraftServices();
+    }
+  }
+
+  cancelEditDraft(): void {
+    if (this.savingDraft) return;
+    this.editingDraft = false;
+    this.draftError = '';
+  }
+
+  saveDraft(): void {
+    if (!this.order || !this.isDraft || this.savingDraft) return;
+
+    this.savingDraft = true;
+    this.draftError = '';
+    const orderId = this.order.id;
+
+    this.ordersService
+      .updateDraft(orderId, {
+        service_type_id: this.draftForm.serviceTypeId || undefined,
+        notes: this.draftForm.notes.trim() || null,
+      })
+      .subscribe({
+        next: () => {
+          this.savingDraft = false;
+          this.editingDraft = false;
+          this.actionSuccessMessage = 'Borrador actualizado correctamente.';
+          this.loadOrder(orderId, true);
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.savingDraft = false;
+          this.draftError = err.error?.message ?? 'No se pudo guardar el borrador.';
+          this.cd.markForCheck();
+        },
+      });
+  }
+
+  private loadDraftServices(): void {
+    this.loadingDraftServices = true;
+
+    this.ordersService.getServices().subscribe({
+      next: (response) => {
+        this.draftServices = this.ordersService
+          .unwrapCollection(response)
+          .filter((s) => s.is_active !== false);
+        this.loadingDraftServices = false;
+        this.cd.markForCheck();
+      },
+      error: () => {
+        this.loadingDraftServices = false;
+        this.cd.markForCheck();
+      },
+    });
+  }
+
+  // ── Borrador: eliminar ───────────────────────────────────────────────────
+
+  openDeleteDraftModal(): void {
+    if (!this.isDraft) return;
+    this.showDeleteDraftModal = true;
+  }
+
+  closeDeleteDraftModal(): void {
+    if (!this.deletingDraft) {
+      this.showDeleteDraftModal = false;
+    }
+  }
+
+  deleteDraft(): void {
+    if (!this.order || !this.isDraft || this.deletingDraft) return;
+
+    this.deletingDraft = true;
+    this.draftError = '';
+
+    this.ordersService.deleteDraft(this.order.id).subscribe({
+      next: () => {
+        this.deletingDraft = false;
+        this.showDeleteDraftModal = false;
+        this.router.navigate(['/client/orders']);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.deletingDraft = false;
+        this.showDeleteDraftModal = false;
+        this.draftError = err.error?.message ?? 'No se pudo eliminar el borrador.';
         this.cd.markForCheck();
       },
     });
@@ -300,6 +446,8 @@ export class OrderDetailComponent {
   getStatusMeta(status: string | null | undefined): OrderStatusMeta {
     const normalizedStatus = String(status ?? '').trim().toUpperCase() as OrderStatus;
     switch (normalizedStatus) {
+      case 'DRAFT':
+        return { label: 'Borrador', classes: 'border-slate-300 bg-slate-50 text-slate-600' };
       case 'BUDGETED':
         return { label: 'Presupuesto generado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
       case 'CLIENT_REVIEW_PENDING':

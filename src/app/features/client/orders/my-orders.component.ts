@@ -71,6 +71,8 @@ export class MyOrdersComponent {
     const normalizedStatus = String(status).trim().toUpperCase() as OrderStatus;
 
     switch (normalizedStatus) {
+      case 'DRAFT':
+        return { label: 'Borrador', classes: 'border-slate-300 bg-slate-50 text-slate-600' };
       case 'BUDGETED':
         return { label: 'Presupuesto generado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
       case 'CLIENT_REVIEW_PENDING':

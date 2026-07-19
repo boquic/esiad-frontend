@@ -37,6 +37,142 @@
     {{ pickupSuccessMessage }}
   </div>
 
+  <!-- Success: borrador enviado a cotización -->
+  <div *ngIf="draftSuccessMessage" class="flex items-center rounded-xl mb-5"
+       style="gap:9px;padding:12px 16px;background:#f0fdf4;border:1px solid #bbf7d0;font-size:13px;color:#166534;">
+    <svg class="shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+    </svg>
+    {{ draftSuccessMessage }}
+  </div>
+
+  <!-- ──────────────────────────────────────────────────────── -->
+  <!-- BANNER: DRAFT – resumen del borrador y acciones          -->
+  <!-- ──────────────────────────────────────────────────────── -->
+  <div *ngIf="isDraft" class="rounded-xl mb-5 flex flex-col"
+       style="gap:0;background:rgba(248,250,252,0.90);backdrop-filter:blur(20px) saturate(140%);border:1px solid #cbd5e1;">
+
+    <!-- Encabezado -->
+    <div class="flex items-start" style="gap:12px;padding:18px 22px;">
+      <div class="grid place-items-center rounded-lg shrink-0"
+           style="width:38px;height:38px;background:rgba(100,116,139,0.12);color:#475569;border:1px solid rgba(100,116,139,0.25);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>
+        </svg>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h2 class="font-bold" style="font-size:15.5px;color:#1e293b;letter-spacing:-0.01em;margin-bottom:3px;">Este pedido es un borrador</h2>
+        <p style="font-size:13px;color:#64748b;line-height:1.5;">
+          Todavía no se ha enviado. Revisa los datos, edítalos si hace falta y envíalo a cotización para que un operario lo revise.
+        </p>
+      </div>
+    </div>
+
+    <!-- Error de acciones sobre el borrador -->
+    <div *ngIf="draftError" class="flex items-center" style="gap:9px;margin:0 22px 14px;padding:10px 14px;border-radius:9px;background:#fff0f0;border:1px solid #f5c6c6;font-size:12.5px;color:#c0392b;font-weight:500;">
+      <svg class="shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
+      {{ draftError }}
+    </div>
+
+    <!-- Resumen (modo lectura) -->
+    <div *ngIf="!editingDraft" class="flex flex-col" style="gap:10px;padding:0 22px 4px;">
+      <div class="flex justify-between items-center" style="font-size:13px;">
+        <span style="color:#64748b;font-weight:500;">Servicio</span>
+        <span style="color:#1e293b;font-weight:600;">{{ getServiceName() }}</span>
+      </div>
+      <div class="flex justify-between items-center" style="font-size:13px;">
+        <span style="color:#64748b;font-weight:500;">Archivos adjuntos</span>
+        <span style="color:#1e293b;font-weight:600;">{{ getOrderFiles().length }}</span>
+      </div>
+      <div class="flex justify-between items-start" style="font-size:13px;gap:24px;">
+        <span style="color:#64748b;font-weight:500;white-space:nowrap;">Indicaciones</span>
+        <span style="color:#1e293b;font-weight:600;text-align:right;">{{ order?.notes || 'Sin notas' }}</span>
+      </div>
+    </div>
+
+    <!-- Formulario de edición -->
+    <div *ngIf="editingDraft" class="flex flex-col" style="gap:14px;padding:0 22px 4px;">
+      <div class="flex flex-col" style="gap:7px;">
+        <label for="draftService" class="font-semibold" style="font-size:12.5px;color:#334155;">Tipo de servicio</label>
+        <div *ngIf="loadingDraftServices" style="font-size:12.5px;color:#94a3b8;">Cargando servicios…</div>
+        <select *ngIf="!loadingDraftServices" id="draftService" [(ngModel)]="draftForm.serviceTypeId"
+                class="w-full rounded-lg font-medium"
+                style="padding:10px 12px;font-size:13.5px;border:1px solid #cbd5e1;background:#fff;color:#1e293b;font-family:inherit;">
+          <option *ngFor="let service of draftServices" [value]="service.id">{{ service.name }}</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col" style="gap:7px;">
+        <label for="draftNotes" class="font-semibold" style="font-size:12.5px;color:#334155;">Notas / Indicaciones</label>
+        <textarea id="draftNotes" [(ngModel)]="draftForm.notes" rows="3"
+                  placeholder="Ej: escala 50%, indicaciones de corte por capas, acabado mate…"
+                  class="w-full rounded-lg"
+                  style="padding:10px 12px;font-size:13.5px;border:1px solid #cbd5e1;background:#fff;color:#1e293b;resize:none;font-family:inherit;"></textarea>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="flex flex-wrap items-center" style="gap:9px;padding:16px 22px 18px;">
+
+      <ng-container *ngIf="!editingDraft">
+        <!-- Enviar a cotización -->
+        <button type="button" (click)="submitDraft()" [disabled]="submittingDraft"
+                class="inline-flex items-center justify-center font-bold rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                style="gap:7px;font-size:13.5px;padding:10px 18px;background:#3a8f8b;border:1px solid #2e7874;cursor:pointer;font-family:inherit;">
+          <svg *ngIf="submittingDraft" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          <svg *ngIf="!submittingDraft" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+          {{ submittingDraft ? 'Enviando…' : 'Enviar a cotización' }}
+        </button>
+
+        <!-- Editar -->
+        <button type="button" (click)="startEditDraft()" [disabled]="submittingDraft"
+                class="inline-flex items-center justify-center font-semibold rounded-lg disabled:opacity-50"
+                style="gap:7px;font-size:13.5px;padding:10px 16px;color:#334155;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-family:inherit;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>
+          </svg>
+          Editar
+        </button>
+
+        <!-- Eliminar -->
+        <button type="button" (click)="openDeleteDraftModal()" [disabled]="submittingDraft"
+                class="inline-flex items-center justify-center font-semibold rounded-lg disabled:opacity-50"
+                style="gap:7px;font-size:13.5px;padding:10px 16px;color:#c0392b;border:1px solid #f5c6c6;background:#fff0f0;cursor:pointer;font-family:inherit;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>
+          </svg>
+          Eliminar
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="editingDraft">
+        <!-- Guardar cambios -->
+        <button type="button" (click)="saveDraft()" [disabled]="savingDraft"
+                class="inline-flex items-center justify-center font-bold rounded-lg text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                style="gap:7px;font-size:13.5px;padding:10px 18px;background:#3a8f8b;border:1px solid #2e7874;cursor:pointer;font-family:inherit;">
+          <svg *ngIf="savingDraft" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          <svg *ngIf="!savingDraft" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+          {{ savingDraft ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+
+        <!-- Cancelar edición -->
+        <button type="button" (click)="cancelEditDraft()" [disabled]="savingDraft"
+                class="inline-flex items-center justify-center font-semibold rounded-lg disabled:opacity-50"
+                style="font-size:13.5px;padding:10px 16px;color:#64748b;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-family:inherit;">
+          Cancelar
+        </button>
+      </ng-container>
+    </div>
+  </div>
+
   <!-- ──────────────────────────────────────────────────────── -->
   <!-- BANNER: BUDGETED – confirmar revisión / enviar observación -->
   <!-- ──────────────────────────────────────────────────────── -->
@@ -531,8 +667,8 @@
         </div>
       </section>
 
-      <!-- Resumen económico -->
-      <section class="rounded-xl overflow-hidden"
+      <!-- Resumen económico (aún no aplica mientras el pedido es un borrador) -->
+      <section *ngIf="!isDraft" class="rounded-xl overflow-hidden"
                style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
         <div style="padding:16px 22px;background:linear-gradient(135deg,#3a8f8b,#2e7874);">
           <p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.80);margin-bottom:2px;">Presupuesto</p>
@@ -567,7 +703,7 @@
       </section>
 
       <!-- Historial de pagos -->
-      <section class="rounded-xl"
+      <section *ngIf="!isDraft" class="rounded-xl"
                style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
         <div class="flex items-center font-semibold"
              style="gap:9px;font-size:15px;letter-spacing:-0.005em;color:#2c2c2c;padding:18px 22px 16px;border-bottom:1px solid rgba(224,224,224,0.65);">
@@ -627,6 +763,46 @@
           </a>
         </div>
       </section>
+
+    </div>
+  </div>
+
+  <!-- Modal Eliminar Borrador -->
+  <div *ngIf="showDeleteDraftModal" class="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-900 bg-opacity-40 backdrop-blur-sm" (click)="closeDeleteDraftModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-[90%] max-w-100 p-6" style="border:1px solid #e5e7eb;">
+
+      <div class="flex items-start" style="gap:14px;margin-bottom:20px;">
+        <div class="shrink-0 grid place-items-center rounded-full"
+             style="width:40px;height:40px;background:#fef2f2;color:#dc2626;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-bold text-gray-900" style="font-size:17px;letter-spacing:-0.01em;margin-bottom:6px;">¿Eliminar este borrador?</h3>
+          <p class="text-gray-500" style="font-size:13.5px;line-height:1.5;">
+            Se eliminarán el pedido y los archivos que hayas adjuntado. Esta acción no se puede deshacer.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-2">
+        <button (click)="closeDeleteDraftModal()" [disabled]="deletingDraft"
+                class="font-semibold rounded-lg text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                style="font-size:13.5px;padding:9px 16px;background:white;border:1px solid #d1d5db;cursor:pointer;">
+          Cancelar
+        </button>
+        <button (click)="deleteDraft()" [disabled]="deletingDraft"
+                class="inline-flex items-center justify-center font-bold rounded-lg text-white transition-opacity disabled:opacity-50"
+                style="gap:6px;font-size:13.5px;padding:9px 18px;background:#dc2626;border:1px solid #b91c1c;cursor:pointer;min-width:150px;">
+          <svg *ngIf="deletingDraft" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          {{ deletingDraft ? 'Eliminando...' : 'Sí, eliminar' }}
+        </button>
+      </div>
 
     </div>
   </div>

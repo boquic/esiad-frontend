@@ -116,10 +116,6 @@ type ResourceResponse<T> = T | { data?: T | null };
 
 export type CreateOrderPayload = {
   service_type_id: string;
-  material_id: string;
-  quantity?: number;
-  area?: number;
-  volume?: number;
   notes?: string;
 };
 

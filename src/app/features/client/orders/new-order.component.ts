@@ -202,7 +202,6 @@ export class NewOrderComponent {
   submitOrder(): void {
     this.submitError = '';
     this.submitSuccess = '';
-    this.createdOrder = null;
 
     if (this.orderForm.invalid || !this.selectedService) {
       this.orderForm.markAllAsTouched();
@@ -220,28 +219,33 @@ export class NewOrderComponent {
     this.submitting = true;
     const file = this.selectedFile;
 
+    // Si un intento anterior ya creó el borrador, se reintenta desde ahí en vez
+    // de crear un pedido duplicado.
+    const existingDraft = this.createdOrder;
+
+    if (existingDraft) {
+      this.ordersService.updateDraft(existingDraft.id, { notes: payload.notes ?? null }).subscribe({
+        next: () => this.uploadAndSend(existingDraft.id, file),
+        error: () => this.uploadAndSend(existingDraft.id, file),
+      });
+      return;
+    }
+
+    // El pedido se crea como borrador (DRAFT), se le adjunta el plano y
+    // finalmente se envía (DRAFT → BUDGETED).
     this.ordersService.createOrder(payload).subscribe({
       next: (response) => {
-        this.createdOrder = this.ordersService.unwrapResource(response);
-        if (this.createdOrder) {
-          this.ordersService.uploadOrderFile(this.createdOrder.id, file).subscribe({
-            next: () => {
-              this.submitting = false;
-              this.submitSuccess = 'Pedido creado y archivo subido correctamente.';
-              this.cd.markForCheck();
-            },
-            error: (err: { error?: { message?: string } }) => {
-              this.submitting = false;
-              this.submitSuccess = 'Pedido creado, pero no se pudo subir el archivo.';
-              this.submitError = err.error?.message ?? 'No se pudo subir el archivo.';
-              this.cd.markForCheck();
-            },
-          });
-        } else {
+        const draft = this.ordersService.unwrapResource(response);
+        this.createdOrder = draft;
+
+        if (!draft) {
           this.submitting = false;
-          this.submitSuccess = 'Pedido creado correctamente.';
+          this.submitError = 'No se pudo crear el borrador del pedido.';
           this.cd.markForCheck();
+          return;
         }
+
+        this.uploadAndSend(draft.id, file);
       },
       error: (err: { error?: { message?: string } }) => {
         this.submitting = false;
@@ -251,7 +255,57 @@ export class NewOrderComponent {
     });
   }
 
+  /** Elimina el borrador creado si el cliente decide descartarlo. */
+  discardDraft(): void {
+    if (!this.createdOrder || this.submitSuccess) return;
+
+    const draftId = this.createdOrder.id;
+    this.submitting = true;
+
+    this.ordersService.deleteDraft(draftId).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.createdOrder = null;
+        this.submitError = '';
+        this.cd.markForCheck();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.submitting = false;
+        this.submitError = err.error?.message ?? 'No se pudo eliminar el borrador.';
+        this.cd.markForCheck();
+      },
+    });
+  }
+
   // ── Private helpers ───────────────────────────────────────────────────────
+
+  private uploadAndSend(draftId: string, file: File): void {
+    this.ordersService.uploadOrderFile(draftId, file).subscribe({
+      next: () => this.sendDraft(draftId),
+      error: (err: { error?: { message?: string } }) => {
+        this.submitting = false;
+        this.submitError =
+          err.error?.message ?? 'No se pudo subir el archivo. Tu borrador se guardó.';
+        this.cd.markForCheck();
+      },
+    });
+  }
+
+  private sendDraft(draftId: string): void {
+    this.ordersService.submitDraft(draftId).subscribe({
+      next: () => {
+        this.submitting = false;
+        this.submitSuccess = 'Pedido enviado correctamente.';
+        this.cd.markForCheck();
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.submitting = false;
+        this.submitError =
+          err.error?.message ?? 'No se pudo enviar el pedido. Tu borrador se guardó.';
+        this.cd.markForCheck();
+      },
+    });
+  }
 
   private buildCreatePayload(): CreateOrderPayload {
     const payload: CreateOrderPayload = {

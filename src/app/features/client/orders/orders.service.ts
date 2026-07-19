@@ -34,6 +34,7 @@ export type MaterialOption = {
 };
 
 export type OrderStatus =
+  | 'DRAFT'
   | 'BUDGETED'
   | 'CLIENT_REVIEW_PENDING'
   | 'OPERATOR_REVIEW_PENDING'
@@ -119,6 +120,18 @@ export type CreateOrderPayload = {
   notes?: string;
 };
 
+export type UpdateDraftPayload = {
+  service_type_id?: string;
+  notes?: string | null;
+};
+
+export type DeleteDraftResponse = {
+  data: {
+    id: string;
+    deleted: boolean;
+  };
+};
+
 export type FileUploadResponse = {
   data: {
     id: string;
@@ -166,6 +179,21 @@ export class ClientOrdersService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<FileUploadResponse>(`/api/orders/${orderId}/files`, formData);
+  }
+
+  /** PATCH /api/orders/:id — editar un borrador (solo estado DRAFT). */
+  updateDraft(orderId: string, changes: UpdateDraftPayload): Observable<ResourceResponse<ClientOrderDetail>> {
+    return this.http.patch<ResourceResponse<ClientOrderDetail>>(`/api/orders/${orderId}`, changes);
+  }
+
+  /** DELETE /api/orders/:id — eliminar un borrador (solo estado DRAFT). */
+  deleteDraft(orderId: string): Observable<DeleteDraftResponse> {
+    return this.http.delete<DeleteDraftResponse>(`/api/orders/${orderId}`);
+  }
+
+  /** POST /api/orders/:id/submit — enviar el borrador: DRAFT → BUDGETED. */
+  submitDraft(orderId: string): Observable<ConfirmOrderResponse> {
+    return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/submit`, {});
   }
 
   confirmOrder(orderId: string): Observable<ConfirmOrderResponse> {

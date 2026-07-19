@@ -353,6 +353,15 @@
                 Selecciona un servicio y adjunta tu archivo
               </div>
 
+              <!-- Descartar borrador (solo si quedó guardado sin enviarse) -->
+              <button *ngIf="createdOrder" type="button" (click)="discardDraft()"
+                      [disabled]="submitting"
+                      class="w-full inline-flex items-center justify-center font-semibold rounded-[10px] cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      style="gap:7px;font-family:inherit;font-size:13px;padding:10px 16px;color:#c0392b;border:1px solid #f5c6c6;background:#fff0f0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                Descartar borrador
+              </button>
+
               <!-- Cancel -->
               <a routerLink="/client/dashboard"
                  class="w-full inline-flex items-center justify-center no-underline font-semibold rounded-[10px] cursor-pointer transition-all"

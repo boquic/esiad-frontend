@@ -81,14 +81,34 @@ export class NewOrderComponent {
   selectedFile: File | null = null;
   fileError = '';
 
+  /** Corte láser: el cliente solo puede subir .dwg para asegurar compatibilidad con la máquina de corte. */
+  get isLaserService(): boolean {
+    return this.ordersService.normalizePricingModel(this.selectedService) === 'PER_UNIT';
+  }
+
+  get acceptedFileExtensions(): string[] {
+    return this.isLaserService ? ['.dwg'] : ['.dwg', '.dxf', '.pdf'];
+  }
+
+  get fileInputAccept(): string {
+    return this.acceptedFileExtensions.join(',');
+  }
+
+  get acceptedFileExtensionsLabel(): string {
+    return this.acceptedFileExtensions.join(', ');
+  }
+
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
     if (!file) return;
     const ext = '.' + (file.name.split('.').pop() ?? '').toLowerCase();
-    if (!['.dwg', '.dxf', '.pdf'].includes(ext)) {
-      this.fileError = 'Solo se aceptan archivos .dwg, .dxf o .pdf';
+    if (!this.acceptedFileExtensions.includes(ext)) {
+      this.fileError = this.isLaserService
+        ? 'Este servicio es de corte láser: solo se acepta el formato .dwg'
+        : 'Solo se aceptan archivos .dwg, .dxf o .pdf';
       this.selectedFile = null;
+      input.value = '';
       return;
     }
     if (file.size > 20 * 1024 * 1024) {
@@ -119,6 +139,17 @@ export class NewOrderComponent {
       this.submitError = '';
       this.submitSuccess = '';
       this.createdOrder = null;
+
+      // Si el archivo ya seleccionado ya no es válido para el nuevo servicio (ej. cambia a corte láser), se descarta.
+      if (this.selectedFile) {
+        const ext = '.' + (this.selectedFile.name.split('.').pop() ?? '').toLowerCase();
+        if (!this.acceptedFileExtensions.includes(ext)) {
+          this.selectedFile = null;
+          this.fileError = this.isLaserService
+            ? 'Este servicio es de corte láser: vuelve a adjuntar el plano en formato .dwg'
+            : 'Vuelve a adjuntar el archivo del plano';
+        }
+      }
     });
 
     this.loadServices();
@@ -180,7 +211,7 @@ export class NewOrderComponent {
     }
 
     if (!this.selectedFile) {
-      this.fileError = 'Debes adjuntar el archivo del plano (.dwg, .dxf o .pdf).';
+      this.fileError = `Debes adjuntar el archivo del plano (${this.acceptedFileExtensionsLabel}).`;
       this.submitError = 'Adjunta el archivo del plano antes de continuar.';
       return;
     }

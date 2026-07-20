@@ -361,6 +361,15 @@
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <p class="opd-done-title">Producción finalizada</p>
           <p class="opd-done-sub">El cliente ya fue notificado para recoger su pedido.</p>
+          <button class="opd-btn success lg" style="margin-top:10px;" (click)="openPickupModal()" [disabled]="isConfirmingPickup">
+            <svg *ngIf="!isConfirmingPickup" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+            <span *ngIf="isConfirmingPickup" class="opd-spin-sm"></span>
+            {{ isConfirmingPickup ? 'Confirmando...' : 'Confirmar recojo / entrega' }}
+          </button>
+          <div class="opd-warning-line">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17v.01"/><path d="M10.3 3.86l-8.6 14.9A1.7 1.7 0 0 0 3.2 21h17.6a1.7 1.7 0 0 0 1.5-2.24l-8.6-14.9a1.7 1.7 0 0 0-3 0z"/></svg>
+            Confírmalo solo cuando el cliente esté presente recogiendo el pedido
+          </div>
         </div>
 
         <div *ngIf="order.status === 'DELIVERED'" class="opd-done-box" style="background:#f0f9ff;border-color:#93c5fd;">
@@ -580,6 +589,30 @@
     <div class="opd-modal-actions">
       <button class="opd-btn secondary" (click)="closeReadyModal()">Cancelar</button>
       <button class="opd-btn success" (click)="confirmMarkAsReady()">Sí, marcar LISTO</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: confirmar recojo / entrega (READY -> DELIVERED) ── -->
+<div *ngIf="showPickupModal"
+     class="opd-modal-backdrop"
+     (click)="closePickupModal()">
+  <div class="opd-modal" (click)="$event.stopPropagation()">
+    <div class="opd-modal-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <h2 class="opd-modal-title">¿Confirmar recojo del pedido?</h2>
+    <p class="opd-modal-desc">
+      Verifica que el cliente esté presente y que el saldo esté cubierto.
+      El pedido pasará a estado <b>"Entregado"</b> y no se puede deshacer.
+    </p>
+    <div class="opd-modal-actions">
+      <button class="opd-btn secondary" [disabled]="isConfirmingPickup" (click)="closePickupModal()">Cancelar</button>
+      <button class="opd-btn success" [disabled]="isConfirmingPickup" (click)="confirmPickup()">
+        {{ isConfirmingPickup ? 'Confirmando...' : 'Sí, confirmar recojo' }}
+      </button>
     </div>
   </div>
 </div>

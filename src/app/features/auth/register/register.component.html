@@ -36,6 +36,18 @@
         </p>
       </div>
 
+      <!-- Confirmacion de exito -->
+      <div *ngIf="successMessage()" class="mb-5 px-4 py-4 rounded-xl flex flex-col items-center text-center gap-2"
+           style="background: #f0fdf4; border: 1px solid #a7f3d0; color: #065f46;">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center" style="background:#3a8f8b;">
+          <svg class="w-4 h-4" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12l5 5L20 7"/>
+          </svg>
+        </div>
+        <span class="text-[13.5px] font-semibold">{{ successMessage() }}</span>
+        <span class="text-[11.5px]" style="color:#2e7874;">Redirigiendo al inicio de sesion...</span>
+      </div>
+
       <!-- Error global -->
       <div *ngIf="errorMessage()" class="mb-5 px-4 py-3 rounded-xl flex items-start gap-2.5 text-sm"
            style="background: #fff0f0; border: 1px solid #f5c6c6; color: #c0392b;">
@@ -47,7 +59,7 @@
       </div>
 
       <!-- Formulario -->
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate class="flex flex-col gap-3.5">
+      <form *ngIf="!successMessage()" [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate class="flex flex-col gap-3.5">
 
         <!-- Nombre + Apellido -->
         <div class="grid grid-cols-2 gap-3">

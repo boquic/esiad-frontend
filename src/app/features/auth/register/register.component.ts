@@ -11,7 +11,6 @@ import {
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs/operators';
 
 // ── Response type ─────────────────────────────────────────────────────────────
 
@@ -68,6 +67,7 @@ export class RegisterComponent {
 
   isLoading           = signal(false);
   errorMessage        = signal('');
+  successMessage      = signal('');
   showPassword        = signal(false);
   showConfirmPassword = signal(false);
 
@@ -122,6 +122,7 @@ export class RegisterComponent {
 
     this.isLoading.set(true);
     this.errorMessage.set('');
+    this.successMessage.set('');
 
     const formValue = this.registerForm.getRawValue();
     const payload = {
@@ -134,14 +135,20 @@ export class RegisterComponent {
 
     this.http
       .post<RegisterResponse>('/api/auth/register', payload)
-      .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
-        next:  () => this.router.navigate(['/login']),
-        error: (err) =>
+        // Contrato del backend: { data: { id, dni, first_name, ... } } (201 Created).
+        next: () => {
+          this.isLoading.set(false);
+          this.successMessage.set('¡Cuenta creada correctamente! Ya puedes iniciar sesion con tu DNI.');
+          setTimeout(() => this.router.navigate(['/login']), 1800);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
           this.errorMessage.set(
             err.error?.message ||
             'Ocurrio un error al registrarse. Verifique sus datos e intente nuevamente.'
-          ),
+          );
+        },
       });
   }
 }

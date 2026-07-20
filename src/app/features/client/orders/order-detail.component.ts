@@ -33,10 +33,7 @@ export class OrderDetailComponent {
   loading = false;
   error = '';
 
-  // Pickup
-  confirmingPickup = false;
-  showPickupModal = false;
-  pickupSuccessMessage = '';
+  // La confirmación de recogida ahora la realiza el operario en el local; el cliente ya no confirma nada.
   downloadingFileId: string | null = null;
 
   // Confirm review (BUDGETED / CLIENT_REVIEW_PENDING)
@@ -247,64 +244,6 @@ export class OrderDetailComponent {
         this.draftError = err.error?.message ?? 'No se pudo eliminar el borrador.';
         this.cd.markForCheck();
       },
-    });
-  }
-
-  openPickupModal(): void {
-    if (this.order?.status !== 'READY') return;
-    this.showPickupModal = true;
-  }
-
-  closePickupModal(): void {
-    if (!this.confirmingPickup) {
-      this.showPickupModal = false;
-    }
-  }
-
-  confirmPickup(): void {
-    if (!this.order || this.order.status !== 'READY') return;
-    
-    this.confirmingPickup = true;
-    this.error = '';
-    this.pickupSuccessMessage = '';
-    
-    console.log('pickup_confirm_attempt', { orderId: this.order.id });
-
-    this.ordersService.confirmPickup(this.order.id).subscribe({
-      next: (response) => {
-        console.log('pickup_confirm_success', { orderId: this.order?.id });
-        this.confirmingPickup = false;
-        this.showPickupModal = false;
-        
-        if (this.order) {
-          this.pickupSuccessMessage = 'Pedido entregado';
-          this.loadOrder(this.order.id, true);
-        } else {
-          this.cd.markForCheck();
-        }
-      },
-      error: (error: any) => {
-        console.log('pickup_confirm_fail', { orderId: this.order?.id, error });
-        this.confirmingPickup = false;
-        this.showPickupModal = false;
-
-        if (error.status === 401 || error.status === 403) {
-            this.router.navigate(['/login']);
-            return;
-        }
-
-        if (error.status === 404) {
-            this.error = 'Pedido no encontrado';
-        } else {
-            this.error = error.error?.message ?? 'No se puede confirmar la recogida: estado inválido';
-        }
-        
-        if (this.order) {
-            this.loadOrder(this.order.id);
-        } else {
-            this.cd.markForCheck();
-        }
-      }
     });
   }
 

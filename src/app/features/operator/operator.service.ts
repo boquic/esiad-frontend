@@ -112,4 +112,9 @@ export class OperatorService {
     if (estimated_delivery_at) body['estimated_delivery_at'] = estimated_delivery_at;
     return this.http.patch<GenericResponse>(`/api/operator/orders/${orderId}/production-time`, body);
   }
+
+  /** POST /api/operator/orders/:id/confirm-pickup — el operario confirma que el cliente recogió el pedido (READY -> DELIVERED). */
+  confirmPickup(orderId: string): Observable<GenericResponse> {
+    return this.http.post<GenericResponse>(`/api/operator/orders/${orderId}/confirm-pickup`, {});
+  }
 }

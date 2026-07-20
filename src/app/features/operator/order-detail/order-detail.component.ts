@@ -585,6 +585,10 @@ export class OperatorOrderDetailComponent implements OnInit {
   isChangingStatus = false;
   showReadyModal   = false;
 
+  // ── Confirmar recojo/entrega (READY -> DELIVERED) ──────────────
+  showPickupModal     = false;
+  isConfirmingPickup  = false;
+
   // ── Review (OPERATOR_REVIEW_PENDING) ────────────────────────────────────
   showReviewPanel      = false;
   reviewAction: 'APPROVE' | 'RETURN_TO_CLIENT' | 'REJECT' | '' = '';
@@ -803,6 +807,29 @@ export class OperatorOrderDetailComponent implements OnInit {
       error: (err) => {
         this.error = err?.error?.message || 'No se pudo cambiar el estado del pedido.';
         this.isChangingStatus = false;
+      }
+    });
+  }
+
+  openPickupModal():  void { this.showPickupModal = true;  }
+  closePickupModal(): void { this.showPickupModal = false; }
+
+  confirmPickup(): void {
+    if (!this.orderId) return;
+    this.isConfirmingPickup = true;
+    this.success = null; this.error = null;
+
+    this.operatorService.confirmPickup(this.orderId).subscribe({
+      next: () => {
+        this.success = 'Recojo confirmado. El pedido se marcó como ENTREGADO.';
+        this.isConfirmingPickup = false;
+        this.showPickupModal = false;
+        if (this.order) this.order.status = 'DELIVERED';
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message || 'No se pudo confirmar el recojo del pedido.';
+        this.isConfirmingPickup = false;
+        this.showPickupModal = false;
       }
     });
   }

@@ -147,18 +147,13 @@
             </div>
 
             <div class="op-detail-block">
-              <div class="op-detail-label">Entrega estimada</div>
-              <div class="op-detail-value"
-                   [class.urgent-text]="urgencyLevel(order) === 'overdue' || urgencyLevel(order) === 'urgent'">
+              <div class="op-detail-label">Tiempo estimado</div>
+              <div class="op-detail-value">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="5" width="18" height="16" rx="2"/>
                   <path d="M3 9h18M8 3v4M16 3v4"/>
                 </svg>
-                <span *ngIf="order.estimated_delivery_at">
-                  {{ order.estimated_delivery_at | date:'dd/MM/yyyy' }}
-                  <span class="op-days-badge">{{ daysLabel(order) }}</span>
-                </span>
-                <span *ngIf="!order.estimated_delivery_at">Sin fecha</span>
+                <span>{{ order.production_time_estimate || 'Sin registrar' }}</span>
               </div>
             </div>
           </div>

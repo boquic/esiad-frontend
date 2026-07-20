@@ -115,26 +115,6 @@
             Fecha de ingreso
           </div>
           <div class="v mono">{{ order.created_at | date:'dd/MM/yyyy' }}</div>
-
-          <div class="k">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="5" width="18" height="16" rx="2"/>
-              <path d="M3 9h18M8 3v4M16 3v4"/><path d="M12 13l2 2 4-4"/>
-            </svg>
-            Entrega estimada
-          </div>
-          <div class="v mono" [class.urgent-val]="isUrgent">
-            {{ order.estimated_delivery_at ? (order.estimated_delivery_at | date:'dd/MM/yyyy HH:mm') : '—' }}
-          </div>
-        </div>
-
-        <!-- Urgency row -->
-        <div *ngIf="isUrgent" class="opd-urgency-row">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
-          </svg>
-          {{ urgencyText }}
-          <span class="hint">Prioriza este pedido</span>
         </div>
 
         <!-- Indicaciones -->
@@ -491,10 +471,6 @@
             <p style="font-size:11px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Tiempo estimado</p>
             <p style="font-size:14px;font-weight:700;color:#2c2c2c;">{{ order.production_time_estimate }}</p>
           </div>
-          <div *ngIf="order.estimated_delivery_at">
-            <p style="font-size:11px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:3px;">Entrega estimada</p>
-            <p style="font-size:14px;font-weight:700;color:#2c2c2c;">{{ order.estimated_delivery_at | date:'dd/MM/yyyy HH:mm' }}</p>
-          </div>
         </div>
         <button (click)="showProductionTimePanel = !showProductionTimePanel" class="opd-btn secondary" style="font-size:13px;">
           {{ showProductionTimePanel ? 'Cancelar' : (order.production_time_estimate ? 'Actualizar tiempo' : 'Registrar tiempo estimado') }}
@@ -504,11 +480,6 @@
             <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;display:block;margin-bottom:5px;">Tiempo estimado *</label>
             <input type="text" class="opd-textarea" [(ngModel)]="productionTimeValue"
                    placeholder="Ej: 48 horas" style="min-height:unset;padding:9px 12px;resize:none;"/>
-          </div>
-          <div>
-            <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;display:block;margin-bottom:5px;">Entrega estimada (opcional)</label>
-            <input type="datetime-local" class="opd-textarea" [(ngModel)]="estimatedDeliveryAtValue"
-                   style="min-height:unset;padding:9px 12px;resize:none;"/>
           </div>
           <button class="opd-btn primary" (click)="submitProductionTime()" [disabled]="isSubmittingProductionTime">
             <span *ngIf="isSubmittingProductionTime" class="opd-spin-sm"></span>

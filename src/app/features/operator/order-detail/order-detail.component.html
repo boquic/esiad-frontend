@@ -305,10 +305,16 @@
           <span><strong>Acción requerida:</strong> Revisa el pedido y archivos. Usa el panel de abajo para aprobar, devolver o rechazar.</span>
         </div>
 
-        <div *ngIf="order.status === 'PENDING_PAYMENT'" class="opd-state-explain"
+        <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition !== 'CASH_ON_DELIVERY'" class="opd-state-explain"
              style="background:rgba(245,243,255,0.85);border-color:#c4b5fd;color:#6d28d9;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>
-          <span>Esperando el pago del cliente antes de iniciar producción.</span>
+          <span>Esperando que el administrador valide el adelanto del cliente antes de iniciar producción.</span>
+        </div>
+
+        <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition === 'CASH_ON_DELIVERY'" class="opd-state-explain"
+             style="background:rgba(245,243,255,0.85);border-color:#c4b5fd;color:#6d28d9;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>
+          <span>Pedido con contraentrega: puedes iniciar producción sin esperar un pago por adelantado.</span>
         </div>
 
         <div *ngIf="order.status === 'IN_PROGRESS'" class="opd-state-explain">
@@ -317,7 +323,10 @@
         </div>
 
         <!-- Acciones -->
-        <div *ngIf="order.status === 'PENDING_PAYMENT'" style="margin-top:4px;">
+        <!-- HU-15/BUG-05: el botón solo aparece cuando corresponde según el estado y la
+             condición de pago. Con ADVANCE_50, el pago lo valida el administrador y el
+             pedido pasa a IN_PROGRESS automáticamente; el operario no debe forzarlo antes. -->
+        <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition === 'CASH_ON_DELIVERY'" style="margin-top:4px;">
           <button class="opd-btn primary lg" (click)="startOrder()" [disabled]="isChangingStatus">
             <svg *ngIf="!isChangingStatus" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
             <span *ngIf="isChangingStatus" class="opd-spin-sm"></span>

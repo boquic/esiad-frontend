@@ -209,9 +209,7 @@ export class ClientOrdersService {
     return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/observations`, { observation });
   }
 
-  confirmPickup(orderId: string): Observable<ConfirmOrderResponse> {
-    return this.http.post<ConfirmOrderResponse>(`/api/orders/${orderId}/confirm-pickup`, {});
-  }
+  // La confirmación de recogida se movió al operario (POST /api/operator/orders/:id/confirm-pickup). El cliente ya no confirma nada.
 
   downloadOrderFile(orderId: string, fileId: string): Observable<Blob> {
     return this.http.get(`/api/orders/${orderId}/files/${fileId}/download`, { responseType: 'blob' });

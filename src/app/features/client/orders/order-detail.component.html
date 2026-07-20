@@ -28,15 +28,6 @@
     {{ actionSuccessMessage }}
   </div>
 
-  <!-- Success recogida -->
-  <div *ngIf="pickupSuccessMessage" class="flex items-center rounded-xl mb-5"
-       style="gap:9px;padding:12px 16px;background:#f0fdf4;border:1px solid #bbf7d0;font-size:13px;color:#166534;">
-    <svg class="shrink-0" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-    </svg>
-    {{ pickupSuccessMessage }}
-  </div>
-
   <!-- Success: borrador enviado a cotización -->
   <div *ngIf="draftSuccessMessage" class="flex items-center rounded-xl mb-5"
        style="gap:9px;padding:12px 16px;background:#f0fdf4;border:1px solid #bbf7d0;font-size:13px;color:#166534;">
@@ -470,7 +461,7 @@
     </div>
   </div>
 
-  <!-- Banner Confirmación Recogida -->
+  <!-- Banner Listo para recoger (informativo: el operario confirma la recogida en el local) -->
   <div *ngIf="order?.status === 'READY'" class="rounded-xl mb-5 flex flex-col md:flex-row md:items-center justify-between"
        style="gap:16px;padding:18px 24px;background:rgba(236,253,245,0.75);backdrop-filter:blur(20px) saturate(140%);border:1px solid #a7f3d0;">
     <div>
@@ -480,18 +471,8 @@
         </svg>
         Tu pedido está listo para recoger en tienda
       </h3>
-      <p style="font-size:13px;color:#047857;margin:0;">Al confirmar se registrará como recogido (DELIVERED).</p>
+      <p style="font-size:13px;color:#047857;margin:0;">Acércate al local con tu comprobante; el operario registrará la entrega al recibirlo.</p>
     </div>
-    <button (click)="openPickupModal()"
-            [disabled]="confirmingPickup"
-            class="shrink-0 inline-flex items-center justify-center font-bold rounded-lg text-white transition-opacity disabled:opacity-50"
-            style="gap:7px;font-size:13.5px;padding:10px 20px;background:#059669;border:none;cursor:pointer;outline:none;">
-      <svg *ngIf="confirmingPickup" class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-      </svg>
-      {{ confirmingPickup ? 'Confirmando...' : 'Confirmar recogida' }}
-    </button>
   </div>
 
   <!-- Loading -->
@@ -846,45 +827,6 @@
     </div>
   </div>
 
-  <!-- Modal Confirmación Recogida -->
-  <div *ngIf="showPickupModal" class="fixed inset-0 z-50 flex items-center justify-center" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="fixed inset-0 bg-gray-900 bg-opacity-40 backdrop-blur-sm transition-opacity" (click)="closePickupModal()"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl w-[90%] max-w-100 p-6 transform transition-all"
-         style="border:1px solid #e5e7eb;">
-      
-      <div class="flex items-start" style="gap:14px;margin-bottom:20px;">
-        <div class="shrink-0 grid place-items-center rounded-full" 
-             style="width:40px;height:40px;background:#ecfdf5;color:#059669;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-          </svg>
-        </div>
-        <div>
-          <h3 id="modal-title" class="font-bold text-gray-900" style="font-size:17px;letter-spacing:-0.01em;margin-bottom:6px;">¿Confirmas que recogiste el pedido?</h3>
-          <p class="text-gray-500" style="font-size:13.5px;line-height:1.5;">Esta acción actualizará el estado de tu pedido a ENTREGADO y no se puede deshacer.</p>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-3 mt-2">
-        <button (click)="closePickupModal()" 
-                [disabled]="confirmingPickup"
-                class="font-semibold rounded-lg text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
-                style="font-size:13.5px;padding:9px 16px;background:white;border:1px solid #d1d5db;cursor:pointer;">
-          Cancelar
-        </button>
-        <button (click)="confirmPickup()" 
-                [disabled]="confirmingPickup"
-                class="inline-flex items-center justify-center font-bold rounded-lg text-white transition-opacity disabled:opacity-50"
-                style="gap:6px;font-size:13.5px;padding:9px 18px;background:#059669;border:1px solid #047857;cursor:pointer;min-width:140px;">
-          <svg *ngIf="confirmingPickup" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-          </svg>
-          {{ confirmingPickup ? 'Confirmando...' : 'Sí, confirmar' }}
-        </button>
-      </div>
-
-    </div>
-  </div>
+  <!-- Confirmación de recogida: ahora la realiza el operario en el local, el cliente ya no confirma nada. -->
 
 </div>

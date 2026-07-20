@@ -93,7 +93,11 @@ export class LoginComponent {
       next: (res) => {
         const data = res?.data ?? {};
 
-        // Compatibilidad: si el backend devolviera token directo.
+        // HU-19/RULE-01: el rol CLIENT omite el 2FA por completo; el backend
+        // devuelve el token directamente en el paso 1 (sin requires_2fa_setup
+        // ni requires_2fa), así que aquí saltamos la pantalla de código/QR y
+        // entramos de una vez. OPERATOR y ADMIN no entran por esta rama: para
+        // ellos el backend sigue devolviendo el reto 2FA (setup o verify).
         if (data.token) {
           this.handleAuthSuccess(data.token, data.user);
           return;

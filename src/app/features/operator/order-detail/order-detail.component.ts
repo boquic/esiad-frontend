@@ -604,7 +604,6 @@ export class OperatorOrderDetailComponent implements OnInit {
   // ── Production Time ──────────────────────────────────────────────────────
   showProductionTimePanel   = false;
   productionTimeValue       = '';
-  estimatedDeliveryAtValue  = '';
   isSubmittingProductionTime = false;
 
   // ── Lifecycle ─────────────────────────────────────────────────
@@ -646,25 +645,8 @@ export class OperatorOrderDetailComponent implements OnInit {
     return (f + l).toUpperCase() || 'CL';
   }
 
-  get isUrgent(): boolean {
-    if (!this.order?.estimated_delivery_at) return false;
-    const diff = this.diffDays(this.order.estimated_delivery_at);
-    return diff < 0 || diff <= 1;
-  }
-
-  get urgencyText(): string {
-    if (!this.order?.estimated_delivery_at) return '';
-    const diff = this.diffDays(this.order.estimated_delivery_at);
-    if (diff < 0) return `Vencido hace ${Math.abs(diff)} día${Math.abs(diff) !== 1 ? 's' : ''}`;
-    if (diff === 0) return 'Vence hoy';
-    return `Vence en ${diff} día${diff !== 1 ? 's' : ''}`;
-  }
-
-  private diffDays(isoDate: string): number {
-    const now      = new Date();
-    const delivery = new Date(isoDate);
-    return Math.ceil((delivery.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  }
+  // HU-14: se elimina el componente de fecha estimada de entrega (isUrgent/urgencyText/diffDays).
+  // Ya no se comprometen fechas exactas; solo se informa production_time_estimate como texto.
 
   statusLabel(status: string): string {
     const map: Record<string, string> = {
@@ -929,8 +911,7 @@ export class OperatorOrderDetailComponent implements OnInit {
 
     this.operatorService.updateProductionTime(
       this.orderId,
-      this.productionTimeValue.trim(),
-      this.estimatedDeliveryAtValue.trim() || undefined
+      this.productionTimeValue.trim()
     ).subscribe({
       next: () => {
         this.success = 'Tiempo de producción registrado.';
@@ -938,10 +919,8 @@ export class OperatorOrderDetailComponent implements OnInit {
         this.showProductionTimePanel = false;
         if (this.order) {
           this.order.production_time_estimate = this.productionTimeValue.trim();
-          if (this.estimatedDeliveryAtValue) this.order.estimated_delivery_at = this.estimatedDeliveryAtValue;
         }
         this.productionTimeValue = '';
-        this.estimatedDeliveryAtValue = '';
       },
       error: (err: any) => {
         this.error = err?.error?.message ?? 'No se pudo registrar el tiempo.';

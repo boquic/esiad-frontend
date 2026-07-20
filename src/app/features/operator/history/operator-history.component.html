@@ -47,7 +47,7 @@
             <th>Servicio</th>
             <th>Material</th>
             <th>Cliente</th>
-            <th>Entrega estimada</th>
+            <th>Tiempo estimado</th>
             <th>Estado</th>
             <th>Acción</th>
           </tr>
@@ -63,7 +63,7 @@
               {{ order.client?.first_name }} {{ order.client?.last_name }}
             </td>
             <td class="oph-cell-mono">
-              {{ order.estimated_delivery_at ? (order.estimated_delivery_at | date:'dd/MM/yyyy') : '—' }}
+              {{ order.production_time_estimate || '—' }}
             </td>
             <td>
               <span class="oph-badge" [class]="order.status === 'READY' ? 'ready' : 'delivered'">

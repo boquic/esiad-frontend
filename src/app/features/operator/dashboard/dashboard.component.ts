@@ -582,8 +582,10 @@ export class OperatorDashboardComponent implements OnInit {
     this.loadAssignedOrders();
   }
 
-  loadAssignedOrders(): void {
-    this.isLoading = true;
+  // HU-21/BUG-02/04/09: `silent=true` refresca la cola desde el servidor sin
+  // mostrar el spinner de página completa (para usar tras confirmar una acción).
+  loadAssignedOrders(silent = false): void {
+    if (!silent) this.isLoading = true;
     this.error = null;
 
     this.operatorService.getAssignedOrders().subscribe({
@@ -607,12 +609,12 @@ export class OperatorDashboardComponent implements OnInit {
             return tA - tB;
           });
 
-        this.isLoading = false;
+        if (!silent) this.isLoading = false;
         this.cd.markForCheck();
       },
-      error: () => {
-        this.error = 'No se pudieron cargar los pedidos asignados.';
-        this.isLoading = false;
+      error: (err: any) => {
+        this.error = err?.error?.message ?? 'No se pudieron cargar los pedidos asignados.';
+        if (!silent) this.isLoading = false;
         this.cd.markForCheck();
       }
     });
@@ -685,12 +687,13 @@ export class OperatorDashboardComponent implements OnInit {
     this.loadingOrderId = order.id;
     this.operatorService.updateOrderStatus(order.id, 'IN_PROGRESS').subscribe({
       next: () => {
-        order.status = 'IN_PROGRESS';
         this.loadingOrderId = null;
+        this.loadAssignedOrders(true);
       },
-      error: () => {
+      error: (err: any) => {
         this.loadingOrderId = null;
-        this.error = 'No se pudo iniciar el pedido.';
+        this.error = err?.error?.message ?? 'No se pudo iniciar el pedido.';
+        this.cd.markForCheck();
       }
     });
   }
@@ -711,12 +714,13 @@ export class OperatorDashboardComponent implements OnInit {
 
     this.operatorService.updateOrderStatus(order.id, 'READY').subscribe({
       next: () => {
-        order.status = 'READY';
         this.loadingOrderId = null;
+        this.loadAssignedOrders(true);
       },
-      error: () => {
+      error: (err: any) => {
         this.loadingOrderId = null;
-        this.error = 'No se pudo cambiar el estado del pedido.';
+        this.error = err?.error?.message ?? 'No se pudo cambiar el estado del pedido.';
+        this.cd.markForCheck();
       }
     });
   }

@@ -466,6 +466,10 @@ export class OrderDetailComponent {
     return this.ordersService.getFileType(file);
   }
 
+  getFileDisplayName(file: OrderFile): string {
+    return this.ordersService.getFileDisplayName(file);
+  }
+
   // ── Payment voucher ──────────────────────────────────────────────────────
   onPaymentFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

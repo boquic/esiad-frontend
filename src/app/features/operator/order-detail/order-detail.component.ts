@@ -670,6 +670,22 @@ export class OperatorOrderDetailComponent implements OnInit {
     return file.file_type.replace('PLAN_', '').toUpperCase();
   }
 
+  /**
+   * Nombre real con el que el cliente subió el archivo (ej: "plano_final.dwg").
+   * Antes se mostraba un nombre inventado ("Plano_XXXXXX.ext"); ahora se usa
+   * el nombre original guardado por el backend, con el mismo fallback para
+   * archivos subidos antes de que ese campo existiera.
+   */
+  fileDisplayName(file: any): string {
+    const original = file?.original_name ?? file?.originalName;
+    if (typeof original === 'string' && original.trim()) {
+      return original.trim();
+    }
+
+    const url = file?.download_url || file?.file_url || '';
+    return typeof url === 'string' && url ? (url.split('/').pop() || url) : `Plano_${String(file?.id ?? '').slice(0, 6).toUpperCase()}.${this.fileExt(file).toLowerCase()}`;
+  }
+
   // ── Status pill CSS class ────────────────────────────────────
   statusPillClass(status: string): string {
     const map: Record<string, string> = {

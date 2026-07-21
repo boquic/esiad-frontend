@@ -295,8 +295,11 @@ export class NewOrderComponent {
     this.ordersService.submitDraft(draftId).subscribe({
       next: () => {
         this.submitting = false;
-        this.submitSuccess = 'Pedido enviado correctamente.';
-        this.cd.markForCheck();
+        // El pedido ya fue enviado (DRAFT -> BUDGETED): en vez de dejar al
+        // cliente en el formulario con un mensaje de éxito, lo llevamos
+        // directo al detalle de su pedido para que pueda enviarlo a
+        // cotización sin tener que ir a "Mis pedidos" primero.
+        this.router.navigate(['/client/orders', draftId]);
       },
       error: (err: { error?: { message?: string } }) => {
         this.submitting = false;

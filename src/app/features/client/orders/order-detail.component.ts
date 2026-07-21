@@ -399,7 +399,7 @@ export class OrderDetailComponent {
       case 'DRAFT':
         return { label: 'Borrador', classes: 'border-slate-300 bg-slate-50 text-slate-600' };
       case 'BUDGETED':
-        return { label: 'Presupuesto generado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
+        return { label: 'Pedido creado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
       case 'CLIENT_REVIEW_PENDING':
         return { label: 'Revisión del cliente pendiente', classes: 'border-orange-300 bg-orange-50 text-orange-700' };
       case 'OPERATOR_REVIEW_PENDING':

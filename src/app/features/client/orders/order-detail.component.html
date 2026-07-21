@@ -177,12 +177,12 @@
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 12h6m-6 4h3M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/>
           </svg>
-          Presupuesto listo — revisa y confirma
+          Pedido creado — envíalo a cotización
         </h3>
         <p style="font-size:13px;color:#b45309;margin:0;">
-          Tu presupuesto estimado es
-          <strong style="font-family:monospace;">S/ {{ getEstimatedPrice() | number:'1.2-2' }}</strong>.
-          <span *ngIf="order?.operator"> · Operario: <strong>{{ getOperatorName(order?.operator) }}</strong></span>
+          Tu pedido ya fue asignado a un operario.
+          <span *ngIf="order?.operator"> Operario: <strong>{{ getOperatorName(order?.operator) }}</strong>.</span>
+          Envíalo a cotización para que te confirme el precio.
         </p>
       </div>
       <button (click)="openConfirmReviewModal()" [disabled]="confirmingReview"
@@ -505,7 +505,7 @@
             <h2 class="font-bold" style="font-size:18px;color:#1f2937;letter-spacing:-0.01em;">{{ getServiceName() }}</h2>
             <p style="font-size:13px;color:#6b7280;margin-top:3px;">{{ getMaterialName() }}</p>
           </div>
-          <div class="shrink-0 text-right">
+          <div *ngIf="hasOperatorPricing" class="shrink-0 text-right">
             <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;margin-bottom:4px;">Presupuesto</p>
             <p style="font-size:20px;font-weight:700;color:#2e7874;font-family:monospace;letter-spacing:-0.02em;line-height:1;">
               <span style="font-size:12px;font-weight:600;opacity:.75;margin-right:3px;vertical-align:2px;">S/</span>{{ getEstimatedPrice() | number:'1.2-2' }}

@@ -68,6 +68,17 @@ export class OrderDetailComponent {
     return this.order?.status === 'DRAFT';
   }
 
+  /**
+   * El operario recién define un precio real durante/al salir de su revisión
+   * (OPERATOR_REVIEW_PENDING). Antes de eso (DRAFT, BUDGETED o mientras está
+   * en revisión) el "presupuesto" es un placeholder en S/ 0.00, así que el
+   * resumen económico no debe mostrarse todavía.
+   */
+  get hasOperatorPricing(): boolean {
+    const s = this.order?.status;
+    return !!s && s !== 'DRAFT' && s !== 'BUDGETED' && s !== 'OPERATOR_REVIEW_PENDING';
+  }
+
   // Payment voucher upload (PENDING_PAYMENT)
   selectedPaymentFile: File | null = null;
   uploadingPayment = false;

@@ -52,6 +52,7 @@ export interface OperatorOrder {
     order_id: string;
     file_url?: string;
     file_type: string;
+    original_name?: string | null;
     uploaded_at: string;
     download_url?: string;
   }>;

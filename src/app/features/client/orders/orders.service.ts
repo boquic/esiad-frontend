@@ -88,6 +88,10 @@ export type OrderFile = {
   fileUrl?: string | null;
   file_type?: string | null;
   fileType?: string | null;
+  // Nombre real con el que el cliente subió el archivo (ej: "plano_final.dwg").
+  // Puede venir null en archivos subidos antes de que este campo existiera.
+  original_name?: string | null;
+  originalName?: string | null;
   uploaded_at?: string | null;
   uploadedAt?: string | null;
   [key: string]: unknown;
@@ -349,5 +353,20 @@ export class ClientOrdersService {
   getFileType(file: OrderFile | null | undefined): string {
     const type = file?.file_type ?? file?.fileType;
     return typeof type === 'string' ? type : 'Archivo';
+  }
+
+  /**
+   * Nombre a mostrar al cliente: el nombre original con el que subió el
+   * archivo si el backend lo tiene guardado; si no (archivos subidos antes
+   * de este campo), se cae al nombre físico del archivo en el servidor.
+   */
+  getFileDisplayName(file: OrderFile | null | undefined): string {
+    const original = file?.original_name ?? file?.originalName;
+    if (typeof original === 'string' && original.trim()) {
+      return original.trim();
+    }
+
+    const url = this.getFileUrl(file);
+    return url ? url.split('/').pop() || url : 'Sin nombre disponible';
   }
 }

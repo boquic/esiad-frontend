@@ -282,7 +282,7 @@ export class OrderDetailComponent {
       next: () => {
         this.confirmingReview = false;
         this.showConfirmReviewModal = false;
-        this.actionSuccessMessage = 'Revisión confirmada correctamente.';
+        this.actionSuccessMessage = 'Envío a cotización exitoso.';
         if (this.order) this.loadOrder(this.order.id, true);
         else this.cd.markForCheck();
       },
@@ -464,6 +464,10 @@ export class OrderDetailComponent {
 
   getFileType(file: OrderFile): string {
     return this.ordersService.getFileType(file);
+  }
+
+  getFileDisplayName(file: OrderFile): string {
+    return this.ordersService.getFileDisplayName(file);
   }
 
   // ── Payment voucher ──────────────────────────────────────────────────────

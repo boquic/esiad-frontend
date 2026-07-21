@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -535,7 +535,7 @@ type UrgencyLevel = 'overdue' | 'urgent' | 'soon' | 'ok';
     }
   `],
 })
-export class OperatorDashboardComponent implements OnInit {
+export class OperatorDashboardComponent implements OnInit, OnDestroy {
   private router          = inject(Router);
   private operatorService = inject(OperatorService);
   private cd              = inject(ChangeDetectorRef);
@@ -551,6 +551,11 @@ export class OperatorDashboardComponent implements OnInit {
 
   // Modal de confirmación para marcar listo
   confirmOrder: OperatorOrder | null = null;
+
+  // HU-21: polling automático de la cola (alternativa simple a WebSockets).
+  // Configurable: ajustar este valor para cambiar la frecuencia (20-30s).
+  private readonly pollIntervalMs = 25000;
+  private pollHandle: ReturnType<typeof setInterval> | null = null;
 
   get firstName(): string {
     return this.userName.split(' ')[0];
@@ -580,6 +585,17 @@ export class OperatorDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAssignedOrders();
+
+    // HU-21/BUG-09 - Pruebas #9, #18: refresco periódico silencioso para que
+    // los pedidos resueltos desaparezcan de la cola sin necesidad de F5.
+    this.pollHandle = setInterval(() => this.loadAssignedOrders(true), this.pollIntervalMs);
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollHandle) {
+      clearInterval(this.pollHandle);
+      this.pollHandle = null;
+    }
   }
 
   // HU-21/BUG-02/04/09: `silent=true` refresca la cola desde el servidor sin

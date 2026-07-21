@@ -644,8 +644,8 @@
         </div>
       </section>
 
-      <!-- Resumen económico (aún no aplica mientras el pedido es un borrador) -->
-      <section *ngIf="!isDraft" class="rounded-xl overflow-hidden"
+      <!-- Resumen económico: recién aplica cuando el operario ya definió un precio real (no en DRAFT/BUDGETED/OPERATOR_REVIEW_PENDING) -->
+      <section *ngIf="hasOperatorPricing" class="rounded-xl overflow-hidden"
                style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
         <div style="padding:16px 22px;background:linear-gradient(135deg,#3a8f8b,#2e7874);">
           <p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.80);margin-bottom:2px;">Presupuesto</p>

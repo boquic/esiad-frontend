@@ -74,7 +74,7 @@ export class MyOrdersComponent {
       case 'DRAFT':
         return { label: 'Borrador', classes: 'border-slate-300 bg-slate-50 text-slate-600' };
       case 'BUDGETED':
-        return { label: 'Presupuesto generado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
+        return { label: 'Pedido creado', classes: 'border-amber-300 bg-amber-50 text-amber-700' };
       case 'CLIENT_REVIEW_PENDING':
         return { label: 'Revisión del cliente pendiente', classes: 'border-orange-300 bg-orange-50 text-orange-700' };
       case 'OPERATOR_REVIEW_PENDING':
@@ -106,5 +106,16 @@ export class MyOrdersComponent {
 
   getEstimatedPrice(order: ClientOrder): number {
     return this.ordersService.getOrderEstimatedPrice(order);
+  }
+
+  /**
+   * El operario recién define un precio real durante/al salir de su revisión
+   * (OPERATOR_REVIEW_PENDING). Antes de eso (DRAFT, BUDGETED o mientras está
+   * en revisión) el "presupuesto" es un placeholder en S/ 0.00, así que no
+   * debe mostrarse todavía en la lista de pedidos.
+   */
+  hasOperatorPricing(order: ClientOrder): boolean {
+    const s = order?.status;
+    return !!s && s !== 'DRAFT' && s !== 'BUDGETED' && s !== 'OPERATOR_REVIEW_PENDING';
   }
 }

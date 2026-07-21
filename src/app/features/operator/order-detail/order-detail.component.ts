@@ -618,20 +618,22 @@ export class OperatorOrderDetailComponent implements OnInit {
     }
   }
 
-  loadOrder(id: string): void {
-    this.isLoading = true;
-    this.error     = null;
+  // HU-21/BUG-02/04/09: `silent=true` refresca el pedido desde el servidor sin
+  // mostrar el spinner de página completa (para usar tras confirmar una acción).
+  loadOrder(id: string, silent = false): void {
+    if (!silent) this.isLoading = true;
+    this.error = null;
 
     this.operatorService.getOrderById(id).subscribe({
       next: (response) => {
         this.order        = (response?.data !== undefined ? response.data : response) as OperatorOrder;
         this.internalNotes = this.order?.operator_notes || this.order?.notes || '';
-        this.isLoading    = false;
+        if (!silent) this.isLoading = false;
         this.cd.markForCheck();
       },
-      error: () => {
-        this.error     = 'Error al cargar los detalles del pedido.';
-        this.isLoading = false;
+      error: (err: any) => {
+        this.error = err?.error?.message ?? 'Error al cargar los detalles del pedido.';
+        if (!silent) this.isLoading = false;
         this.cd.markForCheck();
       }
     });
@@ -762,7 +764,7 @@ export class OperatorOrderDetailComponent implements OnInit {
       next: () => {
         this.success = 'Producción iniciada correctamente.';
         this.isChangingStatus = false;
-        if (this.order) this.order.status = 'IN_PROGRESS';
+        if (this.orderId) this.loadOrder(this.orderId, true);
       },
       error: (err) => {
         this.error = err?.error?.message || 'No se pudo iniciar la producción.';
@@ -784,7 +786,7 @@ export class OperatorOrderDetailComponent implements OnInit {
       next: () => {
         this.success = 'El pedido ha sido marcado como LISTO para recoger.';
         this.isChangingStatus = false;
-        if (this.order) this.order.status = 'READY';
+        if (this.orderId) this.loadOrder(this.orderId, true);
       },
       error: (err) => {
         this.error = err?.error?.message || 'No se pudo cambiar el estado del pedido.';
@@ -806,7 +808,7 @@ export class OperatorOrderDetailComponent implements OnInit {
         this.success = 'Recojo confirmado. El pedido se marcó como ENTREGADO.';
         this.isConfirmingPickup = false;
         this.showPickupModal = false;
-        if (this.order) this.order.status = 'DELIVERED';
+        if (this.orderId) this.loadOrder(this.orderId, true);
       },
       error: (err: any) => {
         this.error = err?.error?.message || 'No se pudo confirmar el recojo del pedido.';
@@ -860,7 +862,7 @@ export class OperatorOrderDetailComponent implements OnInit {
         this.showReviewPanel = false;
         this.reviewAction = '';
         this.reviewNotes = '';
-        if (this.orderId) this.loadOrder(this.orderId);
+        if (this.orderId) this.loadOrder(this.orderId, true);
       },
       error: (err: any) => {
         this.error = err?.error?.message ?? 'No se pudo procesar la revisión.';
@@ -890,7 +892,7 @@ export class OperatorOrderDetailComponent implements OnInit {
         this.showPricePanel = false;
         this.priceAdjustValue = null;
         this.priceAdjustReason = '';
-        if (this.orderId) this.loadOrder(this.orderId);
+        if (this.orderId) this.loadOrder(this.orderId, true);
       },
       error: (err: any) => {
         this.error = err?.error?.message ?? 'No se pudo ajustar el precio.';
@@ -917,10 +919,8 @@ export class OperatorOrderDetailComponent implements OnInit {
         this.success = 'Tiempo de producción registrado.';
         this.isSubmittingProductionTime = false;
         this.showProductionTimePanel = false;
-        if (this.order) {
-          this.order.production_time_estimate = this.productionTimeValue.trim();
-        }
         this.productionTimeValue = '';
+        if (this.orderId) this.loadOrder(this.orderId, true);
       },
       error: (err: any) => {
         this.error = err?.error?.message ?? 'No se pudo registrar el tiempo.';

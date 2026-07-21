@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminPaymentsService, AdminPayment, Operator } from './admin-payments.service';
@@ -9,12 +9,12 @@ import { AdminPaymentsService, AdminPayment, Operator } from './admin-payments.s
   imports: [CommonModule, FormsModule],
   templateUrl: './admin-payments.component.html'
 })
-export class AdminPaymentsComponent implements OnInit {
+export class AdminPaymentsComponent implements OnInit, OnDestroy {
   private paymentsService = inject(AdminPaymentsService);
 
   payments: AdminPayment[] = [];
   operators: Operator[] = [];
-  
+
   isLoading = true;
   error: string | null = null;
   success: string | null = null;
@@ -27,21 +27,40 @@ export class AdminPaymentsComponent implements OnInit {
   selectedOperatorId = '';
   showAssignModal = false;
 
+  // HU-21: polling automático de la bandeja de pagos (alternativa simple a
+  // WebSockets). Configurable: ajustar este valor para cambiar la frecuencia
+  // (20-30s).
+  private readonly pollIntervalMs = 25000;
+  private pollHandle: ReturnType<typeof setInterval> | null = null;
+
   ngOnInit(): void {
     this.loadPendingPayments();
     this.loadOperators();
+
+    // HU-21/BUG-09 - Pruebas #9, #18: refresco periódico silencioso para que
+    // los pagos ya resueltos desaparezcan de la bandeja sin necesidad de F5.
+    this.pollHandle = setInterval(() => this.loadPendingPayments(true), this.pollIntervalMs);
   }
 
-  loadPendingPayments(): void {
-    this.isLoading = true;
+  ngOnDestroy(): void {
+    if (this.pollHandle) {
+      clearInterval(this.pollHandle);
+      this.pollHandle = null;
+    }
+  }
+
+  // HU-21/BUG-02/04/09: `silent=true` refresca la bandeja desde el servidor
+  // sin mostrar el spinner de página completa (para el polling automático).
+  loadPendingPayments(silent = false): void {
+    if (!silent) this.isLoading = true;
     this.paymentsService.getPendingPayments().subscribe({
       next: (response) => {
         this.payments = Array.isArray(response) ? response : (response?.data || []);
-        this.isLoading = false;
+        if (!silent) this.isLoading = false;
       },
       error: (err) => {
-        this.error = `Error al cargar pagos pendientes: ${err.status} ${err.statusText || err.message || ''}`;
-        this.isLoading = false;
+        this.error = err?.error?.message || `Error al cargar pagos pendientes: ${err.status} ${err.statusText || err.message || ''}`;
+        if (!silent) this.isLoading = false;
         console.error(err);
       }
     });

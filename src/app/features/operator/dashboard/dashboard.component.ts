@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -535,7 +535,7 @@ type UrgencyLevel = 'overdue' | 'urgent' | 'soon' | 'ok';
     }
   `],
 })
-export class OperatorDashboardComponent implements OnInit {
+export class OperatorDashboardComponent implements OnInit, OnDestroy {
   private router          = inject(Router);
   private operatorService = inject(OperatorService);
   private cd              = inject(ChangeDetectorRef);
@@ -551,6 +551,11 @@ export class OperatorDashboardComponent implements OnInit {
 
   // Modal de confirmación para marcar listo
   confirmOrder: OperatorOrder | null = null;
+
+  // HU-21: polling automático de la cola (alternativa simple a WebSockets).
+  // Configurable: ajustar este valor para cambiar la frecuencia (20-30s).
+  private readonly pollIntervalMs = 25000;
+  private pollHandle: ReturnType<typeof setInterval> | null = null;
 
   get firstName(): string {
     return this.userName.split(' ')[0];
@@ -580,10 +585,23 @@ export class OperatorDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAssignedOrders();
+
+    // HU-21/BUG-09 - Pruebas #9, #18: refresco periódico silencioso para que
+    // los pedidos resueltos desaparezcan de la cola sin necesidad de F5.
+    this.pollHandle = setInterval(() => this.loadAssignedOrders(true), this.pollIntervalMs);
   }
 
-  loadAssignedOrders(): void {
-    this.isLoading = true;
+  ngOnDestroy(): void {
+    if (this.pollHandle) {
+      clearInterval(this.pollHandle);
+      this.pollHandle = null;
+    }
+  }
+
+  // HU-21/BUG-02/04/09: `silent=true` refresca la cola desde el servidor sin
+  // mostrar el spinner de página completa (para usar tras confirmar una acción).
+  loadAssignedOrders(silent = false): void {
+    if (!silent) this.isLoading = true;
     this.error = null;
 
     this.operatorService.getAssignedOrders().subscribe({
@@ -607,12 +625,12 @@ export class OperatorDashboardComponent implements OnInit {
             return tA - tB;
           });
 
-        this.isLoading = false;
+        if (!silent) this.isLoading = false;
         this.cd.markForCheck();
       },
-      error: () => {
-        this.error = 'No se pudieron cargar los pedidos asignados.';
-        this.isLoading = false;
+      error: (err: any) => {
+        this.error = err?.error?.message ?? 'No se pudieron cargar los pedidos asignados.';
+        if (!silent) this.isLoading = false;
         this.cd.markForCheck();
       }
     });
@@ -685,12 +703,13 @@ export class OperatorDashboardComponent implements OnInit {
     this.loadingOrderId = order.id;
     this.operatorService.updateOrderStatus(order.id, 'IN_PROGRESS').subscribe({
       next: () => {
-        order.status = 'IN_PROGRESS';
         this.loadingOrderId = null;
+        this.loadAssignedOrders(true);
       },
-      error: () => {
+      error: (err: any) => {
         this.loadingOrderId = null;
-        this.error = 'No se pudo iniciar el pedido.';
+        this.error = err?.error?.message ?? 'No se pudo iniciar el pedido.';
+        this.cd.markForCheck();
       }
     });
   }
@@ -711,12 +730,13 @@ export class OperatorDashboardComponent implements OnInit {
 
     this.operatorService.updateOrderStatus(order.id, 'READY').subscribe({
       next: () => {
-        order.status = 'READY';
         this.loadingOrderId = null;
+        this.loadAssignedOrders(true);
       },
-      error: () => {
+      error: (err: any) => {
         this.loadingOrderId = null;
-        this.error = 'No se pudo cambiar el estado del pedido.';
+        this.error = err?.error?.message ?? 'No se pudo cambiar el estado del pedido.';
+        this.cd.markForCheck();
       }
     });
   }

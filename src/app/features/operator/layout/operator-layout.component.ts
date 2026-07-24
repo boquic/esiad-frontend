@@ -764,8 +764,19 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
   // sin importar en qué página del panel del operario esté trabajando.
   private readonly pollIntervalMs = 25000;
   private pollHandle: ReturnType<typeof setInterval> | null = null;
-  private knownStatuses = new Map<string, string>();
-  private baselineReady = false;
+  // Se persiste en localStorage (no solo en memoria) para que, si el
+  // operario recarga la página o vuelve más tarde, no se le vuelva a avisar
+  // de un pedido que ya le fue anunciado antes; y para que si un pedido sale
+  // de revisión y vuelve a entrar (el cliente lo reenvía tras un ajuste de
+  // precio), sí se le avise de nuevo.
+  private readonly notifiedOrdersStorageKey = 'operatorNotifiedQuotationOrders';
+  private notifiedOrderIds: Set<string> = this.loadNotifiedOrderIds();
+  // Se crea una sola vez, en el primer clic/tecla del operario (ver
+  // unlockAudioOnFirstInteraction más abajo): los navegadores bloquean el
+  // audio creado fuera de una interacción real del usuario, y el polling
+  // que dispara el aviso corre en segundo plano (setInterval), no en un
+  // gesto del usuario.
+  private audioCtx: AudioContext | null = null;
 
   notificationToasts: Array<{ id: string; orderId: string; message: string }> = [];
 
@@ -804,13 +815,48 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
       clearInterval(this.pollHandle);
       this.pollHandle = null;
     }
+    if (this.audioCtx) {
+      this.audioCtx.close().catch(() => {});
+      this.audioCtx = null;
+    }
   }
 
   /**
-   * Refresca el conteo de pedidos asignados y detecta pedidos que acaban de
-   * pasar a OPERATOR_REVIEW_PENDING (el cliente los envió a cotización) para
-   * avisarle al operario con un sonido y un aviso, sin que tenga que
-   * refrescar la página ni estar en "Mi cola de trabajo".
+   * Los navegadores solo permiten crear/activar audio a partir de una
+   * interacción real del usuario (clic, tecla). Como el aviso de sonido lo
+   * dispara un polling en segundo plano (sin gesto del usuario en ese
+   * instante), se aprovecha el primer clic/tecla del operario en la página
+   * para dejar el AudioContext ya creado y activo, listo para usarse más
+   * tarde cuando llegue el aviso real.
+   */
+  @HostListener('document:click')
+  @HostListener('document:keydown')
+  unlockAudioOnFirstInteraction(): void {
+    if (this.audioCtx) {
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume().catch(() => {});
+      }
+      return;
+    }
+
+    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+
+    try {
+      this.audioCtx = new AudioCtx();
+    } catch {
+      // Se reintenta en la próxima interacción.
+    }
+  }
+
+  /**
+   * Refresca el conteo de pedidos asignados y detecta pedidos en
+   * OPERATOR_REVIEW_PENDING (el cliente los envió a cotización) que todavía
+   * no se le avisaron a este operario, para mostrarle un sonido + aviso sin
+   * que tenga que refrescar la página ni estar en "Mi cola de trabajo".
+   * Se compara contra un registro persistido (no solo en memoria) para que
+   * el aviso funcione aunque la página se haya recargado justo después de
+   * que el cliente enviara el pedido.
    */
   private refreshQueueState(): void {
     this.operatorService.getAssignedOrders().subscribe({
@@ -820,25 +866,50 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
           o.status === 'IN_PROGRESS' || o.status === 'PENDING'
         ).length;
 
-        // La primera carga solo establece la base: no avisamos de pedidos que
-        // ya estaban en revisión antes de que el operario abriera el panel.
-        if (this.baselineReady) {
-          for (const order of all) {
-            const previousStatus = this.knownStatuses.get(order.id);
-            if (order.status === 'OPERATOR_REVIEW_PENDING' && previousStatus !== 'OPERATOR_REVIEW_PENDING') {
+        let changed = false;
+        for (const order of all) {
+          if (order.status === 'OPERATOR_REVIEW_PENDING') {
+            if (!this.notifiedOrderIds.has(order.id)) {
               this.announceNewQuotationRequest(order);
+              this.notifiedOrderIds.add(order.id);
+              changed = true;
             }
+          } else if (this.notifiedOrderIds.delete(order.id)) {
+            // Si salió de revisión (aprobado, ajustado, cancelado, etc.) se
+            // libera: si el cliente vuelve a enviarlo más adelante, avisa de nuevo.
+            changed = true;
           }
         }
+        if (changed) this.saveNotifiedOrderIds();
 
-        this.knownStatuses = new Map(all.map((o: any) => [o.id, o.status]));
-        this.baselineReady = true;
         this.cd.markForCheck();
       },
       // Silencioso: un fallo de esta actualización en segundo plano no debe
       // interrumpir el trabajo del operario ni el resto del polling.
       error: () => {},
     });
+  }
+
+  private loadNotifiedOrderIds(): Set<string> {
+    if (typeof window === 'undefined') return new Set();
+    try {
+      const raw = localStorage.getItem(this.notifiedOrdersStorageKey);
+      const ids = raw ? JSON.parse(raw) : [];
+      return new Set(Array.isArray(ids) ? ids : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  private saveNotifiedOrderIds(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      // Se limita el historial guardado para que no crezca sin control.
+      const ids = Array.from(this.notifiedOrderIds).slice(-300);
+      localStorage.setItem(this.notifiedOrdersStorageKey, JSON.stringify(ids));
+    } catch {
+      // Si falla (almacenamiento lleno, modo privado, etc.), simplemente no persiste.
+    }
   }
 
   private announceNewQuotationRequest(order: any): void {
@@ -872,10 +943,19 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
     if (typeof window === 'undefined') return;
 
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
+      if (!this.audioCtx) {
+        const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (!AudioCtx) return;
+        this.audioCtx = new AudioCtx();
+      }
 
-      const ctx = new AudioCtx();
+      const ctx = this.audioCtx;
+      if (ctx.state === 'suspended') {
+        // Puede seguir sonando aunque falle este resume puntual (si el
+        // contexto ya se activó antes con un clic/tecla real).
+        ctx.resume().catch(() => {});
+      }
+
       const now = ctx.currentTime;
       const notes = [880, 1174.66]; // La5 -> Re6: campanita corta y agradable
 
@@ -895,8 +975,6 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
         osc.start(start);
         osc.stop(start + 0.45);
       });
-
-      setTimeout(() => ctx.close(), 900);
     } catch {
       // Si el navegador bloquea audio (sin interacción previa, etc.), se
       // omite el sonido; el aviso visual (toast) igual se muestra.

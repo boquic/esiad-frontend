@@ -78,8 +78,13 @@ export class NewOrderComponent {
 
   // ── File upload ───────────────────────────────────────────────────────────
 
-  selectedFile: File | null = null;
+  /** Uno o más archivos (planos, referencias, etc.) para el mismo pedido. */
+  selectedFiles: File[] = [];
   fileError = '';
+
+  get hasSelectedFiles(): boolean {
+    return this.selectedFiles.length > 0;
+  }
 
   /** Corte láser: el cliente solo puede subir .dwg para asegurar compatibilidad con la máquina de corte. */
   get isLaserService(): boolean {
@@ -100,13 +105,21 @@ export class NewOrderComponent {
 
   onFileSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0] ?? null;
-    if (!file) return;
+    if (!input.files || input.files.length === 0) return;
 
-    const accepted = this.applySelectedFile(file);
-    if (!accepted) {
-      input.value = '';
-    }
+    this.addFiles(input.files);
+    // Se limpia para que seleccionar el mismo archivo otra vez vuelva a disparar el evento.
+    input.value = '';
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles = this.selectedFiles.filter((_, i) => i !== index);
+    this.fileError = '';
+    this.cd.markForCheck();
+  }
+
+  getFileSizeLabel(file: File): string {
+    return (file.size / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
   // ── Drag & drop ───────────────────────────────────────────────────────────
@@ -130,37 +143,43 @@ export class NewOrderComponent {
     event.stopPropagation();
     this.isDraggingFile = false;
 
-    const file = event.dataTransfer?.files?.[0] ?? null;
-    if (!file) return;
-    this.applySelectedFile(file);
+    if (!event.dataTransfer?.files || event.dataTransfer.files.length === 0) return;
+    this.addFiles(event.dataTransfer.files);
   }
 
-  /** Valida y guarda un archivo, venga del input file o de un arrastre. Devuelve true si fue aceptado. */
-  private applySelectedFile(file: File): boolean {
-    const ext = '.' + (file.name.split('.').pop() ?? '').toLowerCase();
-    if (!this.acceptedFileExtensions.includes(ext)) {
-      this.fileError = this.isLaserService
-        ? 'Este servicio es de corte láser: solo se acepta el formato .dwg'
-        : 'Solo se aceptan archivos .dwg, .dxf o .pdf';
-      this.selectedFile = null;
-      this.cd.markForCheck();
-      return false;
+  /**
+   * Valida y agrega uno o más archivos a la selección (venga del input file o
+   * de un arrastre). Los archivos válidos se agregan a los ya seleccionados;
+   * los inválidos se descartan mostrando el motivo del último rechazado.
+   */
+  private addFiles(files: FileList | File[]): void {
+    let lastError = '';
+
+    for (const file of Array.from(files)) {
+      const ext = '.' + (file.name.split('.').pop() ?? '').toLowerCase();
+
+      if (!this.acceptedFileExtensions.includes(ext)) {
+        lastError = this.isLaserService
+          ? 'Este servicio es de corte láser: solo se acepta el formato .dwg'
+          : 'Solo se aceptan archivos .dwg, .dxf o .pdf';
+        continue;
+      }
+
+      if (file.size > 20 * 1024 * 1024) {
+        lastError = `El archivo "${file.name}" no puede superar 20 MB`;
+        continue;
+      }
+
+      const isDuplicate = this.selectedFiles.some((f) => f.name === file.name && f.size === file.size);
+      if (isDuplicate) {
+        continue;
+      }
+
+      this.selectedFiles = [...this.selectedFiles, file];
     }
-    if (file.size > 20 * 1024 * 1024) {
-      this.fileError = 'El archivo no puede superar 20 MB';
-      this.selectedFile = null;
-      this.cd.markForCheck();
-      return false;
-    }
-    this.selectedFile = file;
-    this.fileError = '';
+
+    this.fileError = lastError;
     this.cd.markForCheck();
-    return true;
-  }
-
-  get fileSizeMB(): string {
-    if (!this.selectedFile) return '';
-    return (this.selectedFile.size / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
   // ── isActive route helper ─────────────────────────────────────────────────
@@ -178,14 +197,19 @@ export class NewOrderComponent {
       this.submitSuccess = '';
       this.createdOrder = null;
 
-      // Si el archivo ya seleccionado ya no es válido para el nuevo servicio (ej. cambia a corte láser), se descarta.
-      if (this.selectedFile) {
-        const ext = '.' + (this.selectedFile.name.split('.').pop() ?? '').toLowerCase();
-        if (!this.acceptedFileExtensions.includes(ext)) {
-          this.selectedFile = null;
+      // Los archivos ya seleccionados que ya no sean válidos para el nuevo servicio
+      // (ej. cambia a corte láser) se descartan; el resto se conserva.
+      if (this.hasSelectedFiles) {
+        const stillValid = this.selectedFiles.filter((file) => {
+          const ext = '.' + (file.name.split('.').pop() ?? '').toLowerCase();
+          return this.acceptedFileExtensions.includes(ext);
+        });
+
+        if (stillValid.length !== this.selectedFiles.length) {
+          this.selectedFiles = stillValid;
           this.fileError = this.isLaserService
-            ? 'Este servicio es de corte láser: vuelve a adjuntar el plano en formato .dwg'
-            : 'Vuelve a adjuntar el archivo del plano';
+            ? 'Este servicio es de corte láser: se quitaron los archivos que no eran .dwg'
+            : 'Se quitaron archivos que ya no son válidos para este servicio';
         }
       }
     });
@@ -232,7 +256,7 @@ export class NewOrderComponent {
   }
 
   get canSubmit(): boolean {
-    return this.selectedService !== null && this.selectedFile !== null && !this.submitting;
+    return this.selectedService !== null && this.hasSelectedFiles && !this.submitting;
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────
@@ -247,15 +271,15 @@ export class NewOrderComponent {
       return;
     }
 
-    if (!this.selectedFile) {
-      this.fileError = `Debes adjuntar el archivo del plano (${this.acceptedFileExtensionsLabel}).`;
-      this.submitError = 'Adjunta el archivo del plano antes de continuar.';
+    if (!this.hasSelectedFiles) {
+      this.fileError = `Debes adjuntar al menos un archivo del plano (${this.acceptedFileExtensionsLabel}).`;
+      this.submitError = 'Adjunta al menos un archivo del plano antes de continuar.';
       return;
     }
 
     const payload = this.buildCreatePayload();
     this.submitting = true;
-    const file = this.selectedFile;
+    const files = this.selectedFiles;
 
     // Si un intento anterior ya creó el borrador, se reintenta desde ahí en vez
     // de crear un pedido duplicado.
@@ -263,13 +287,13 @@ export class NewOrderComponent {
 
     if (existingDraft) {
       this.ordersService.updateDraft(existingDraft.id, { notes: payload.notes ?? null }).subscribe({
-        next: () => this.uploadAndSend(existingDraft.id, file),
-        error: () => this.uploadAndSend(existingDraft.id, file),
+        next: () => this.uploadAndSend(existingDraft.id, files),
+        error: () => this.uploadAndSend(existingDraft.id, files),
       });
       return;
     }
 
-    // El pedido se crea como borrador (DRAFT), se le adjunta el plano y
+    // El pedido se crea como borrador (DRAFT), se le adjuntan los archivos y
     // finalmente se envía (DRAFT → BUDGETED).
     this.ordersService.createOrder(payload).subscribe({
       next: (response) => {
@@ -283,7 +307,7 @@ export class NewOrderComponent {
           return;
         }
 
-        this.uploadAndSend(draft.id, file);
+        this.uploadAndSend(draft.id, files);
       },
       error: (err: { error?: { message?: string } }) => {
         this.submitting = false;
@@ -317,13 +341,19 @@ export class NewOrderComponent {
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
-  private uploadAndSend(draftId: string, file: File): void {
-    this.ordersService.uploadOrderFile(draftId, file).subscribe({
-      next: () => this.sendDraft(draftId),
+  /** Sube los archivos uno por uno (el backend recibe un archivo por request) y, al terminar todos, envía el borrador. */
+  private uploadAndSend(draftId: string, files: File[], index = 0): void {
+    if (index >= files.length) {
+      this.sendDraft(draftId);
+      return;
+    }
+
+    this.ordersService.uploadOrderFile(draftId, files[index]).subscribe({
+      next: () => this.uploadAndSend(draftId, files, index + 1),
       error: (err: { error?: { message?: string } }) => {
         this.submitting = false;
         this.submitError =
-          err.error?.message ?? 'No se pudo subir el archivo. Tu borrador se guardó.';
+          err.error?.message ?? `No se pudo subir "${files[index].name}". Tu borrador se guardó.`;
         this.cd.markForCheck();
       },
     });

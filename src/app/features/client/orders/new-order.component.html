@@ -34,30 +34,30 @@
                style="width:30px;height:30px;flex-shrink:0;font-size:13px;"
                [style.background]="selectedService ? '#3a8f8b' : '#e0e0e0'"
                [style.color]="selectedService ? '#fff' : '#888'"
-               [style.box-shadow]="selectedService && !selectedFile ? '0 0 0 4px rgba(58, 143, 139, 0.16)' : 'none'">
-            <span *ngIf="!selectedFile">2</span>
-            <svg *ngIf="selectedFile" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+               [style.box-shadow]="selectedService && !hasSelectedFiles ? '0 0 0 4px rgba(58, 143, 139, 0.16)' : 'none'">
+            <span *ngIf="!hasSelectedFiles">2</span>
+            <svg *ngIf="hasSelectedFiles" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
               <path d="M5 12l5 5L20 7"/>
             </svg>
           </div>
           <div class="font-semibold" style="font-size:13px;letter-spacing:-0.005em;transition:color .2s;"
-               [style.color]="selectedFile ? '#2e7874' : (selectedService ? '#3a8f8b' : '#888')">Archivo</div>
+               [style.color]="hasSelectedFiles ? '#2e7874' : (selectedService ? '#3a8f8b' : '#888')">Archivo</div>
         </div>
 
         <div style="width:80px;height:2px;margin:0 14px;border-radius:2px;transition:background-color .2s;"
-             [style.background]="selectedFile ? '#3a8f8b' : '#ccc'"></div>
+             [style.background]="hasSelectedFiles ? '#3a8f8b' : '#ccc'"></div>
 
         <!-- Step 3: Confirmar -->
         <div class="flex items-center" style="gap:10px;">
           <div class="grid place-items-center rounded-full font-bold transition-all duration-200"
                style="width:30px;height:30px;flex-shrink:0;font-size:13px;"
-               [style.background]="selectedFile ? '#3a8f8b' : '#e0e0e0'"
-               [style.color]="selectedFile ? '#fff' : '#888'"
-               [style.box-shadow]="selectedFile ? '0 0 0 4px rgba(58, 143, 139, 0.16)' : 'none'">
+               [style.background]="hasSelectedFiles ? '#3a8f8b' : '#e0e0e0'"
+               [style.color]="hasSelectedFiles ? '#fff' : '#888'"
+               [style.box-shadow]="hasSelectedFiles ? '0 0 0 4px rgba(58, 143, 139, 0.16)' : 'none'">
             <span>3</span>
           </div>
           <div class="font-semibold" style="font-size:13px;letter-spacing:-0.005em;transition:color .2s;"
-               [style.color]="selectedFile ? '#3a8f8b' : '#888'">Confirmar</div>
+               [style.color]="hasSelectedFiles ? '#3a8f8b' : '#888'">Confirmar</div>
         </div>
       </div>
 
@@ -231,39 +231,48 @@
             </a>
 
             <!-- Hidden file input -->
-            <input #fileInput type="file" [attr.accept]="fileInputAccept" class="hidden" (change)="onFileSelect($event)">
+            <input #fileInput type="file" multiple [attr.accept]="fileInputAccept" class="hidden" (change)="onFileSelect($event)">
 
-            <!-- File selected state -->
-            <div *ngIf="selectedFile" class="flex items-center rounded-xl"
-                 (dragover)="onDropzoneDragOver($event)"
-                 (dragleave)="onDropzoneDragLeave($event)"
-                 (drop)="onDropzoneDrop($event)"
-                 style="gap:16px;padding:18px;background:rgba(58,143,139,0.05);border:1.5px solid #3a8f8b;">
-              <div class="grid place-items-center rounded-[11px] shrink-0" style="width:48px;height:48px;background:rgba(58,143,139,0.10);color:#3a8f8b;border:1px solid rgba(58,143,139,0.30);">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8l5 5v10a2 2 0 0 1-2 2h-2"/><polyline points="9 11 12 14 15 11"/><line x1="12" y1="14" x2="12" y2="4"/></svg>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center flex-wrap" style="gap:8px;font-family:monospace;font-size:14px;font-weight:600;color:#2c2c2c;letter-spacing:-0.01em;">
-                  {{ selectedFile.name }}
-                  <span class="inline-flex items-center font-bold uppercase" style="gap:4px;background:rgba(58,143,139,0.12);color:#2e7874;padding:2px 9px;border-radius:999px;font-size:11px;border:1px solid rgba(58,143,139,0.30);">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
-                    Archivo listo
-                  </span>
+            <!-- Files selected: list + "add more" -->
+            <div *ngIf="hasSelectedFiles" class="flex flex-col" style="gap:8px;margin-bottom:12px;">
+              <div *ngFor="let file of selectedFiles; let i = index" class="flex items-center rounded-xl"
+                   style="gap:16px;padding:14px 16px;background:rgba(58,143,139,0.05);border:1.5px solid #3a8f8b;">
+                <div class="grid place-items-center rounded-[11px] shrink-0" style="width:42px;height:42px;background:rgba(58,143,139,0.10);color:#3a8f8b;border:1px solid rgba(58,143,139,0.30);">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8l5 5v10a2 2 0 0 1-2 2h-2"/><polyline points="9 11 12 14 15 11"/><line x1="12" y1="14" x2="12" y2="4"/></svg>
                 </div>
-                <div class="flex items-center" style="gap:10px;font-size:12px;color:#666;margin-top:3px;">
-                  <span>{{ fileSizeMB }}</span>
-                  <span style="width:3px;height:3px;border-radius:50%;background:#999;display:inline-block;"></span>
-                  <span>Listo para enviar</span>
+                <div class="flex-1 min-w-0">
+                  <div class="truncate" style="font-family:monospace;font-size:13.5px;font-weight:600;color:#2c2c2c;letter-spacing:-0.01em;">
+                    {{ file.name }}
+                  </div>
+                  <div class="flex items-center" style="gap:10px;font-size:12px;color:#666;margin-top:2px;">
+                    <span>{{ getFileSizeLabel(file) }}</span>
+                    <span style="width:3px;height:3px;border-radius:50%;background:#999;display:inline-block;"></span>
+                    <span>Listo para enviar</span>
+                  </div>
                 </div>
+                <button type="button" (click)="removeFile(i)" [disabled]="submitting"
+                        class="inline-flex items-center justify-center cursor-pointer shrink-0 rounded-lg disabled:opacity-50" title="Quitar archivo"
+                        style="width:30px;height:30px;border:1px solid #f5c6c6;background:#fff0f0;color:#c0392b;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
               </div>
-              <button type="button" (click)="fileInput.click()" class="inline-flex items-center font-medium cursor-pointer shrink-0 rounded-lg" style="gap:6px;border:1px solid #e0e0e0;background:rgba(255,255,255,0.7);color:#666;font-family:inherit;font-size:12px;padding:7px 13px;">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.08-4.96"/></svg>
-                Cambiar archivo
-              </button>
+
+              <!-- Agregar otro archivo (también acepta soltar aquí) -->
+              <div (click)="fileInput.click()"
+                   (dragover)="onDropzoneDragOver($event)"
+                   (dragleave)="onDropzoneDragLeave($event)"
+                   (drop)="onDropzoneDrop($event)"
+                   class="flex items-center justify-center cursor-pointer rounded-xl transition-all"
+                   [style.border]="isDraggingFile ? '1.5px dashed #3a8f8b' : '1.5px dashed #ccc'"
+                   [style.background]="isDraggingFile ? 'rgba(58,143,139,0.08)' : 'rgba(255,255,255,0.30)'"
+                   style="gap:8px;padding:12px;text-align:center;font-size:13px;color:#3a8f8b;font-weight:600;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+                {{ isDraggingFile ? 'Suelta el archivo aquí' : 'Agregar otro archivo' }}
+              </div>
             </div>
 
             <!-- No file state -->
-            <div *ngIf="!selectedFile"
+            <div *ngIf="!hasSelectedFiles"
                  (click)="fileInput.click()"
                  (dragover)="onDropzoneDragOver($event)"
                  (dragleave)="onDropzoneDragLeave($event)"
@@ -335,8 +344,8 @@
                   <span style="color:#2c2c2c;font-weight:600;">{{ selectedService.name }}</span>
                 </div>
                 <div class="flex justify-between items-center" style="font-size:13px;">
-                  <span style="color:#666;font-weight:500;">Archivo</span>
-                  <span style="color:#2c2c2c;font-weight:600;">{{ selectedFile ? 'Adjuntado' : 'Pendiente' }}</span>
+                  <span style="color:#666;font-weight:500;">Archivos</span>
+                  <span style="color:#2c2c2c;font-weight:600;">{{ hasSelectedFiles ? (selectedFiles.length + (selectedFiles.length === 1 ? ' archivo' : ' archivos')) : 'Pendiente' }}</span>
                 </div>
                 <div class="flex justify-between items-center" style="font-size:13px;">
                   <span style="color:#666;font-weight:500;">Indicaciones</span>

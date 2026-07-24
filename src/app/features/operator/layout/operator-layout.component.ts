@@ -1,5 +1,5 @@
 import {
-  Component, inject, OnInit, ChangeDetectorRef,
+  Component, inject, OnInit, OnDestroy, ChangeDetectorRef,
   HostListener, ViewEncapsulation,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -17,6 +17,25 @@ import { OperatorService } from '../operator.service';
 <!-- Orbs decorativos de fondo -->
 <div class="op-orb-tr"></div>
 <div class="op-orb-bl"></div>
+
+<!-- Avisos de nuevos pedidos enviados a cotización -->
+<div class="op-toast-stack">
+  <div *ngFor="let toast of notificationToasts" class="op-toast" (click)="goToToastOrder(toast.orderId)">
+    <div class="op-toast-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/>
+        <path d="M10 21a2 2 0 0 0 4 0"/>
+      </svg>
+    </div>
+    <div class="op-toast-body">
+      <div class="op-toast-title">Nuevo pedido a cotizar</div>
+      <div class="op-toast-msg">{{ toast.message }}</div>
+    </div>
+    <button class="op-toast-close" (click)="dismissToast(toast.id); $event.stopPropagation()" title="Cerrar">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+</div>
 
 <div class="op-shell" [class.collapsed]="sidebarCollapsed">
 
@@ -235,6 +254,71 @@ import { OperatorService } from '../operator.service';
       pointer-events: none;
       z-index: 0;
     }
+
+    /* ── Toasts: nuevo pedido enviado a cotización ───────────────── */
+    .op-toast-stack {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 340px;
+    }
+    @keyframes opToastIn {
+      from { opacity:0; transform:translateX(24px) scale(0.98); }
+      to   { opacity:1; transform:translateX(0) scale(1); }
+    }
+    .op-toast {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 14px 14px 14px 16px;
+      border-radius: 14px;
+      background: rgba(22,58,55,0.97);
+      backdrop-filter: blur(18px) saturate(150%);
+      -webkit-backdrop-filter: blur(18px) saturate(150%);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 10px 32px -8px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.12);
+      cursor: pointer;
+      animation: opToastIn 0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+    .op-toast-icon {
+      width: 34px; height: 34px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: rgba(58,143,139,0.28);
+      color: #cce8e6;
+      display: grid;
+      place-items: center;
+    }
+    .op-toast-body { min-width: 0; flex: 1; }
+    .op-toast-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #cce8e6;
+      margin-bottom: 2px;
+    }
+    .op-toast-msg {
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      line-height: 1.4;
+    }
+    .op-toast-close {
+      flex-shrink: 0;
+      width: 22px; height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.55);
+      cursor: pointer;
+    }
+    .op-toast-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
 
     /* ── Page enter animation ──────────────────────────────────── */
     @keyframes opPageIn {
@@ -663,7 +747,7 @@ import { OperatorService } from '../operator.service';
     .op-dd-item-danger .op-dd-label { color: #c0392b !important; }
   `],
 })
-export class OperatorLayoutComponent implements OnInit {
+export class OperatorLayoutComponent implements OnInit, OnDestroy {
   private router          = inject(Router);
   private cd              = inject(ChangeDetectorRef);
   private operatorService = inject(OperatorService);
@@ -674,6 +758,16 @@ export class OperatorLayoutComponent implements OnInit {
   sidebarCollapsed = false;
 
   assignedCount = 0;
+
+  // ── Aviso de "pedido enviado a cotización" (sonido + toast) ────────────────
+  // Polling propio del layout (no solo del dashboard) para que el aviso llegue
+  // sin importar en qué página del panel del operario esté trabajando.
+  private readonly pollIntervalMs = 25000;
+  private pollHandle: ReturnType<typeof setInterval> | null = null;
+  private knownStatuses = new Map<string, string>();
+  private baselineReady = false;
+
+  notificationToasts: Array<{ id: string; orderId: string; message: string }> = [];
 
   get userInitials(): string {
     const p = this.userName.trim().split(/\s+/);
@@ -700,16 +794,113 @@ export class OperatorLayoutComponent implements OnInit {
         this.cd.markForCheck();
       });
 
-    // Badge: pedidos asignados activos
+    // Badge de pedidos asignados + detección de nuevos envíos a cotización.
+    this.refreshQueueState();
+    this.pollHandle = setInterval(() => this.refreshQueueState(), this.pollIntervalMs);
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollHandle) {
+      clearInterval(this.pollHandle);
+      this.pollHandle = null;
+    }
+  }
+
+  /**
+   * Refresca el conteo de pedidos asignados y detecta pedidos que acaban de
+   * pasar a OPERATOR_REVIEW_PENDING (el cliente los envió a cotización) para
+   * avisarle al operario con un sonido y un aviso, sin que tenga que
+   * refrescar la página ni estar en "Mi cola de trabajo".
+   */
+  private refreshQueueState(): void {
     this.operatorService.getAssignedOrders().subscribe({
       next: (res) => {
-        const all = Array.isArray(res) ? res : (res?.data || []);
+        const all: any[] = Array.isArray(res) ? res : (res?.data || []);
         this.assignedCount = all.filter((o: any) =>
           o.status === 'IN_PROGRESS' || o.status === 'PENDING'
         ).length;
+
+        // La primera carga solo establece la base: no avisamos de pedidos que
+        // ya estaban en revisión antes de que el operario abriera el panel.
+        if (this.baselineReady) {
+          for (const order of all) {
+            const previousStatus = this.knownStatuses.get(order.id);
+            if (order.status === 'OPERATOR_REVIEW_PENDING' && previousStatus !== 'OPERATOR_REVIEW_PENDING') {
+              this.announceNewQuotationRequest(order);
+            }
+          }
+        }
+
+        this.knownStatuses = new Map(all.map((o: any) => [o.id, o.status]));
+        this.baselineReady = true;
         this.cd.markForCheck();
       },
+      // Silencioso: un fallo de esta actualización en segundo plano no debe
+      // interrumpir el trabajo del operario ni el resto del polling.
+      error: () => {},
     });
+  }
+
+  private announceNewQuotationRequest(order: any): void {
+    const firstName = order?.client?.first_name ?? '';
+    const lastName = order?.client?.last_name ?? '';
+    const clientName = `${firstName} ${lastName}`.trim() || 'Un cliente';
+
+    this.pushToast(order.id, `${clientName} te envió un pedido a cotizar`);
+    this.playNotificationChime();
+  }
+
+  private pushToast(orderId: string, message: string): void {
+    const id = `${orderId}-${Date.now()}`;
+    this.notificationToasts = [...this.notificationToasts, { id, orderId, message }];
+    this.cd.markForCheck();
+    setTimeout(() => this.dismissToast(id), 8000);
+  }
+
+  dismissToast(id: string): void {
+    this.notificationToasts = this.notificationToasts.filter((t) => t.id !== id);
+    this.cd.markForCheck();
+  }
+
+  goToToastOrder(orderId: string): void {
+    this.notificationToasts = this.notificationToasts.filter((t) => t.orderId !== orderId);
+    this.router.navigate(['/operator/orders', orderId]);
+  }
+
+  /** Campanita de dos tonos generada con Web Audio API (sin archivo de audio). */
+  private playNotificationChime(): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime;
+      const notes = [880, 1174.66]; // La5 -> Re6: campanita corta y agradable
+
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+
+        const start = now + i * 0.13;
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(0.28, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.4);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.45);
+      });
+
+      setTimeout(() => ctx.close(), 900);
+    } catch {
+      // Si el navegador bloquea audio (sin interacción previa, etc.), se
+      // omite el sonido; el aviso visual (toast) igual se muestra.
+    }
   }
 
   isActive(path: string): boolean {

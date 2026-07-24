@@ -217,6 +217,19 @@
               <span *ngIf="isLaserService" style="color:#2e7874;font-weight:600;"> (corte láser: solo .dwg)</span>
             </div>
 
+            <!-- Plantilla descargable (solo corte láser) -->
+            <a *ngIf="isLaserService" href="/templates/plantilla-corte-laser.dwg" download="Formato Final - 01.dwg"
+               class="flex items-center rounded-xl no-underline" style="gap:12px;padding:14px 16px;margin-bottom:14px;background:rgba(58,143,139,0.05);border:1px solid rgba(58,143,139,0.25);">
+              <div class="grid place-items-center rounded-lg shrink-0" style="width:38px;height:38px;background:rgba(58,143,139,0.10);color:#3a8f8b;border:1px solid rgba(58,143,139,0.25);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold" style="font-size:13px;color:#2e7874;">Descargar plantilla de corte láser</div>
+                <div style="font-size:11.5px;color:#666;margin-top:1px;">Formato base (.dwg) para editar y volver a subir</div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3a8f8b" stroke-width="2.5" style="flex-shrink:0;"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+
             <!-- Hidden file input -->
             <input #fileInput type="file" [attr.accept]="fileInputAccept" class="hidden" (change)="onFileSelect($event)">
 

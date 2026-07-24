@@ -340,8 +340,7 @@ export class OrderDetailComponent {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        const fileName = (file.file_url ?? file.fileUrl ?? 'archivo').split('/').pop() || `archivo-${file.id}`;
-        a.download = fileName;
+        a.download = this.getFileDisplayName(file);
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

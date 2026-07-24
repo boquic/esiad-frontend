@@ -192,28 +192,6 @@
         Enviar a cotización
       </button>
     </div>
-
-    <!-- Observación -->
-    <div style="padding:16px 24px;">
-      <p style="font-size:12.5px;font-weight:600;color:#92400e;margin-bottom:8px;">¿Tienes observaciones? Envíalas al operario:</p>
-      <div *ngIf="observationError" style="font-size:12px;color:#c0392b;margin-bottom:6px;">{{ observationError }}</div>
-      <div *ngIf="observationSuccess" style="font-size:12px;color:#166534;margin-bottom:6px;">{{ observationSuccess }}</div>
-      <div class="flex gap-2">
-        <textarea [(ngModel)]="observationText" rows="2" placeholder="Ej: La medida correcta es 60x40 cm"
-                  class="flex-1 rounded-lg"
-                  style="padding:9px 12px;font-size:13px;border:1px solid #fcd34d;background:#fffbeb;resize:none;font-family:inherit;"></textarea>
-        <button (click)="submitObservation()" [disabled]="submittingObservation || !observationText.trim()"
-                class="shrink-0 inline-flex items-center justify-center font-semibold rounded-lg disabled:opacity-50"
-                style="gap:6px;padding:9px 14px;font-size:13px;background:#fff;border:1px solid #fcd34d;color:#92400e;cursor:pointer;">
-          <svg *ngIf="!submittingObservation" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-          <svg *ngIf="submittingObservation" class="animate-spin" width="13" height="13" viewBox="0 0 24 24" fill="none">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-          </svg>
-          Enviar
-        </button>
-      </div>
-    </div>
   </div>
 
   <!-- ──────────────────────────────────────────────────────── -->
@@ -798,10 +776,10 @@
         </div>
         <div>
           <h3 class="font-bold text-gray-900" style="font-size:17px;letter-spacing:-0.01em;margin-bottom:6px;">Confirmar revisión</h3>
-          <p class="text-gray-500" style="font-size:13.5px;line-height:1.5;">Puedes agregar una nota opcional antes de confirmar.</p>
+          <p class="text-gray-500" style="font-size:13.5px;line-height:1.5;">Puedes agregar una observación para el operario antes de confirmar (opcional).</p>
         </div>
       </div>
-      <textarea [(ngModel)]="confirmReviewNotes" rows="3" placeholder="Confirmo medidas, material y presupuesto (opcional)"
+      <textarea [(ngModel)]="confirmReviewNotes" rows="3" placeholder="Ej: La medida correcta es 60x40 cm"
                 class="w-full rounded-lg mb-4"
                 style="padding:10px 12px;font-size:13px;border:1px solid #d1d5db;resize:none;font-family:inherit;"></textarea>
       <div class="flex justify-end gap-3">

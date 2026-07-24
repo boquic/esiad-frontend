@@ -234,7 +234,11 @@
             <input #fileInput type="file" [attr.accept]="fileInputAccept" class="hidden" (change)="onFileSelect($event)">
 
             <!-- File selected state -->
-            <div *ngIf="selectedFile" class="flex items-center rounded-xl" style="gap:16px;padding:18px;background:rgba(58,143,139,0.05);border:1.5px solid #3a8f8b;">
+            <div *ngIf="selectedFile" class="flex items-center rounded-xl"
+                 (dragover)="onDropzoneDragOver($event)"
+                 (dragleave)="onDropzoneDragLeave($event)"
+                 (drop)="onDropzoneDrop($event)"
+                 style="gap:16px;padding:18px;background:rgba(58,143,139,0.05);border:1.5px solid #3a8f8b;">
               <div class="grid place-items-center rounded-[11px] shrink-0" style="width:48px;height:48px;background:rgba(58,143,139,0.10);color:#3a8f8b;border:1px solid rgba(58,143,139,0.30);">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8l5 5v10a2 2 0 0 1-2 2h-2"/><polyline points="9 11 12 14 15 11"/><line x1="12" y1="14" x2="12" y2="4"/></svg>
               </div>
@@ -261,13 +265,18 @@
             <!-- No file state -->
             <div *ngIf="!selectedFile"
                  (click)="fileInput.click()"
+                 (dragover)="onDropzoneDragOver($event)"
+                 (dragleave)="onDropzoneDragLeave($event)"
+                 (drop)="onDropzoneDrop($event)"
                  class="flex flex-col items-center justify-center cursor-pointer rounded-xl transition-all"
-                 style="gap:12px;padding:28px;border:1.5px dashed #ccc;background:rgba(255,255,255,0.40);text-align:center;">
+                 [style.border]="isDraggingFile ? '1.5px dashed #3a8f8b' : '1.5px dashed #ccc'"
+                 [style.background]="isDraggingFile ? 'rgba(58,143,139,0.08)' : 'rgba(255,255,255,0.40)'"
+                 style="gap:12px;padding:28px;text-align:center;">
               <div class="grid place-items-center rounded-[11px]" style="width:48px;height:48px;background:rgba(58,143,139,0.08);color:#3a8f8b;border:1px solid rgba(58,143,139,0.20);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               </div>
               <div>
-                <div class="font-semibold" style="font-size:14px;color:#2c2c2c;margin-bottom:4px;">Arrastra tu archivo o haz clic para subir</div>
+                <div class="font-semibold" style="font-size:14px;color:#2c2c2c;margin-bottom:4px;">{{ isDraggingFile ? 'Suelta el archivo aquí' : 'Arrastra tu archivo o haz clic para subir' }}</div>
                 <div style="font-size:12px;color:#888;">{{ acceptedFileExtensionsLabel }} · máx. 20 MB</div>
               </div>
             </div>

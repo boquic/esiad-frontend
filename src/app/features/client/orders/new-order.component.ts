@@ -102,22 +102,60 @@ export class NewOrderComponent {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
     if (!file) return;
+
+    const accepted = this.applySelectedFile(file);
+    if (!accepted) {
+      input.value = '';
+    }
+  }
+
+  // ── Drag & drop ───────────────────────────────────────────────────────────
+
+  isDraggingFile = false;
+
+  onDropzoneDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingFile = true;
+  }
+
+  onDropzoneDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingFile = false;
+  }
+
+  onDropzoneDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDraggingFile = false;
+
+    const file = event.dataTransfer?.files?.[0] ?? null;
+    if (!file) return;
+    this.applySelectedFile(file);
+  }
+
+  /** Valida y guarda un archivo, venga del input file o de un arrastre. Devuelve true si fue aceptado. */
+  private applySelectedFile(file: File): boolean {
     const ext = '.' + (file.name.split('.').pop() ?? '').toLowerCase();
     if (!this.acceptedFileExtensions.includes(ext)) {
       this.fileError = this.isLaserService
         ? 'Este servicio es de corte láser: solo se acepta el formato .dwg'
         : 'Solo se aceptan archivos .dwg, .dxf o .pdf';
       this.selectedFile = null;
-      input.value = '';
-      return;
+      this.cd.markForCheck();
+      return false;
     }
     if (file.size > 20 * 1024 * 1024) {
       this.fileError = 'El archivo no puede superar 20 MB';
       this.selectedFile = null;
-      return;
+      this.cd.markForCheck();
+      return false;
     }
     this.selectedFile = file;
     this.fileError = '';
+    this.cd.markForCheck();
+    return true;
   }
 
   get fileSizeMB(): string {

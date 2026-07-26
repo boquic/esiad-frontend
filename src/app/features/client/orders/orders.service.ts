@@ -219,6 +219,11 @@ export class ClientOrdersService {
     return this.http.get(`/api/orders/${orderId}/files/${fileId}/download`, { responseType: 'blob' });
   }
 
+  /** DELETE /api/orders/:id/files/:fileId — quitar un archivo antes de enviar a cotización (DRAFT o BUDGETED). */
+  deleteOrderFile(orderId: string, fileId: string): Observable<DeleteDraftResponse> {
+    return this.http.delete<DeleteDraftResponse>(`/api/orders/${orderId}/files/${fileId}`);
+  }
+
   uploadPaymentVoucher(orderId: string, file: File): Observable<ConfirmOrderResponse> {
     const formData = new FormData();
     formData.append('file', file);

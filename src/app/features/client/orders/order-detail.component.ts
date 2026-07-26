@@ -64,8 +64,24 @@ export class OrderDetailComponent {
   showDeleteDraftModal = false;
   deletingDraft = false;
 
+  // ── Archivos: agregar/quitar antes de enviar a cotización ────────────────
+  uploadingOrderFile = false;
+  fileActionError = '';
+  removingFileId: string | null = null;
+
   get isDraft(): boolean {
     return this.order?.status === 'DRAFT';
+  }
+
+  /**
+   * El cliente puede editar notas y adjuntar/quitar archivos mientras el
+   * pedido no se haya enviado a cotización todavía (DRAFT o BUDGETED). A
+   * partir de OPERATOR_REVIEW_PENDING el operario ya empezó su revisión y no
+   * se debe modificar.
+   */
+  get isEditableBeforeQuotation(): boolean {
+    const s = this.order?.status;
+    return s === 'DRAFT' || s === 'BUDGETED';
   }
 
   /**
@@ -159,16 +175,19 @@ export class OrderDetailComponent {
   // ── Borrador: editar ─────────────────────────────────────────────────────
 
   startEditDraft(): void {
-    if (!this.order || !this.isDraft) return;
+    if (!this.order || !this.isEditableBeforeQuotation) return;
 
     this.draftForm = {
-      serviceTypeId: String(this.order['service_type_id'] ?? ''),
+      // El tipo de servicio solo se puede cambiar en DRAFT (en BUDGETED ya
+      // hay un operario asignado según esa especialidad).
+      serviceTypeId: this.isDraft ? String(this.order['service_type_id'] ?? '') : '',
       notes: this.order.notes ?? '',
     };
     this.editingDraft = true;
     this.draftError = '';
+    this.fileActionError = '';
 
-    if (this.draftServices.length === 0) {
+    if (this.isDraft && this.draftServices.length === 0) {
       this.loadDraftServices();
     }
   }
@@ -180,7 +199,7 @@ export class OrderDetailComponent {
   }
 
   saveDraft(): void {
-    if (!this.order || !this.isDraft || this.savingDraft) return;
+    if (!this.order || !this.isEditableBeforeQuotation || this.savingDraft) return;
 
     this.savingDraft = true;
     this.draftError = '';
@@ -195,15 +214,68 @@ export class OrderDetailComponent {
         next: () => {
           this.savingDraft = false;
           this.editingDraft = false;
-          this.actionSuccessMessage = 'Borrador actualizado correctamente.';
+          this.actionSuccessMessage = 'Pedido actualizado correctamente.';
           this.loadOrder(orderId, true);
         },
         error: (err: { error?: { message?: string } }) => {
           this.savingDraft = false;
-          this.draftError = err.error?.message ?? 'No se pudo guardar el borrador.';
+          this.draftError = err.error?.message ?? 'No se pudo guardar los cambios.';
           this.cd.markForCheck();
         },
       });
+  }
+
+  // ── Archivos: agregar/quitar antes de enviar a cotización ────────────────
+
+  onAddOrderFiles(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input.files ? Array.from(input.files) : [];
+    input.value = '';
+    if (!files.length || !this.order || !this.isEditableBeforeQuotation) return;
+
+    this.uploadFilesSequentially(this.order.id, files, 0);
+  }
+
+  private uploadFilesSequentially(orderId: string, files: File[], index: number): void {
+    if (index >= files.length) {
+      this.uploadingOrderFile = false;
+      this.loadOrder(orderId, true);
+      return;
+    }
+
+    this.uploadingOrderFile = true;
+    this.fileActionError = '';
+
+    this.ordersService.uploadOrderFile(orderId, files[index]).subscribe({
+      next: () => {
+        this.uploadFilesSequentially(orderId, files, index + 1);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.uploadingOrderFile = false;
+        this.fileActionError = err.error?.message ?? 'No se pudo subir uno de los archivos.';
+        this.loadOrder(orderId, true);
+      },
+    });
+  }
+
+  removeOrderFile(file: OrderFile): void {
+    if (!this.order || !file.id || !this.isEditableBeforeQuotation || this.removingFileId) return;
+
+    this.removingFileId = file.id;
+    this.fileActionError = '';
+    const orderId = this.order.id;
+
+    this.ordersService.deleteOrderFile(orderId, file.id).subscribe({
+      next: () => {
+        this.removingFileId = null;
+        this.loadOrder(orderId, true);
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.removingFileId = null;
+        this.fileActionError = err.error?.message ?? 'No se pudo quitar el archivo.';
+        this.cd.markForCheck();
+      },
+    });
   }
 
   private loadDraftServices(): void {

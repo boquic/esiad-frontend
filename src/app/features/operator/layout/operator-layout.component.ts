@@ -949,6 +949,7 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
         this.audioCtx = new AudioCtx();
       }
 
+      if (!this.audioCtx) return;
       const ctx = this.audioCtx;
       if (ctx.state === 'suspended') {
         // Puede seguir sonando aunque falle este resume puntual (si el

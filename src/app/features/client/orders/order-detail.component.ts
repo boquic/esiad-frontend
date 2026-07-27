@@ -69,6 +69,18 @@ export class OrderDetailComponent {
   fileActionError = '';
   removingFileId: string | null = null;
 
+  /**
+   * true mientras hay una subida/eliminación de archivo en curso. Se usa
+   * para bloquear "Reenviar a revisión" / "Confirmar revisión": si el
+   * cliente confirma mientras una eliminación todavía está en camino al
+   * servidor, el pedido puede cambiar de estado antes de que la
+   * eliminación llegue, y el backend la rechaza (ya no es editable) sin
+   * que el archivo viejo llegue a borrarse, dejando archivos duplicados.
+   */
+  get hasPendingFileOperation(): boolean {
+    return this.uploadingOrderFile || !!this.removingFileId;
+  }
+
   get isDraft(): boolean {
     return this.order?.status === 'DRAFT';
   }

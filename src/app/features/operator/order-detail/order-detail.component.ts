@@ -672,6 +672,44 @@ export class OperatorOrderDetailComponent implements OnInit {
     return file.file_type.replace('PLAN_', '').toUpperCase();
   }
 
+  // ── Descarga de archivos ────────────────────────────────────────
+  private downloadingFileId: string | null = null;
+
+  isDownloading(file: any): boolean {
+    return this.downloadingFileId === file?.id;
+  }
+
+  /**
+   * Descarga el archivo autenticado (vía Blob + HttpClient, no un <a href>
+   * plano) y lo guarda con su nombre original.
+   */
+  downloadFile(file: any): void {
+    if (!this.orderId || !file?.id) return;
+    this.downloadingFileId = file.id;
+    this.error = null;
+
+    this.operatorService.downloadOrderFile(this.orderId, file.id).subscribe({
+      next: (blob) => {
+        const filename = this.fileDisplayName(file);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        this.downloadingFileId = null;
+        this.cd.markForCheck();
+      },
+      error: (err: any) => {
+        this.downloadingFileId = null;
+        this.error = err?.error?.message ?? 'No se pudo descargar el archivo.';
+        this.cd.markForCheck();
+      }
+    });
+  }
+
   /** "Cantidad" del pedido: número de archivos/planos que el cliente adjuntó. */
   fileCountLabel(order: OperatorOrder): string {
     const n = order.files?.length ?? 0;

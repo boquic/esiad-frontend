@@ -146,12 +146,13 @@
                 <span>Subido: {{ file.uploaded_at | date:'dd/MM/yyyy' }}</span>
               </div>
             </div>
-            <a [href]="file.download_url || file.file_url" target="_blank" class="opd-btn primary">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <button class="opd-btn primary" (click)="downloadFile(file)" [disabled]="isDownloading(file)">
+              <svg *ngIf="!isDownloading(file)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/>
               </svg>
-              Descargar plano
-            </a>
+              <span *ngIf="isDownloading(file)" class="opd-spin-sm"></span>
+              {{ isDownloading(file) ? 'Descargando...' : 'Descargar plano' }}
+            </button>
           </div>
 
           <div class="opd-verify-note">

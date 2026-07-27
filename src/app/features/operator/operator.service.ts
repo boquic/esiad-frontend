@@ -129,4 +129,14 @@ export class OperatorService {
   confirmPayment(orderId: string): Observable<GenericResponse> {
     return this.http.post<GenericResponse>(`/api/operator/orders/${orderId}/confirm-payment`, {});
   }
+
+  /**
+   * Descarga un archivo del pedido como Blob (no con un <a href> plano), para
+   * que el interceptor adjunte el JWT en el header Authorization. Una
+   * navegación directa del navegador no envía ese header y el backend
+   * responde 401, por eso antes la descarga no funcionaba.
+   */
+  downloadOrderFile(orderId: string, fileId: string): Observable<Blob> {
+    return this.http.get(`/api/operator/orders/${orderId}/files/${fileId}/download`, { responseType: 'blob' });
+  }
 }

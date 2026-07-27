@@ -8,6 +8,15 @@ import { filter } from 'rxjs/operators';
 import { getUserName } from '../../../core/utils/jwt.utils';
 import { OperatorService } from '../operator.service';
 
+type NotificationHistoryItem = {
+  id: string;
+  orderId: string;
+  type: 'quotation' | 'payment';
+  message: string;
+  createdAt: number;
+  read: boolean;
+};
+
 @Component({
   selector: 'app-operator-layout',
   standalone: true,
@@ -144,13 +153,50 @@ import { OperatorService } from '../operator.service';
       <div class="op-nav-right">
 
         <!-- Notifications -->
-        <button class="op-icon-btn" title="Notificaciones">
+        <button class="op-icon-btn" title="Notificaciones" (click)="toggleNotificationsPanel()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/>
             <path d="M10 21a2 2 0 0 0 4 0"/>
           </svg>
-          <span *ngIf="assignedCount > 0" class="op-bell-badge">{{ assignedCount }}</span>
+          <span *ngIf="unreadNotificationsCount > 0" class="op-bell-badge">{{ unreadNotificationsCount }}</span>
         </button>
+
+        <!-- Backdrop del panel de notificaciones -->
+        <div *ngIf="showNotificationsPanel"
+             style="position:fixed;inset:0;z-index:40;"
+             (click)="closeNotificationsPanel()">
+        </div>
+
+        <!-- Panel de notificaciones -->
+        <div *ngIf="showNotificationsPanel" class="op-notif-dropdown">
+          <div class="op-notif-header">
+            <span>Notificaciones</span>
+            <button *ngIf="notificationHistory.length > 0" class="op-notif-clear" (click)="clearNotificationHistory()">
+              Limpiar
+            </button>
+          </div>
+          <div class="op-notif-list">
+            <div *ngIf="notificationHistory.length === 0" class="op-notif-empty">
+              Aún no tienes notificaciones. Aquí verás cuando un cliente te envíe un pedido a cotizar o un comprobante de pago.
+            </div>
+            <button *ngFor="let n of notificationHistory" class="op-notif-item" [class.unread]="!n.read"
+                    (click)="openNotification(n)">
+              <div class="op-notif-icon" [class.payment]="n.type === 'payment'">
+                <svg *ngIf="n.type === 'quotation'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9z"/><path d="M10 21a2 2 0 0 0 4 0"/>
+                </svg>
+                <svg *ngIf="n.type === 'payment'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/>
+                </svg>
+              </div>
+              <div class="op-notif-body">
+                <div class="op-notif-msg">{{ n.message }}</div>
+                <div class="op-notif-time">{{ formatNotificationTime(n.createdAt) }}</div>
+              </div>
+              <span *ngIf="!n.read" class="op-notif-dot"></span>
+            </button>
+          </div>
+        </div>
 
         <!-- Avatar chip -->
         <button class="op-avatar-chip" (click)="toggleUserMenu()">
@@ -745,6 +791,89 @@ import { OperatorService } from '../operator.service';
       color: #c0392b !important;
     }
     .op-dd-item-danger .op-dd-label { color: #c0392b !important; }
+
+    /* ── Panel de notificaciones (campanita) ──────────────────────── */
+    .op-notif-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 46px;
+      width: 320px;
+      max-width: calc(100vw - 24px);
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 14px;
+      box-shadow: 0 8px 32px -8px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.06);
+      overflow: hidden;
+      animation: opDropIn 0.18s cubic-bezier(0.4,0,0.2,1);
+      z-index: 50;
+    }
+    .op-notif-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 15px;
+      font-size: 13px; font-weight: 700; color: #1a1a1a;
+      background: linear-gradient(180deg, rgba(58,143,139,0.06), transparent);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .op-notif-clear {
+      font-size: 11.5px; font-weight: 600; color: #3a8f8b;
+      background: none; border: none; cursor: pointer; padding: 2px 4px;
+      font-family: inherit;
+    }
+    .op-notif-clear:hover { text-decoration: underline; }
+    .op-notif-list { max-height: 360px; overflow-y: auto; padding: 5px; }
+    .op-notif-empty {
+      padding: 22px 14px;
+      text-align: center;
+      font-size: 12.5px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .op-notif-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 9px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      position: relative;
+      transition: background .12s;
+    }
+    .op-notif-item:hover { background: rgba(58,143,139,0.07); }
+    .op-notif-item.unread { background: rgba(58,143,139,0.05); }
+    .op-notif-icon {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      background: rgba(58,143,139,0.09);
+      border: 1px solid rgba(58,143,139,0.14);
+      color: #2e7874;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .op-notif-icon.payment {
+      background: rgba(124,58,237,0.09);
+      border-color: rgba(124,58,237,0.16);
+      color: #7c3aed;
+    }
+    .op-notif-body { min-width: 0; padding-right: 10px; }
+    .op-notif-msg { font-size: 12.5px; font-weight: 600; color: #1a1a1a; line-height: 1.4; }
+    .op-notif-time { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .op-notif-dot {
+      position: absolute;
+      top: 12px; right: 10px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #e74c3c;
+      flex-shrink: 0;
+    }
   `],
 })
 export class OperatorLayoutComponent implements OnInit, OnDestroy {
@@ -771,6 +900,11 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
   // precio), sí se le avise de nuevo.
   private readonly notifiedOrdersStorageKey = 'operatorNotifiedQuotationOrders';
   private notifiedOrderIds: Set<string> = this.loadNotifiedOrderIds();
+  // Igual que notifiedOrderIds, pero para comprobantes de pago pendientes de
+  // revisión (el cliente subió su captura). Se guarda aparte porque un mismo
+  // pedido puede pasar por ambos avisos en momentos distintos.
+  private readonly notifiedPaymentsStorageKey = 'operatorNotifiedPendingPayments';
+  private notifiedPaymentOrderIds: Set<string> = this.loadIdSet(this.notifiedPaymentsStorageKey);
   // Se crea una sola vez, en el primer clic/tecla del operario (ver
   // unlockAudioOnFirstInteraction más abajo): los navegadores bloquean el
   // audio creado fuera de una interacción real del usuario, y el polling
@@ -779,6 +913,18 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
   private audioCtx: AudioContext | null = null;
 
   notificationToasts: Array<{ id: string; orderId: string; message: string }> = [];
+
+  // ── Historial de notificaciones (panel de la campanita) ──────────────────
+  // Solo se registran avisos que el cliente origina: pedido enviado a
+  // cotización o comprobante de pago subido. Se persiste para que el
+  // operario pueda revisarlas aunque recargue la página.
+  showNotificationsPanel = false;
+  private readonly notificationHistoryStorageKey = 'operatorNotificationHistory';
+  notificationHistory: NotificationHistoryItem[] = this.loadNotificationHistory();
+
+  get unreadNotificationsCount(): number {
+    return this.notificationHistory.filter((n) => !n.read).length;
+  }
 
   get userInitials(): string {
     const p = this.userName.trim().split(/\s+/);
@@ -867,6 +1013,7 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
         ).length;
 
         let changed = false;
+        let paymentsChanged = false;
         for (const order of all) {
           if (order.status === 'OPERATOR_REVIEW_PENDING') {
             if (!this.notifiedOrderIds.has(order.id)) {
@@ -879,8 +1026,21 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
             // libera: si el cliente vuelve a enviarlo más adelante, avisa de nuevo.
             changed = true;
           }
+
+          if (order.has_pending_payment) {
+            if (!this.notifiedPaymentOrderIds.has(order.id)) {
+              this.announceNewPayment(order);
+              this.notifiedPaymentOrderIds.add(order.id);
+              paymentsChanged = true;
+            }
+          } else if (this.notifiedPaymentOrderIds.delete(order.id)) {
+            // El comprobante ya se revisó (aprobado/rechazado): si el cliente
+            // sube uno nuevo más adelante, avisa de nuevo.
+            paymentsChanged = true;
+          }
         }
         if (changed) this.saveNotifiedOrderIds();
+        if (paymentsChanged) this.saveIdSet(this.notifiedPaymentsStorageKey, this.notifiedPaymentOrderIds);
 
         this.cd.markForCheck();
       },
@@ -891,9 +1051,17 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
   }
 
   private loadNotifiedOrderIds(): Set<string> {
+    return this.loadIdSet(this.notifiedOrdersStorageKey);
+  }
+
+  private saveNotifiedOrderIds(): void {
+    this.saveIdSet(this.notifiedOrdersStorageKey, this.notifiedOrderIds);
+  }
+
+  private loadIdSet(key: string): Set<string> {
     if (typeof window === 'undefined') return new Set();
     try {
-      const raw = localStorage.getItem(this.notifiedOrdersStorageKey);
+      const raw = localStorage.getItem(key);
       const ids = raw ? JSON.parse(raw) : [];
       return new Set(Array.isArray(ids) ? ids : []);
     } catch {
@@ -901,24 +1069,106 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
     }
   }
 
-  private saveNotifiedOrderIds(): void {
+  private saveIdSet(key: string, set: Set<string>): void {
     if (typeof window === 'undefined') return;
     try {
       // Se limita el historial guardado para que no crezca sin control.
-      const ids = Array.from(this.notifiedOrderIds).slice(-300);
-      localStorage.setItem(this.notifiedOrdersStorageKey, JSON.stringify(ids));
+      const ids = Array.from(set).slice(-300);
+      localStorage.setItem(key, JSON.stringify(ids));
     } catch {
       // Si falla (almacenamiento lleno, modo privado, etc.), simplemente no persiste.
     }
   }
 
   private announceNewQuotationRequest(order: any): void {
+    const clientName = this.getOrderClientName(order);
+    const message = `${clientName} te envió un pedido a cotizar`;
+
+    this.pushToast(order.id, message);
+    this.pushNotification(order.id, 'quotation', message);
+    this.playNotificationChime();
+  }
+
+  private announceNewPayment(order: any): void {
+    const clientName = this.getOrderClientName(order);
+    const message = `${clientName} envió un comprobante de pago para revisar`;
+
+    this.pushToast(order.id, message);
+    this.pushNotification(order.id, 'payment', message);
+    this.playNotificationChime();
+  }
+
+  private getOrderClientName(order: any): string {
     const firstName = order?.client?.first_name ?? '';
     const lastName = order?.client?.last_name ?? '';
-    const clientName = `${firstName} ${lastName}`.trim() || 'Un cliente';
+    return `${firstName} ${lastName}`.trim() || 'Un cliente';
+  }
 
-    this.pushToast(order.id, `${clientName} te envió un pedido a cotizar`);
-    this.playNotificationChime();
+  // ── Historial de notificaciones (panel de la campanita) ──────────────────
+
+  toggleNotificationsPanel(): void {
+    this.showNotificationsPanel = !this.showNotificationsPanel;
+  }
+
+  closeNotificationsPanel(): void {
+    this.showNotificationsPanel = false;
+  }
+
+  openNotification(item: NotificationHistoryItem): void {
+    item.read = true;
+    this.saveNotificationHistory();
+    this.showNotificationsPanel = false;
+    this.router.navigate(['/operator/orders', item.orderId]);
+  }
+
+  clearNotificationHistory(): void {
+    this.notificationHistory = [];
+    this.saveNotificationHistory();
+  }
+
+  formatNotificationTime(timestamp: number): string {
+    const diffMs = Date.now() - timestamp;
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return 'Justo ahora';
+    if (diffMin < 60) return `Hace ${diffMin} min`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `Hace ${diffHours} h`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `Hace ${diffDays} d`;
+  }
+
+  private pushNotification(orderId: string, type: 'quotation' | 'payment', message: string): void {
+    const item: NotificationHistoryItem = {
+      id: `${orderId}-${type}-${Date.now()}`,
+      orderId,
+      type,
+      message,
+      createdAt: Date.now(),
+      read: false,
+    };
+    // Más reciente primero; se limita a 50 para no crecer sin control.
+    this.notificationHistory = [item, ...this.notificationHistory].slice(0, 50);
+    this.saveNotificationHistory();
+  }
+
+  private loadNotificationHistory(): NotificationHistoryItem[] {
+    if (typeof window === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem(this.notificationHistoryStorageKey);
+      const items = raw ? JSON.parse(raw) : [];
+      return Array.isArray(items) ? items : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private saveNotificationHistory(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(this.notificationHistoryStorageKey, JSON.stringify(this.notificationHistory));
+    } catch {
+      // Si falla (almacenamiento lleno, modo privado, etc.), simplemente no persiste.
+    }
   }
 
   private pushToast(orderId: string, message: string): void {

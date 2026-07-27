@@ -28,6 +28,9 @@ export interface OperatorOrder {
   production_time_estimate?: string | null;
   production_started_at?: string | null;
   production_ready_at?: string | null;
+  // Comprobante de pago del cliente aún no revisado por el operario.
+  has_pending_payment?: boolean;
+  pending_payment_uploaded_at?: string | null;
   client?: {
     id: string;
     first_name: string;

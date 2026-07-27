@@ -423,9 +423,13 @@
           <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;display:block;margin-bottom:5px;">
             Precio final (S/) <span style="color:#dc2626;">* obligatorio</span>
           </label>
-          <input type="number" class="opd-textarea" [(ngModel)]="approvePriceValue"
-                 min="0.01" step="0.01" placeholder="165.00"
-                 style="min-height:unset;padding:9px 12px;resize:none;margin-bottom:12px;"/>
+          <input type="text" inputmode="decimal" class="opd-textarea" [(ngModel)]="approvePriceValue"
+                 placeholder="165.00"
+                 style="min-height:unset;padding:9px 12px;resize:none;"/>
+          <p style="font-size:11.5px;margin:5px 0 12px;"
+             [style.color]="approvePriceValue && !isApprovePriceFormatValid ? '#dc2626' : '#888'">
+            Formato con dos decimales, ej: 20.00, 0.50, 15.20
+          </p>
 
           <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;display:block;margin-bottom:6px;">
             Comentario para el cliente (opcional)
@@ -445,7 +449,8 @@
           </textarea>
         </div>
 
-        <button *ngIf="reviewAction" class="opd-btn primary lg" (click)="submitReview()" [disabled]="isSubmittingReview">
+        <button *ngIf="reviewAction" class="opd-btn primary lg" (click)="submitReview()"
+                [disabled]="isSubmittingReview || (reviewAction === 'APPROVE' && !isApprovePriceFormatValid)">
           <span *ngIf="isSubmittingReview" class="opd-spin-sm"></span>
           <svg *ngIf="!isSubmittingReview" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
           {{ isSubmittingReview ? 'Procesando...' : 'Confirmar acción' }}

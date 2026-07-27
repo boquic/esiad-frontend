@@ -592,15 +592,10 @@ export class OperatorOrderDetailComponent implements OnInit {
 
   // ── Review (OPERATOR_REVIEW_PENDING) ────────────────────────────────────
   showReviewPanel      = false;
-  reviewAction: 'APPROVE' | 'RETURN_TO_CLIENT' | 'REJECT' | '' = '';
+  reviewAction: 'APPROVE' | 'REJECT' | '' = '';
   reviewNotes          = '';
+  approvePriceValue: number | null = null;
   isSubmittingReview   = false;
-
-  // ── Adjust Price ─────────────────────────────────────────────────────────
-  showPricePanel       = false;
-  priceAdjustValue: number | null = null;
-  priceAdjustReason    = '';
-  isSubmittingPrice    = false;
 
   // ── Production Time ──────────────────────────────────────────────────────
   showProductionTimePanel   = false;
@@ -924,66 +919,56 @@ export class OperatorOrderDetailComponent implements OnInit {
   }
 
   // ── Review ────────────────────────────────────────────────────
+  // Solo dos acciones: Aprobar (fija el precio final que el operario considera
+  // correcto, comentario opcional) o Rechazar (motivo obligatorio). Ambas
+  // envían el pedido de vuelta al cliente (CLIENT_REVIEW_PENDING) a la espera
+  // de su respuesta; ninguna cancela el pedido ni lo pasa a pago directo.
   get reviewNotesRequired(): boolean {
-    return this.reviewAction === 'RETURN_TO_CLIENT' || this.reviewAction === 'REJECT';
+    return this.reviewAction === 'REJECT';
+  }
+
+  selectReviewAction(action: 'APPROVE' | 'REJECT'): void {
+    this.reviewAction = action;
+    this.reviewNotes = '';
+    this.approvePriceValue = null;
+    this.error = null;
   }
 
   submitReview(): void {
     if (!this.orderId || !this.reviewAction) return;
-    if (this.reviewNotesRequired && !this.reviewNotes.trim()) {
-      this.error = 'Debes ingresar una nota para esta acción.';
+
+    if (this.reviewAction === 'APPROVE') {
+      if (!this.approvePriceValue || this.approvePriceValue <= 0) {
+        this.error = 'Debes ingresar el precio final del pedido.';
+        return;
+      }
+    } else if (this.reviewNotesRequired && !this.reviewNotes.trim()) {
+      this.error = 'Debes ingresar el motivo del rechazo.';
       return;
     }
+
     this.isSubmittingReview = true;
     this.error = null; this.success = null;
 
-    this.operatorService.reviewOrder(this.orderId, this.reviewAction as 'APPROVE' | 'RETURN_TO_CLIENT' | 'REJECT', this.reviewNotes.trim() || undefined).subscribe({
+    const price = this.reviewAction === 'APPROVE' ? (this.approvePriceValue ?? undefined) : undefined;
+
+    this.operatorService.reviewOrder(this.orderId, this.reviewAction as 'APPROVE' | 'REJECT', this.reviewNotes.trim() || undefined, price).subscribe({
       next: () => {
         const msg: Record<string, string> = {
-          APPROVE:           'Revisión aprobada. El pedido avanzó al siguiente estado.',
-          RETURN_TO_CLIENT:  'Pedido devuelto al cliente.',
-          REJECT:            'Pedido rechazado/cancelado.',
+          APPROVE: 'Precio enviado al cliente. Queda a la espera de su confirmación.',
+          REJECT:  'Pedido devuelto al cliente con el motivo indicado.',
         };
         this.success = msg[this.reviewAction] ?? 'Acción realizada.';
         this.isSubmittingReview = false;
         this.showReviewPanel = false;
         this.reviewAction = '';
         this.reviewNotes = '';
+        this.approvePriceValue = null;
         if (this.orderId) this.loadOrder(this.orderId, true);
       },
       error: (err: any) => {
         this.error = err?.error?.message ?? 'No se pudo procesar la revisión.';
         this.isSubmittingReview = false;
-      }
-    });
-  }
-
-  // ── Adjust Price ──────────────────────────────────────────────
-  submitPriceAdjust(): void {
-    if (!this.orderId) return;
-    if (!this.priceAdjustValue || this.priceAdjustValue <= 0) {
-      this.error = 'El precio final debe ser mayor a 0.';
-      return;
-    }
-    if (!this.priceAdjustReason.trim()) {
-      this.error = 'El motivo del ajuste es requerido.';
-      return;
-    }
-    this.isSubmittingPrice = true;
-    this.error = null; this.success = null;
-
-    this.operatorService.adjustOrderPrice(this.orderId, this.priceAdjustValue, this.priceAdjustReason.trim()).subscribe({
-      next: () => {
-        this.success = 'Precio ajustado. El pedido volvió a revisión del cliente.';
-        this.isSubmittingPrice = false;
-        this.showPricePanel = false;
-        this.priceAdjustValue = null;
-        this.priceAdjustReason = '';
-        if (this.orderId) this.loadOrder(this.orderId, true);
-      },
-      error: (err: any) => {
-        this.error = err?.error?.message ?? 'No se pudo ajustar el precio.';
-        this.isSubmittingPrice = false;
       }
     });
   }

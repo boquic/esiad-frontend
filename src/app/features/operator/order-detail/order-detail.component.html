@@ -289,7 +289,7 @@
         <div *ngIf="order.status === 'OPERATOR_REVIEW_PENDING'" class="opd-state-explain"
              style="background:rgba(238,242,255,0.85);border-color:#a5b4fc;color:#3730a3;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.01"/></svg>
-          <span><strong>Acción requerida:</strong> Revisa el pedido y archivos. Usa el panel de abajo para aprobar, devolver o rechazar.</span>
+          <span><strong>Acción requerida:</strong> Revisa el pedido y archivos. Usa el panel de abajo para aprobar (con el precio final) o rechazar.</span>
         </div>
 
         <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition !== 'CASH_ON_DELIVERY' && order.has_pending_payment" class="opd-state-explain"
@@ -403,45 +403,45 @@
           <span><strong>Observaciones del cliente:</strong> {{ order.client_review_notes }}</span>
         </div>
 
-        <!-- Precios -->
-        <div *ngIf="order.estimated_price || order.final_price" class="opd-price-grid">
-          <div *ngIf="order.estimated_price" class="opd-price-box">
-            <div class="opd-price-label">Precio estimado</div>
-            <div class="opd-price-val">S/ {{ order.estimated_price | number:'1.2-2' }}</div>
-          </div>
-          <div *ngIf="order.final_price" class="opd-price-box adjusted">
-            <div class="opd-price-label red">Precio ajustado</div>
-            <div class="opd-price-val red">S/ {{ order.final_price | number:'1.2-2' }}</div>
-          </div>
-        </div>
-
         <!-- Botones de acción -->
         <p style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;margin-bottom:8px;">Selecciona una acción:</p>
         <div class="opd-review-actions">
           <button class="opd-review-btn approve" [class.sel]="reviewAction === 'APPROVE'"
-                  (click)="reviewAction = 'APPROVE'">
+                  (click)="selectReviewAction('APPROVE')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
             Aprobar
           </button>
-          <button class="opd-review-btn return" [class.sel]="reviewAction === 'RETURN_TO_CLIENT'"
-                  (click)="reviewAction = 'RETURN_TO_CLIENT'">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg>
-            Devolver al cliente
-          </button>
           <button class="opd-review-btn reject" [class.sel]="reviewAction === 'REJECT'"
-                  (click)="reviewAction = 'REJECT'">
+                  (click)="selectReviewAction('REJECT')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
             Rechazar
           </button>
         </div>
 
-        <!-- Nota -->
-        <div *ngIf="reviewAction" style="margin-bottom:12px;">
+        <!-- Aprobar: el operario fija el precio final + comentario opcional -->
+        <div *ngIf="reviewAction === 'APPROVE'" style="margin-bottom:12px;">
+          <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;display:block;margin-bottom:5px;">
+            Precio final (S/) <span style="color:#dc2626;">* obligatorio</span>
+          </label>
+          <input type="number" class="opd-textarea" [(ngModel)]="approvePriceValue"
+                 min="0.01" step="0.01" placeholder="165.00"
+                 style="min-height:unset;padding:9px 12px;resize:none;margin-bottom:12px;"/>
+
           <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;display:block;margin-bottom:6px;">
-            Nota <span style="color:#dc2626;" *ngIf="reviewNotesRequired">* obligatoria</span><span *ngIf="!reviewNotesRequired">(opcional)</span>
+            Comentario para el cliente (opcional)
           </label>
           <textarea class="opd-textarea" [(ngModel)]="reviewNotes" rows="3"
-                    [placeholder]="reviewAction === 'APPROVE' ? 'Ej: Archivos revisados y presupuesto validado' : 'Explica el motivo al cliente...'">
+                    placeholder="Ej: Archivos revisados, precio final confirmado">
+          </textarea>
+        </div>
+
+        <!-- Rechazar: motivo obligatorio -->
+        <div *ngIf="reviewAction === 'REJECT'" style="margin-bottom:12px;">
+          <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;display:block;margin-bottom:6px;">
+            Motivo del rechazo <span style="color:#dc2626;">* obligatorio</span>
+          </label>
+          <textarea class="opd-textarea" [(ngModel)]="reviewNotes" rows="3"
+                    placeholder="Explica el motivo al cliente...">
           </textarea>
         </div>
 
@@ -450,33 +450,6 @@
           <svg *ngIf="!isSubmittingReview" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
           {{ isSubmittingReview ? 'Procesando...' : 'Confirmar acción' }}
         </button>
-
-        <!-- Ajustar precio -->
-        <div style="margin-top:16px;padding-top:14px;border-top:1px dashed #e0e0e0;">
-          <button (click)="showPricePanel = !showPricePanel" class="opd-btn secondary" style="width:100%;font-size:13px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
-            {{ showPricePanel ? 'Cancelar ajuste de precio' : 'Ajustar precio final' }}
-          </button>
-          <div *ngIf="showPricePanel" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
-            <div>
-              <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;display:block;margin-bottom:5px;">Precio final (S/) *</label>
-              <input type="number" class="opd-textarea" [(ngModel)]="priceAdjustValue"
-                     min="0.01" step="0.01" placeholder="165.00"
-                     style="min-height:unset;padding:9px 12px;resize:none;"/>
-            </div>
-            <div>
-              <label style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#666;display:block;margin-bottom:5px;">Motivo *</label>
-              <textarea class="opd-textarea" [(ngModel)]="priceAdjustReason" rows="2"
-                        placeholder="El archivo requiere más tiempo de corte"></textarea>
-            </div>
-            <button class="opd-btn primary" (click)="submitPriceAdjust()" [disabled]="isSubmittingPrice">
-              <span *ngIf="isSubmittingPrice" class="opd-spin-sm"></span>
-              {{ isSubmittingPrice ? 'Guardando...' : 'Guardar ajuste' }}
-            </button>
-          </div>
-        </div>
       </section>
 
       <!-- ══ PANEL: Tiempo de producción (IN_PROGRESS) ══ -->

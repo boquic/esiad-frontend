@@ -104,9 +104,16 @@ export class OperatorService {
     return this.http.patch<GenericResponse>(`/api/operator/orders/${orderId}/notes`, { notes });
   }
 
-  reviewOrder(orderId: string, action: 'APPROVE' | 'RETURN_TO_CLIENT' | 'REJECT', notes?: string): Observable<GenericResponse> {
-    const body: Record<string, string> = { action };
+  /**
+   * Revisión del operario: APPROVE (fija el precio final que considera
+   * correcto, comentario opcional) o REJECT (motivo obligatorio). Ambas
+   * acciones envían el pedido de vuelta al cliente (CLIENT_REVIEW_PENDING)
+   * a la espera de su respuesta.
+   */
+  reviewOrder(orderId: string, action: 'APPROVE' | 'REJECT', notes?: string, finalPrice?: number): Observable<GenericResponse> {
+    const body: Record<string, string | number> = { action };
     if (notes) body['notes'] = notes;
+    if (finalPrice !== undefined && finalPrice !== null) body['final_price'] = finalPrice;
     return this.http.post<GenericResponse>(`/api/operator/orders/${orderId}/review`, body);
   }
 

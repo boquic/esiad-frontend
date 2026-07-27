@@ -514,9 +514,19 @@ export class OrderDetailComponent {
     return this.ordersService.getPaymentRequiredAmount(this.order);
   }
 
+  /**
+   * El operario fijó un precio final durante su revisión (independientemente
+   * de si dejó o no un comentario). Antes esto exigía también que hubiera un
+   * "motivo" para mostrarse, pero eso ocultaba el precio nuevo cuando el
+   * operario aprobaba sin dejar comentario.
+   */
   hasPriceAdjustment(): boolean {
-    const fp = this.getFinalPrice();
-    return fp !== null && !!this.order?.operator_price_adjustment_reason;
+    return this.getFinalPrice() !== null;
+  }
+
+  /** Comentario del operario al aprobar (opcional) o motivo por el que no aprobó el pedido (obligatorio en ese caso). */
+  getOperatorReviewNote(): string | null {
+    return this.order?.operator_price_adjustment_reason || null;
   }
 
   getOrderFiles(): OrderFile[] {

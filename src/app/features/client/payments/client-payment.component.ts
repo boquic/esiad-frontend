@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ClientOrdersService, ClientOrderDetail } from '../orders/orders.service';
@@ -582,6 +582,7 @@ export class ClientPaymentComponent implements OnInit {
   private router = inject(Router);
   private ordersService = inject(ClientOrdersService);
   private paymentsService = inject(ClientPaymentsService);
+  private cd = inject(ChangeDetectorRef);
 
   orderId: string | null = null;
   order: ClientOrderDetail | null = null;
@@ -613,10 +614,12 @@ export class ClientPaymentComponent implements OnInit {
           this.error = 'Este pedido no está pendiente de pago.';
         }
         this.isLoading = false;
+        this.cd.markForCheck();
       },
       error: (err) => {
         this.error = 'Error al cargar el pedido.';
         this.isLoading = false;
+        this.cd.markForCheck();
         console.error(err);
       }
     });
@@ -645,9 +648,13 @@ export class ClientPaymentComponent implements OnInit {
       this.error = null;
       this.selectedFile = file;
       const reader = new FileReader();
-      reader.onload = (e) => { this.filePreview = e.target?.result ?? null; };
+      reader.onload = (e) => {
+        this.filePreview = e.target?.result ?? null;
+        this.cd.markForCheck();
+      };
       reader.readAsDataURL(file);
     }
+    this.cd.markForCheck();
   }
 
   removeFile(): void {
@@ -673,6 +680,7 @@ export class ClientPaymentComponent implements OnInit {
       next: () => {
         this.success = 'Captura subida con éxito. Esperando validación del administrador.';
         this.isSubmitting = false;
+        this.cd.markForCheck();
         setTimeout(() => {
           this.router.navigate(['/client/orders', this.orderId]);
         }, 2500);
@@ -694,6 +702,7 @@ export class ClientPaymentComponent implements OnInit {
         }
 
         this.isSubmitting = false;
+        this.cd.markForCheck();
         console.error('[payments] upload error:', err.status, err.error);
       }
     });

@@ -75,24 +75,44 @@ export class OrderDetailComponent {
 
   /**
    * El cliente puede editar notas y adjuntar/quitar archivos mientras el
-   * pedido no se haya enviado a cotización todavía (DRAFT o BUDGETED). A
-   * partir de OPERATOR_REVIEW_PENDING el operario ya empezó su revisión y no
-   * se debe modificar.
+   * pedido no se haya enviado a cotización todavía (DRAFT o BUDGETED), o si
+   * el operario RECHAZÓ el pedido (CLIENT_REVIEW_PENDING sin precio final):
+   * en ese caso el cliente puede ajustar archivos antes de reenviarlo a
+   * revisión. A partir de OPERATOR_REVIEW_PENDING el operario ya empezó su
+   * revisión y no se debe modificar; tampoco si ya fue aprobado con precio
+   * (ahí solo corresponde confirmar y pagar).
    */
   get isEditableBeforeQuotation(): boolean {
     const s = this.order?.status;
-    return s === 'DRAFT' || s === 'BUDGETED';
+    if (s === 'DRAFT' || s === 'BUDGETED') return true;
+    return this.getReviewOutcome() === 'rejected';
   }
 
   /**
-   * El operario recién define un precio real durante/al salir de su revisión
-   * (OPERATOR_REVIEW_PENDING). Antes de eso (DRAFT, BUDGETED o mientras está
-   * en revisión) el "presupuesto" es un placeholder en S/ 0.00, así que el
-   * resumen económico no debe mostrarse todavía.
+   * El operario recién fija un precio real al APROBAR durante su revisión.
+   * Antes de eso (DRAFT, BUDGETED, en revisión, o si el operario RECHAZÓ el
+   * pedido) no hay precio real que mostrar — mostrar "S/ 0.00" en esos casos
+   * confundía, dando a entender que el pedido no cuesta nada.
    */
   get hasOperatorPricing(): boolean {
-    const s = this.order?.status;
-    return !!s && s !== 'DRAFT' && s !== 'BUDGETED' && s !== 'OPERATOR_REVIEW_PENDING';
+    return this.getFinalPrice() !== null;
+  }
+
+  /**
+   * Cuando el pedido está en CLIENT_REVIEW_PENDING porque el operario ya lo
+   * revisó (aprobó con precio, o rechazó con un motivo), indica cuál fue el
+   * resultado para mostrar la frase correcta y habilitar la edición cuando
+   * corresponda.
+   */
+  getReviewOutcome(): 'approved' | 'rejected' | null {
+    const o = this.order;
+    if (!o || o.status !== 'CLIENT_REVIEW_PENDING' || !o.operator_reviewed_at) return null;
+    return this.getFinalPrice() !== null ? 'approved' : 'rejected';
+  }
+
+  /** Código corto para mostrar al cliente en vez del UUID completo. */
+  get orderCode(): string {
+    return this.order ? '#' + this.order.id.slice(0, 8).toUpperCase() : '';
   }
 
   // Payment voucher upload (PENDING_PAYMENT)
@@ -488,6 +508,14 @@ export class OrderDetailComponent {
   }
 
   getStatusMeta(status: string | null | undefined): OrderStatusMeta {
+    const outcome = this.getReviewOutcome();
+    if (outcome === 'approved') {
+      return { label: 'Aprobado · revisa el precio', classes: 'border-teal-300 bg-teal-50 text-teal-700' };
+    }
+    if (outcome === 'rejected') {
+      return { label: 'Rechazado por el operario', classes: 'border-red-300 bg-red-50 text-red-700' };
+    }
+
     const normalizedStatus = String(status ?? '').trim().toUpperCase() as OrderStatus;
     switch (normalizedStatus) {
       case 'DRAFT':

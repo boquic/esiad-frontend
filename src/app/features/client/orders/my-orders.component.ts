@@ -67,8 +67,62 @@ export class MyOrdersComponent {
     this.router.navigate(['/login']);
   }
 
-  getStatusMeta(status: string): OrderStatusMeta {
-    const normalizedStatus = String(status).trim().toUpperCase() as OrderStatus;
+  getServiceName(order: ClientOrder): string {
+    return order.service_type?.name ?? order.serviceType?.name ?? 'Servicio sin nombre';
+  }
+
+  getMaterialName(order: ClientOrder): string {
+    return order.material?.name ?? 'Material no especificado';
+  }
+
+  /** Código corto para mostrar al cliente en vez del UUID completo. */
+  orderCode(order: ClientOrder): string {
+    return '#' + order.id.slice(0, 8).toUpperCase();
+  }
+
+  private getFinalPriceValue(order: ClientOrder): number | null {
+    const raw = order?.final_price;
+    if (raw === null || raw === undefined) return null;
+    const parsed = typeof raw === 'number' ? raw : Number(raw);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  /** Precio final ya fijado por el operario; si no, no hay nada que mostrar. */
+  getDisplayPrice(order: ClientOrder): number {
+    return this.getFinalPriceValue(order) ?? 0;
+  }
+
+  /**
+   * El operario recién fija un precio real al APROBAR durante su revisión.
+   * Antes de eso (DRAFT, BUDGETED, en revisión, o si el operario RECHAZÓ el
+   * pedido) no hay precio real que mostrar — mostrar "S/ 0.00" en esos casos
+   * confundía, dando a entender que el pedido no cuesta nada.
+   */
+  hasOperatorPricing(order: ClientOrder): boolean {
+    return this.getFinalPriceValue(order) !== null;
+  }
+
+  /**
+   * Cuando el pedido está en CLIENT_REVIEW_PENDING porque el operario ya lo
+   * revisó (aprobó con precio, o rechazó con un motivo), se muestra una
+   * frase explícita de "Aprobado"/"Rechazado" en vez del genérico "Revisión
+   * del cliente pendiente", que no aclaraba qué pasó.
+   */
+  getReviewOutcome(order: ClientOrder): 'approved' | 'rejected' | null {
+    if (order?.status !== 'CLIENT_REVIEW_PENDING' || !order?.operator_reviewed_at) return null;
+    return this.hasOperatorPricing(order) ? 'approved' : 'rejected';
+  }
+
+  getStatusMeta(order: ClientOrder): OrderStatusMeta {
+    const outcome = this.getReviewOutcome(order);
+    if (outcome === 'approved') {
+      return { label: 'Aprobado · revisa el precio', classes: 'border-teal-300 bg-teal-50 text-teal-700' };
+    }
+    if (outcome === 'rejected') {
+      return { label: 'Rechazado por el operario', classes: 'border-red-300 bg-red-50 text-red-700' };
+    }
+
+    const normalizedStatus = String(order?.status ?? '').trim().toUpperCase() as OrderStatus;
 
     switch (normalizedStatus) {
       case 'DRAFT':
@@ -96,28 +150,5 @@ export class MyOrdersComponent {
       default:
         return { label: normalizedStatus || 'Desconocido', classes: 'border-gray-300 bg-gray-100 text-gray-500' };
     }
-  }
-
-  getServiceName(order: ClientOrder): string {
-    return order.service_type?.name ?? order.serviceType?.name ?? 'Servicio sin nombre';
-  }
-
-  getMaterialName(order: ClientOrder): string {
-    return order.material?.name ?? 'Material no especificado';
-  }
-
-  getEstimatedPrice(order: ClientOrder): number {
-    return this.ordersService.getOrderEstimatedPrice(order);
-  }
-
-  /**
-   * El operario recién define un precio real durante/al salir de su revisión
-   * (OPERATOR_REVIEW_PENDING). Antes de eso (DRAFT, BUDGETED o mientras está
-   * en revisión) el "presupuesto" es un placeholder en S/ 0.00, así que no
-   * debe mostrarse todavía en la lista de pedidos.
-   */
-  hasOperatorPricing(order: ClientOrder): boolean {
-    const s = order?.status;
-    return !!s && s !== 'DRAFT' && s !== 'BUDGETED' && s !== 'OPERATOR_REVIEW_PENDING';
   }
 }

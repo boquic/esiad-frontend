@@ -492,6 +492,7 @@ export class AdminLayoutComponent implements OnInit {
         this.activeOrdersCount =
           (statusMap.get('BUDGETED')         ?? 0) +
           (statusMap.get('PENDING_PAYMENT')  ?? 0) +
+          (statusMap.get('PAID')             ?? 0) +
           (statusMap.get('IN_PROGRESS')      ?? 0) +
           (statusMap.get('READY')            ?? 0);
         this.cd.markForCheck();

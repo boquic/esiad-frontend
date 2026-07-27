@@ -305,10 +305,16 @@
           <span><strong>Acción requerida:</strong> Revisa el pedido y archivos. Usa el panel de abajo para aprobar, devolver o rechazar.</span>
         </div>
 
-        <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition !== 'CASH_ON_DELIVERY'" class="opd-state-explain"
+        <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition !== 'CASH_ON_DELIVERY' && order.has_pending_payment" class="opd-state-explain"
              style="background:rgba(245,243,255,0.85);border-color:#c4b5fd;color:#6d28d9;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>
-          <span>Esperando que el administrador valide el adelanto del cliente antes de iniciar producción.</span>
+          <span>El cliente subió su comprobante de pago. Verifícalo (ej. en tu celular) y confirma el pago para poder iniciar producción.</span>
+        </div>
+
+        <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition !== 'CASH_ON_DELIVERY' && !order.has_pending_payment" class="opd-state-explain"
+             style="background:rgba(245,243,255,0.85);border-color:#c4b5fd;color:#6d28d9;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>
+          <span>Esperando que el cliente suba el comprobante de su adelanto.</span>
         </div>
 
         <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition === 'CASH_ON_DELIVERY'" class="opd-state-explain"
@@ -317,16 +323,38 @@
           <span>Pedido con contraentrega: puedes iniciar producción sin esperar un pago por adelantado.</span>
         </div>
 
+        <div *ngIf="order.status === 'PAID'" class="opd-state-explain"
+             style="background:rgba(20,184,166,0.10);border-color:rgba(20,184,166,0.35);color:#0f766e;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+          <span>Pago confirmado. Ya puedes iniciar producción.</span>
+        </div>
+
         <div *ngIf="order.status === 'IN_PROGRESS'" class="opd-state-explain">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.01"/></svg>
           <span>Producción en curso. Marca como listo cuando esté terminado para notificar al cliente.</span>
         </div>
 
         <!-- Acciones -->
-        <!-- HU-15/BUG-05: el botón solo aparece cuando corresponde según el estado y la
-             condición de pago. Con ADVANCE_50, el pago lo valida el administrador y el
-             pedido pasa a IN_PROGRESS automáticamente; el operario no debe forzarlo antes. -->
+        <!-- El pago con adelanto (ADVANCE_50) lo confirma el operario aquí mismo tras
+             verificarlo (ej. en su celular); con contraentrega (CASH_ON_DELIVERY) no hay
+             comprobante que verificar y se puede iniciar producción directamente. -->
         <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition === 'CASH_ON_DELIVERY'" style="margin-top:4px;">
+          <button class="opd-btn primary lg" (click)="startOrder()" [disabled]="isChangingStatus">
+            <svg *ngIf="!isChangingStatus" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
+            <span *ngIf="isChangingStatus" class="opd-spin-sm"></span>
+            {{ isChangingStatus ? 'Procesando...' : 'Iniciar producción' }}
+          </button>
+        </div>
+
+        <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition !== 'CASH_ON_DELIVERY' && order.has_pending_payment" style="margin-top:4px;">
+          <button class="opd-btn primary lg" (click)="confirmPayment()" [disabled]="isChangingStatus">
+            <svg *ngIf="!isChangingStatus" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+            <span *ngIf="isChangingStatus" class="opd-spin-sm"></span>
+            {{ isChangingStatus ? 'Procesando...' : 'Confirmar pago' }}
+          </button>
+        </div>
+
+        <div *ngIf="order.status === 'PAID'" style="margin-top:4px;">
           <button class="opd-btn primary lg" (click)="startOrder()" [disabled]="isChangingStatus">
             <svg *ngIf="!isChangingStatus" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
             <span *ngIf="isChangingStatus" class="opd-spin-sm"></span>

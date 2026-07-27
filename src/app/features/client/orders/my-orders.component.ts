@@ -81,6 +81,8 @@ export class MyOrdersComponent {
         return { label: 'En revisión del operario', classes: 'border-indigo-300 bg-indigo-50 text-indigo-700' };
       case 'PENDING_PAYMENT':
         return { label: 'Pendiente de pago', classes: 'border-purple-300 bg-purple-50 text-purple-700' };
+      case 'PAID':
+        return { label: 'Pago confirmado', classes: 'border-teal-300 bg-teal-50 text-teal-700' };
       case 'IN_PROGRESS':
         return { label: 'En producción', classes: 'border-blue-300 bg-blue-50 text-blue-700' };
       case 'READY':

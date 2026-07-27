@@ -141,7 +141,7 @@ import { ClientOrdersService, ClientOrder } from '../orders/orders.service';
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2f855a" stroke-width="2.5">
               <path d="M5 12l5 5L20 7"/>
             </svg>
-            En producción
+            {{ order.status === 'PAID' ? 'Pago confirmado' : 'En producción' }}
           </div>
           <div class="history-amount mono">S/ {{ (order.estimated_price ?? 0) | number:'1.2-2' }}</div>
         </div>
@@ -369,7 +369,7 @@ export class ClientPaymentsListComponent implements OnInit {
         const orders = this.ordersService.unwrapCollection(response);
         this.pendingPaymentOrders = orders.filter(o => o.status === 'PENDING_PAYMENT');
         this.completedPaymentOrders = orders.filter(
-          o => ['IN_PROGRESS', 'READY', 'DELIVERED'].includes(o.status as string)
+          o => ['PAID', 'IN_PROGRESS', 'READY', 'DELIVERED'].includes(o.status as string)
         );
         this.isLoading = false;
         this.cd.markForCheck();

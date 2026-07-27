@@ -165,15 +165,12 @@ type NotificationHistoryItem = {
         <div *ngIf="showNotificationsPanel" class="op-notif-dropdown" (click)="$event.stopPropagation()">
           <div class="op-notif-header">
             <span>Notificaciones</span>
-            <button *ngIf="notificationHistory.length > 0" class="op-notif-clear" (click)="clearNotificationHistory()">
-              Limpiar
-            </button>
           </div>
           <div class="op-notif-list">
-            <div *ngIf="notificationHistory.length === 0" class="op-notif-empty">
+            <div *ngIf="recentNotifications.length === 0" class="op-notif-empty">
               Aún no tienes notificaciones. Aquí verás cuando un cliente te envíe un pedido a cotizar o un comprobante de pago.
             </div>
-            <button *ngFor="let n of notificationHistory" class="op-notif-item" [class.unread]="!n.read"
+            <button *ngFor="let n of recentNotifications" class="op-notif-item" [class.unread]="!n.read"
                     (click)="openNotification(n)">
               <div class="op-notif-icon" [class.payment]="n.type === 'payment'">
                 <svg *ngIf="n.type === 'quotation'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -812,12 +809,6 @@ type NotificationHistoryItem = {
       background: linear-gradient(180deg, rgba(58,143,139,0.06), transparent);
       border-bottom: 1px solid rgba(0,0,0,0.06);
     }
-    .op-notif-clear {
-      font-size: 11.5px; font-weight: 600; color: #3a8f8b;
-      background: none; border: none; cursor: pointer; padding: 2px 4px;
-      font-family: inherit;
-    }
-    .op-notif-clear:hover { text-decoration: underline; }
     .op-notif-list { max-height: 360px; overflow-y: auto; padding: 5px; }
     .op-notif-empty {
       padding: 22px 14px;
@@ -920,6 +911,11 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
     return this.notificationHistory.filter((n) => !n.read).length;
   }
 
+  /** El panel solo lista las 5 notificaciones más recientes. */
+  get recentNotifications(): NotificationHistoryItem[] {
+    return this.notificationHistory.slice(0, 5);
+  }
+
   get userInitials(): string {
     const p = this.userName.trim().split(/\s+/);
     return ((p[0]?.[0] ?? '') + (p[1]?.[0] ?? '')).toUpperCase() || 'OP';
@@ -974,9 +970,11 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
    * listener global (en vez de un backdrop con position:fixed) porque el
    * navbar tiene backdrop-filter, y eso hace que los elementos fixed dentro
    * de él queden acotados a su caja en vez de cubrir toda la pantalla.
+   * Se escucha en la fase de "mousedown" (no "click") para que se dispare
+   * antes de cualquier otro manejador y no dependa del orden de eventos.
    */
-  @HostListener('document:click', ['$event'])
-  onDocumentClickForNotifications(event: MouseEvent): void {
+  @HostListener('document:mousedown', ['$event'])
+  onDocumentMouseDownForNotifications(event: MouseEvent): void {
     if (!this.showNotificationsPanel) return;
     const target = event.target as HTMLElement | null;
     if (target?.closest('.op-notif-dropdown') || target?.closest('.op-icon-btn')) return;
@@ -1127,11 +1125,6 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
     this.saveNotificationHistory();
     this.showNotificationsPanel = false;
     this.router.navigate(['/operator/orders', item.orderId]);
-  }
-
-  clearNotificationHistory(): void {
-    this.notificationHistory = [];
-    this.saveNotificationHistory();
   }
 
   formatNotificationTime(timestamp: number): string {

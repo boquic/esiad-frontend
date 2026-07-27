@@ -161,14 +161,8 @@ type NotificationHistoryItem = {
           <span *ngIf="unreadNotificationsCount > 0" class="op-bell-badge">{{ unreadNotificationsCount }}</span>
         </button>
 
-        <!-- Backdrop del panel de notificaciones -->
-        <div *ngIf="showNotificationsPanel"
-             style="position:fixed;inset:0;z-index:40;"
-             (click)="closeNotificationsPanel()">
-        </div>
-
-        <!-- Panel de notificaciones -->
-        <div *ngIf="showNotificationsPanel" class="op-notif-dropdown">
+        <!-- Panel de notificaciones (se cierra con el listener global de clic afuera) -->
+        <div *ngIf="showNotificationsPanel" class="op-notif-dropdown" (click)="$event.stopPropagation()">
           <div class="op-notif-header">
             <span>Notificaciones</span>
             <button *ngIf="notificationHistory.length > 0" class="op-notif-clear" (click)="clearNotificationHistory()">
@@ -975,6 +969,20 @@ export class OperatorLayoutComponent implements OnInit, OnDestroy {
    * para dejar el AudioContext ya creado y activo, listo para usarse más
    * tarde cuando llegue el aviso real.
    */
+  /**
+   * Cierra el panel de notificaciones al hacer clic fuera de él. Se usa un
+   * listener global (en vez de un backdrop con position:fixed) porque el
+   * navbar tiene backdrop-filter, y eso hace que los elementos fixed dentro
+   * de él queden acotados a su caja en vez de cubrir toda la pantalla.
+   */
+  @HostListener('document:click', ['$event'])
+  onDocumentClickForNotifications(event: MouseEvent): void {
+    if (!this.showNotificationsPanel) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.op-notif-dropdown') || target?.closest('.op-icon-btn')) return;
+    this.closeNotificationsPanel();
+  }
+
   @HostListener('document:click')
   @HostListener('document:keydown')
   unlockAudioOnFirstInteraction(): void {

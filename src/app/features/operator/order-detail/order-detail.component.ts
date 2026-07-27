@@ -672,6 +672,12 @@ export class OperatorOrderDetailComponent implements OnInit {
     return file.file_type.replace('PLAN_', '').toUpperCase();
   }
 
+  /** "Cantidad" del pedido: número de archivos/planos que el cliente adjuntó. */
+  fileCountLabel(order: OperatorOrder): string {
+    const n = order.files?.length ?? 0;
+    return `${n} archivo${n === 1 ? '' : 's'}`;
+  }
+
   /**
    * Nombre real con el que el cliente subió el archivo (ej: "plano_final.dwg").
    * Antes se mostraba un nombre inventado ("Plano_XXXXXX.ext"); ahora se usa

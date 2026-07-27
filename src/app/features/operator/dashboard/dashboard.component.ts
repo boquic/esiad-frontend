@@ -720,6 +720,17 @@ export class OperatorDashboardComponent implements OnInit, OnDestroy {
     return this.loadingOrderId === order.id;
   }
 
+  /** Fecha/hora en que el pedido fue enviado a cotización (aprox. = último cambio de estado). */
+  formatSentAt(order: OperatorOrder): string {
+    const iso = order.updated_at || order.created_at;
+    if (!iso) return 'Sin registrar';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return 'Sin registrar';
+    const date = d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const time = d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    return `${date} · ${time}`;
+  }
+
   // ── Colas por orden de pago (número de orden) ──────────────────
   // Cola 1: pedidos con comprobante subido, esperando que el operario lo
   // verifique y confirme el pago. Se ordenan por el momento en que el

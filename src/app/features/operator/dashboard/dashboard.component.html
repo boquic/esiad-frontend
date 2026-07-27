@@ -128,12 +128,25 @@
 
           <div class="op-svc-type">
             {{ order.service_type?.name || 'Servicio' }}
-            <span class="sep">·</span>
-            {{ order.material?.name || 'Material' }}
+            <ng-container *ngIf="order.status !== 'OPERATOR_REVIEW_PENDING'">
+              <span class="sep">·</span>
+              {{ order.material?.name || 'Material' }}
+            </ng-container>
           </div>
 
           <div class="op-order-detail">
-            <div class="op-detail-block">
+            <!-- Recién enviado a cotización: mostramos fecha/hora de envío en vez de la especificación -->
+            <div class="op-detail-block" *ngIf="order.status === 'OPERATOR_REVIEW_PENDING'">
+              <div class="op-detail-label">Enviado a cotización</div>
+              <div class="op-detail-value">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/>
+                </svg>
+                {{ formatSentAt(order) }}
+              </div>
+            </div>
+
+            <div class="op-detail-block" *ngIf="order.status !== 'OPERATOR_REVIEW_PENDING'">
               <div class="op-detail-label">Especificación</div>
               <div class="op-detail-value">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -178,9 +191,6 @@
             </svg>
             Revisar ahora
           </a>
-          <div *ngIf="order.client_review_notes" class="op-ready-hint" style="color:#9a3412;font-size:11px;text-align:left;">
-            Obs: {{ order.client_review_notes | slice:0:40 }}{{ order.client_review_notes.length > 40 ? '…' : '' }}
-          </div>
         </ng-container>
 
         <!-- CLIENT_REVIEW_PENDING: esperando cliente -->

@@ -419,12 +419,35 @@ export class OrderDetailComponent {
         window.URL.revokeObjectURL(url);
         this.cd.markForCheck();
       },
-      error: (err) => {
+      error: (err: any) => {
         this.downloadingFileId = null;
-        this.error = 'No se pudo descargar el archivo.';
-        this.cd.markForCheck();
+        this.extractErrorMessage(err, 'No se pudo descargar el archivo.').then((msg) => {
+          this.error = msg;
+          this.cd.markForCheck();
+        });
       }
     });
+  }
+
+  /**
+   * Con `responseType: 'blob'`, el body de una respuesta de ERROR también
+   * llega como Blob (no el JSON `{error, message}` que manda el backend),
+   * así que antes siempre se mostraba el mensaje genérico de fallback en vez
+   * de la causa real. Esto lee ese Blob como texto y lo parsea.
+   */
+  private extractErrorMessage(err: any, fallback: string): Promise<string> {
+    if (err?.error instanceof Blob) {
+      return err.error.text()
+        .then((text: string) => {
+          try {
+            return JSON.parse(text)?.message || fallback;
+          } catch {
+            return fallback;
+          }
+        })
+        .catch(() => fallback);
+    }
+    return Promise.resolve(err?.error?.message ?? fallback);
   }
 
   getOperatorName(op: any): string {

@@ -586,6 +586,16 @@ export class OrderDetailComponent {
   }
 
   /**
+   * true si el cliente ya subió un comprobante que sigue esperando que el
+   * operario/admin lo verifique. Mientras esto sea true no tiene sentido
+   * seguir pidiéndole "Realiza el adelanto": ya lo hizo, solo falta que se lo
+   * confirmen.
+   */
+  hasPendingPaymentVoucher(): boolean {
+    return this.ordersService.getOrderPayments(this.order).some((p) => p.status === 'PENDING');
+  }
+
+  /**
    * El operario fijó un precio final durante su revisión (independientemente
    * de si dejó o no un comentario). Antes esto exigía también que hubiera un
    * "motivo" para mostrarse, pero eso ocultaba el precio nuevo cuando el

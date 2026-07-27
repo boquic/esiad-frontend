@@ -211,16 +211,8 @@
       <!-- Precio fijado por el operario -->
       <div *ngIf="hasPriceAdjustment()" class="rounded-lg mb-3" style="padding:12px 14px;background:rgba(255,237,213,0.7);border:1px solid #fdba74;">
         <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:8px;">El operario fijó el precio final</p>
-        <div class="grid grid-cols-2 gap-3 mb-2">
-          <div>
-            <p style="font-size:11px;color:#9a3412;font-weight:600;">Precio estimado original</p>
-            <p style="font-size:16px;font-weight:700;font-family:monospace;color:#374151;">S/ {{ getEstimatedPrice() | number:'1.2-2' }}</p>
-          </div>
-          <div>
-            <p style="font-size:11px;color:#9a3412;font-weight:600;">Precio final</p>
-            <p style="font-size:16px;font-weight:700;font-family:monospace;color:#dc2626;">S/ {{ getFinalPrice() | number:'1.2-2' }}</p>
-          </div>
-        </div>
+        <p style="font-size:11px;color:#9a3412;font-weight:600;">Precio final</p>
+        <p style="font-size:20px;font-weight:700;font-family:monospace;color:#dc2626;">S/ {{ getFinalPrice() | number:'1.2-2' }}</p>
       </div>
 
       <!-- Comentario del operario al aprobar, o motivo por el que no aprobó el pedido -->
@@ -236,16 +228,16 @@
         <strong>Tus observaciones previas:</strong> {{ order?.client_review_notes }}
       </div>
 
-      <button *ngIf="getReviewOutcome() !== 'rejected'" (click)="openConfirmReviewModal()" [disabled]="confirmingReview || hasPendingFileOperation"
+      <button *ngIf="getReviewOutcome() !== 'rejected' && !hasPriceAdjustment()" (click)="openConfirmReviewModal()" [disabled]="confirmingReview || hasPendingFileOperation"
               class="inline-flex items-center justify-center font-bold rounded-lg text-white disabled:opacity-50"
               style="gap:7px;font-size:13px;padding:10px 18px;background:#ea580c;border:1px solid #c2410c;cursor:pointer;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-        {{ hasPriceAdjustment() ? 'Aceptar precio y continuar' : 'Confirmar revisión' }}
+        Confirmar revisión
       </button>
     </div>
 
-    <!-- Enviar nueva observación (aprobado / caso general) -->
-    <div *ngIf="getReviewOutcome() !== 'rejected'" style="padding:16px 24px;">
+    <!-- Enviar nueva observación (caso general, sin precio del operario todavía) -->
+    <div *ngIf="getReviewOutcome() !== 'rejected' && !hasPriceAdjustment()" style="padding:16px 24px;">
       <p style="font-size:12.5px;font-weight:600;color:#9a3412;margin-bottom:8px;">Enviar nueva observación:</p>
       <div *ngIf="observationError" style="font-size:12px;color:#c0392b;margin-bottom:6px;">{{ observationError }}</div>
       <div *ngIf="observationSuccess" style="font-size:12px;color:#166534;margin-bottom:6px;">{{ observationSuccess }}</div>
@@ -262,6 +254,30 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
           </svg>
           Enviar
+        </button>
+      </div>
+    </div>
+
+    <!-- Aceptar precio (aprobado): un solo botón, observación opcional -->
+    <div *ngIf="hasPriceAdjustment()" style="padding:16px 24px;">
+      <div *ngIf="error" style="font-size:12px;color:#c0392b;margin-bottom:6px;">{{ error }}</div>
+      <p *ngIf="hasPendingFileOperation" style="font-size:12px;color:#9a3412;margin-bottom:6px;">
+        Espera a que termine de subirse/quitarse el archivo antes de continuar.
+      </p>
+      <p style="font-size:12.5px;font-weight:600;color:#9a3412;margin-bottom:8px;">Observación para el operario (opcional):</p>
+      <div class="flex gap-2">
+        <textarea [(ngModel)]="confirmReviewNotes" rows="2" placeholder="Describe tu observación"
+                  class="flex-1 rounded-lg"
+                  style="padding:9px 12px;font-size:13px;border:1px solid #fdba74;background:#fff7ed;resize:none;font-family:inherit;"></textarea>
+        <button (click)="confirmReview()" [disabled]="confirmingReview || hasPendingFileOperation"
+                class="shrink-0 inline-flex items-center justify-center font-bold rounded-lg text-white disabled:opacity-50"
+                style="gap:6px;padding:9px 16px;font-size:13px;background:#ea580c;border:1px solid #c2410c;cursor:pointer;">
+          <svg *ngIf="!confirmingReview" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <svg *ngIf="confirmingReview" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          Aceptar precio y continuar
         </button>
       </div>
     </div>
@@ -753,41 +769,6 @@
              <p style="font-size:14px;font-weight:600;color:#1f2937;margin:0;">{{ getOperatorName(order.operator) }}</p>
              <p style="font-size:12px;color:#6b7280;margin:2px 0 0 0;">Especialista asignado</p>
            </div>
-        </div>
-      </section>
-
-      <!-- Resumen económico: recién aplica cuando el operario aprobó el pedido y fijó un precio final -->
-      <section *ngIf="hasOperatorPricing" class="rounded-xl overflow-hidden"
-               style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
-        <div style="padding:16px 22px;background:linear-gradient(135deg,#3a8f8b,#2e7874);">
-          <p style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:rgba(255,255,255,0.80);margin-bottom:2px;">Presupuesto</p>
-          <h3 class="font-bold text-white" style="font-size:15px;letter-spacing:-0.005em;">Resumen económico</h3>
-        </div>
-        <div style="padding:18px 22px;">
-          <div class="rounded-xl text-center"
-               style="padding:16px;background:rgba(58,143,139,0.07);border:1px solid rgba(58,143,139,0.22);margin-bottom:14px;">
-            <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#3a8f8b;margin-bottom:6px;">Monto estimado</p>
-            <p style="font-size:28px;font-weight:800;color:#2e7874;font-family:monospace;letter-spacing:-0.03em;line-height:1;">
-              <span style="font-size:15px;font-weight:600;opacity:.75;margin-right:4px;vertical-align:3px;">S/</span>{{ getEstimatedPrice() | number:'1.2-2' }}
-            </p>
-          </div>
-          <!-- Precio final ajustado -->
-          <div *ngIf="getFinalPrice() !== null" class="rounded-lg px-3 py-2.5 mb-2"
-               style="background:rgba(254,242,242,0.85);border:1px solid #fca5a5;">
-            <p style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#dc2626;">Precio final ajustado</p>
-            <p style="font-size:16px;font-weight:700;color:#dc2626;margin-top:3px;font-family:monospace;">S/ {{ getFinalPrice() | number:'1.2-2' }}</p>
-          </div>
-          <!-- Monto de pago requerido (solo para PENDING_PAYMENT) -->
-          <div *ngIf="order.status === 'PENDING_PAYMENT'" class="rounded-lg px-3 py-2.5 mb-2"
-               style="background:rgba(245,243,255,0.85);border:1px solid #c4b5fd;">
-            <p style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#7c3aed;">Monto a pagar</p>
-            <p style="font-size:16px;font-weight:700;color:#7c3aed;margin-top:3px;font-family:monospace;">S/ {{ getPaymentRequiredAmount() | number:'1.2-2' }}</p>
-          </div>
-          <div *ngIf="order.advance_amount" class="rounded-lg px-3 py-2.5"
-               style="background:rgba(249,250,251,0.85);border:1px solid #f0f0f0;">
-            <p style="font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Adelanto registrado</p>
-            <p style="font-size:14px;font-weight:700;color:#374151;margin-top:3px;font-family:monospace;">S/ {{ order.advance_amount | number:'1.2-2' }}</p>
-          </div>
         </div>
       </section>
 

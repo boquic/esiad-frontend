@@ -382,13 +382,21 @@ export class OrderDetailComponent {
     this.error = '';
     this.actionSuccessMessage = '';
 
-    this.ordersService.confirmReview(this.order.id, this.confirmReviewNotes || undefined).subscribe({
-      next: () => {
+    const orderId = this.order.id;
+
+    this.ordersService.confirmReview(orderId, this.confirmReviewNotes || undefined).subscribe({
+      next: (response) => {
         this.confirmingReview = false;
         this.showConfirmReviewModal = false;
+        // Si el cliente aceptó el precio del operario, el pedido pasa a
+        // PENDING_PAYMENT: lo llevamos directo a la vista de pago (Yape) en
+        // vez de dejarlo en el detalle a que busque cómo pagar.
+        if (response?.data?.status === 'PENDING_PAYMENT') {
+          this.router.navigate(['/client/orders', orderId, 'payment']);
+          return;
+        }
         this.actionSuccessMessage = 'Envío a cotización exitoso.';
-        if (this.order) this.loadOrder(this.order.id, true);
-        else this.cd.markForCheck();
+        this.loadOrder(orderId, true);
       },
       error: (err: any) => {
         this.confirmingReview = false;

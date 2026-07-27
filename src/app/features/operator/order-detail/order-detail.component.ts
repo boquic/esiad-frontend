@@ -699,10 +699,34 @@ export class OperatorOrderDetailComponent implements OnInit {
       },
       error: (err: any) => {
         this.downloadingFileId = null;
-        this.error = err?.error?.message ?? 'No se pudo descargar el archivo.';
-        this.cd.markForCheck();
+        this.extractErrorMessage(err, 'No se pudo descargar el archivo.').then((msg) => {
+          this.error = msg;
+          this.cd.markForCheck();
+        });
       }
     });
+  }
+
+  /**
+   * Con `responseType: 'blob'`, el body de una respuesta de ERROR también
+   * llega como Blob (no como el JSON `{error, message}` que manda el
+   * backend) — por eso antes siempre se mostraba el mensaje genérico de
+   * fallback, ocultando la causa real (ej: "el archivo ya no existe en el
+   * servidor"). Esto lee ese Blob como texto y lo parsea.
+   */
+  private extractErrorMessage(err: any, fallback: string): Promise<string> {
+    if (err?.error instanceof Blob) {
+      return err.error.text()
+        .then((text: string) => {
+          try {
+            return JSON.parse(text)?.message || fallback;
+          } catch {
+            return fallback;
+          }
+        })
+        .catch(() => fallback);
+    }
+    return Promise.resolve(err?.error?.message ?? fallback);
   }
 
   /** "Cantidad" del pedido: número de archivos/planos que el cliente adjuntó. */

@@ -73,6 +73,7 @@ export class AdminDashboardComponent implements OnInit {
   get totalActiveOrders(): number {
     return (this.ordersByStatus.get('BUDGETED')        ?? 0) +
            (this.ordersByStatus.get('PENDING_PAYMENT') ?? 0) +
+           (this.ordersByStatus.get('PAID')            ?? 0) +
            (this.ordersByStatus.get('IN_PROGRESS')     ?? 0) +
            (this.ordersByStatus.get('READY')           ?? 0);
   }
@@ -287,7 +288,7 @@ export class AdminDashboardComponent implements OnInit {
   statusLabel(status: string): string {
     const m: Record<string, string> = {
       READY: 'Listo', IN_PROGRESS: 'En proceso', BUDGETED: 'Presupuestado',
-      PENDING_PAYMENT: 'Pago pendiente', DELIVERED: 'Entregado', CANCELLED: 'Cancelado',
+      PENDING_PAYMENT: 'Pago pendiente', PAID: 'Pago confirmado', DELIVERED: 'Entregado', CANCELLED: 'Cancelado',
     };
     return m[status] ?? status;
   }
@@ -295,7 +296,7 @@ export class AdminDashboardComponent implements OnInit {
   statusClass(status: string): string {
     const m: Record<string, string> = {
       READY: 'listo', IN_PROGRESS: 'proceso', BUDGETED: 'cola',
-      PENDING_PAYMENT: 'pago', DELIVERED: 'entregado', CANCELLED: 'cancelado',
+      PENDING_PAYMENT: 'pago', PAID: 'pagado', DELIVERED: 'entregado', CANCELLED: 'cancelado',
     };
     return m[status] ?? '';
   }

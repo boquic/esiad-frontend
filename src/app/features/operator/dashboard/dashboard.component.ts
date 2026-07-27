@@ -305,6 +305,26 @@ type UrgencyLevel = 'overdue' | 'urgent' | 'soon' | 'ok';
       background: rgba(139,92,246,0.12);
       border-color: rgba(139,92,246,0.30);
     }
+    .op-badge.pagado {
+      color: #0f766e;
+      background: rgba(20,184,166,0.14);
+      border-color: rgba(20,184,166,0.30);
+    }
+    /* Número de orden (cola de verificación de pago / cola de producción) */
+    .op-queue-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: rgba(58,143,139,0.14);
+      color: #2e7874;
+      font-size: 11px;
+      font-weight: 700;
+      margin-left: 6px;
+    }
     .op-badge.urgent {
       color: #c0392b;
       background: #fff0f0;
@@ -612,7 +632,7 @@ export class OperatorDashboardComponent implements OnInit, OnDestroy {
 
         const activeStatuses = new Set([
           'BUDGETED', 'CLIENT_REVIEW_PENDING', 'OPERATOR_REVIEW_PENDING',
-          'PENDING_PAYMENT', 'IN_PROGRESS', 'READY'
+          'PENDING_PAYMENT', 'PAID', 'IN_PROGRESS', 'READY'
         ]);
         this.orders = all
           .filter(o => activeStatuses.has(o.status))
@@ -674,6 +694,7 @@ export class OperatorDashboardComponent implements OnInit, OnDestroy {
       CLIENT_REVIEW_PENDING:   'Revisión cliente',
       OPERATOR_REVIEW_PENDING: 'Pendiente revisión',
       PENDING_PAYMENT:         'Pago pendiente',
+      PAID:                    'Pago confirmado',
       IN_PROGRESS:             'En producción',
       READY:                   'Listo',
       DELIVERED:               'Entregado',
@@ -688,6 +709,7 @@ export class OperatorDashboardComponent implements OnInit, OnDestroy {
       CLIENT_REVIEW_PENDING:   'pendiente',
       OPERATOR_REVIEW_PENDING: 'revision',
       PENDING_PAYMENT:         'pago',
+      PAID:                    'pagado',
       IN_PROGRESS:             'proceso',
       READY:                   'listo',
     };
@@ -698,7 +720,61 @@ export class OperatorDashboardComponent implements OnInit, OnDestroy {
     return this.loadingOrderId === order.id;
   }
 
+  // ── Colas por orden de pago (número de orden) ──────────────────
+  // Cola 1: pedidos con comprobante subido, esperando que el operario lo
+  // verifique y confirme el pago. Se ordenan por el momento en que el
+  // cliente subió el comprobante (el primero en pagar, primero se revisa).
+  get paymentVerificationQueue(): OperatorOrder[] {
+    return this.orders
+      .filter(o => o.status === 'PENDING_PAYMENT' && o.has_pending_payment)
+      .sort((a, b) => this.timeOrInfinity(a.pending_payment_uploaded_at) - this.timeOrInfinity(b.pending_payment_uploaded_at));
+  }
+
+  // Cola 2: pedidos con el pago ya confirmado por el operario, esperando
+  // iniciar producción. Se ordenan por el momento en que se confirmó el pago.
+  get paidQueue(): OperatorOrder[] {
+    return this.orders
+      .filter(o => o.status === 'PAID')
+      .sort((a, b) => this.timeOrInfinity(a.payment_confirmed_at) - this.timeOrInfinity(b.payment_confirmed_at));
+  }
+
+  /** Posición (1-based) del pedido dentro de la cola de verificación de pago, o null si no aplica. */
+  paymentVerificationPosition(order: OperatorOrder): number | null {
+    if (order.status !== 'PENDING_PAYMENT' || !order.has_pending_payment) return null;
+    const idx = this.paymentVerificationQueue.findIndex(o => o.id === order.id);
+    return idx === -1 ? null : idx + 1;
+  }
+
+  /** Posición (1-based) del pedido dentro de la cola de producción (pagos ya confirmados), o null si no aplica. */
+  paidQueuePosition(order: OperatorOrder): number | null {
+    if (order.status !== 'PAID') return null;
+    const idx = this.paidQueue.findIndex(o => o.id === order.id);
+    return idx === -1 ? null : idx + 1;
+  }
+
+  private timeOrInfinity(iso: string | null | undefined): number {
+    return iso ? new Date(iso).getTime() : Infinity;
+  }
+
   // ── Actions ──────────────────────────────────────────────────
+
+  /** El operario ya verificó el comprobante (fuera del sistema) y confirma que el pago es real: PENDING_PAYMENT -> PAID. */
+  confirmPayment(order: OperatorOrder): void {
+    this.loadingOrderId = order.id;
+    this.operatorService.confirmPayment(order.id).subscribe({
+      next: () => {
+        this.loadingOrderId = null;
+        this.loadAssignedOrders(true);
+      },
+      error: (err: any) => {
+        this.loadingOrderId = null;
+        this.error = err?.error?.message ?? 'No se pudo confirmar el pago.';
+        this.cd.markForCheck();
+      }
+    });
+  }
+
+  /** Pago ya confirmado (PAID): inicia producción -> IN_PROGRESS. */
   startOrder(order: OperatorOrder): void {
     this.loadingOrderId = order.id;
     this.operatorService.updateOrderStatus(order.id, 'IN_PROGRESS').subscribe({

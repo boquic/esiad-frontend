@@ -75,7 +75,7 @@ export class ClientDashboardComponent implements OnInit {
   /** Pedidos activos: cualquier estado no terminal */
   get activeOrders(): number {
     return this.orders.filter(o =>
-      ['BUDGETED', 'PENDING_PAYMENT', 'IN_PROGRESS', 'READY'].includes(o.status as string)
+      ['BUDGETED', 'PENDING_PAYMENT', 'PAID', 'IN_PROGRESS', 'READY'].includes(o.status as string)
     ).length;
   }
 
@@ -124,8 +124,8 @@ export class ClientDashboardComponent implements OnInit {
   // ── Notificación reciente (pedido más urgente) ─────────────────────────────
 
   get recentNotif(): { orderCode: string; title: string; message: string; timeAgo: string; orderId: string; actionRoute: string[]; type: 'ready' | 'payment' | 'progress' | 'budget' } | null {
-    // Prioridad: READY > PENDING_PAYMENT > IN_PROGRESS > BUDGETED
-    const priority: (string)[] = ['READY', 'PENDING_PAYMENT', 'IN_PROGRESS', 'BUDGETED'];
+    // Prioridad: READY > PENDING_PAYMENT > PAID > IN_PROGRESS > BUDGETED
+    const priority: (string)[] = ['READY', 'PENDING_PAYMENT', 'PAID', 'IN_PROGRESS', 'BUDGETED'];
 
     for (const status of priority) {
       const o = this.orders.find(x => x.status === status);
@@ -154,6 +154,16 @@ export class ClientDashboardComponent implements OnInit {
             message:     'Tu presupuesto fue aprobado. Realiza el pago por Yape para pasar a producción.',
             timeAgo:     ago,
             actionRoute: ['/client/orders', o.id, 'payment'],
+          };
+        case 'PAID':
+          return {
+            orderId:     o.id,
+            orderCode:   code,
+            type:        'progress',
+            title:       `Confirmamos el pago de tu pedido ${code}`,
+            message:     'El operario iniciará la producción de tu pedido en breve.',
+            timeAgo:     ago,
+            actionRoute: ['/client/orders', o.id],
           };
         case 'IN_PROGRESS':
           return {
@@ -209,6 +219,7 @@ export class ClientDashboardComponent implements OnInit {
       case 'READY':           return { label: 'Listo para recoger', color: '#2f855a', bg: 'rgba(72,187,120,0.14)',    border: 'rgba(47,133,90,0.30)' };
       case 'IN_PROGRESS':     return { label: 'En proceso',         color: '#2e7874', bg: 'rgba(58,143,139,0.10)',    border: 'rgba(58,143,139,0.30)' };
       case 'PENDING_PAYMENT': return { label: 'Pago pendiente',     color: '#b8860b', bg: '#fff7e6',                  border: '#f5d39a' };
+      case 'PAID':            return { label: 'Pago confirmado',    color: '#0f766e', bg: 'rgba(20,184,166,0.10)',    border: 'rgba(20,184,166,0.30)' };
       case 'BUDGETED':        return { label: 'Presupuestado',      color: '#7c5cbf', bg: 'rgba(124,92,191,0.10)',    border: 'rgba(124,92,191,0.28)' };
       case 'DELIVERED':       return { label: 'Entregado',          color: '#666',    bg: 'rgba(136,136,136,0.10)',   border: 'rgba(136,136,136,0.20)' };
       case 'CANCELLED':       return { label: 'Cancelado',          color: '#c0392b', bg: 'rgba(192,57,43,0.08)',     border: 'rgba(192,57,43,0.22)' };

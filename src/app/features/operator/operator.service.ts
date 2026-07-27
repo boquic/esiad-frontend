@@ -26,6 +26,8 @@ export interface OperatorOrder {
   operator_reviewed_at?: string | null;
   operator_price_adjustment_reason?: string | null;
   production_time_estimate?: string | null;
+  // Momento en que el operario confirmó el pago (PENDING_PAYMENT -> PAID).
+  payment_confirmed_at?: string | null;
   production_started_at?: string | null;
   production_ready_at?: string | null;
   // Comprobante de pago del cliente aún no revisado por el operario.
@@ -121,5 +123,10 @@ export class OperatorService {
   /** POST /api/operator/orders/:id/confirm-pickup — el operario confirma que el cliente recogió el pedido (READY -> DELIVERED). */
   confirmPickup(orderId: string): Observable<GenericResponse> {
     return this.http.post<GenericResponse>(`/api/operator/orders/${orderId}/confirm-pickup`, {});
+  }
+
+  /** POST /api/operator/orders/:id/confirm-payment — el operario verificó el comprobante y confirma el pago (PENDING_PAYMENT -> PAID). */
+  confirmPayment(orderId: string): Observable<GenericResponse> {
+    return this.http.post<GenericResponse>(`/api/operator/orders/${orderId}/confirm-payment`, {});
   }
 }

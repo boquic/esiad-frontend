@@ -92,6 +92,7 @@ import { OperatorService, OperatorOrder } from '../operator.service';
       50%      { box-shadow: 0 0 0 5px rgba(99,102,241,0.18); }
     }
     .opd-status-pill.s-payment         { color:#6d28d9; background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.30); }
+    .opd-status-pill.s-paid            { color:#0f766e; background:rgba(20,184,166,0.14);  border:1px solid rgba(20,184,166,0.30); }
     .opd-status-pill.s-pending         { color:#666;    background:rgba(102,102,102,0.10); border:1px solid rgba(102,102,102,0.25); }
     .opd-status-pill.s-in_progress     { color:#1d4ed8; background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.30); }
     .opd-status-pill.s-ready           { color:#2f855a; background:rgba(72,187,120,0.14); border:1px solid rgba(47,133,90,0.30); }
@@ -656,6 +657,7 @@ export class OperatorOrderDetailComponent implements OnInit {
       CLIENT_REVIEW_PENDING:    'Revisión del cliente',
       OPERATOR_REVIEW_PENDING:  'Pendiente de revisión',
       PENDING_PAYMENT:          'Pendiente de pago',
+      PAID:                     'Pago confirmado',
       IN_PROGRESS:              'En producción',
       READY:                    'Listo para recoger',
       DELIVERED:                'Entregado',
@@ -693,6 +695,7 @@ export class OperatorOrderDetailComponent implements OnInit {
       CLIENT_REVIEW_PENDING:   's-client-review',
       OPERATOR_REVIEW_PENDING: 's-operator-review',
       PENDING_PAYMENT:         's-payment',
+      PAID:                    's-paid',
       IN_PROGRESS:             's-in_progress',
       READY:                   's-ready',
       DELIVERED:               's-delivered',
@@ -706,13 +709,13 @@ export class OperatorOrderDetailComponent implements OnInit {
   // 4 pasos visibles: Revisión | Producción | Listo | Entregado
   private readonly statusOrder = [
     'BUDGETED', 'CLIENT_REVIEW_PENDING', 'OPERATOR_REVIEW_PENDING',
-    'PENDING_PAYMENT', 'IN_PROGRESS', 'READY', 'DELIVERED'
+    'PENDING_PAYMENT', 'PAID', 'IN_PROGRESS', 'READY', 'DELIVERED'
   ];
 
   // Mapa de estado → índice de paso (0-based, de 4 pasos)
   private readonly stepMap: Record<string, number> = {
     BUDGETED: 0, CLIENT_REVIEW_PENDING: 0, OPERATOR_REVIEW_PENDING: 0,
-    PENDING_PAYMENT: 1, IN_PROGRESS: 1,
+    PENDING_PAYMENT: 1, PAID: 1, IN_PROGRESS: 1,
     READY: 2,
     DELIVERED: 3,
     CANCELLED: -1, EXPIRED: -1,
@@ -742,15 +745,18 @@ export class OperatorOrderDetailComponent implements OnInit {
 
     events.push({ when: this.order.created_at ?? null, what: 'Pedido <b>creado</b> por el cliente' });
 
-    if (['CLIENT_REVIEW_PENDING','OPERATOR_REVIEW_PENDING','PENDING_PAYMENT','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
+    if (['CLIENT_REVIEW_PENDING','OPERATOR_REVIEW_PENDING','PENDING_PAYMENT','PAID','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
       events.push({ when: this.order.client_reviewed_at ?? null, what: 'Cliente <b>confirmó</b> la revisión' });
     }
-    if (['OPERATOR_REVIEW_PENDING','PENDING_PAYMENT','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
+    if (['OPERATOR_REVIEW_PENDING','PENDING_PAYMENT','PAID','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
       // Solo si llegó a revisión del operario
       events.push({ when: null, what: 'En <b>revisión del operario</b>' });
     }
-    if (['PENDING_PAYMENT','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
+    if (['PENDING_PAYMENT','PAID','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
       events.push({ when: this.order.operator_reviewed_at ?? null, what: 'Operario <b>aprobó</b> la revisión' });
+    }
+    if (['PAID','IN_PROGRESS','READY','DELIVERED'].includes(s)) {
+      events.push({ when: this.order.payment_confirmed_at ?? null, what: 'Operario <b>confirmó</b> el pago' });
     }
     if (['IN_PROGRESS','READY','DELIVERED'].includes(s)) {
       events.push({ when: this.order.production_started_at ?? null, what: 'Producción <b>iniciada</b>' });
@@ -771,6 +777,27 @@ export class OperatorOrderDetailComponent implements OnInit {
   }
 
   // ── Actions ──────────────────────────────────────────────────
+
+  /** El operario verificó el comprobante (fuera del sistema) y confirma que el pago es real: PENDING_PAYMENT -> PAID. */
+  confirmPayment(): void {
+    if (!this.orderId) return;
+    this.isChangingStatus = true;
+    this.error = null; this.success = null;
+
+    this.operatorService.confirmPayment(this.orderId).subscribe({
+      next: () => {
+        this.success = 'Pago confirmado correctamente.';
+        this.isChangingStatus = false;
+        if (this.orderId) this.loadOrder(this.orderId, true);
+      },
+      error: (err) => {
+        this.error = err?.error?.message || 'No se pudo confirmar el pago.';
+        this.isChangingStatus = false;
+      }
+    });
+  }
+
+  /** Pago ya confirmado (PAID): inicia producción -> IN_PROGRESS. */
   startOrder(): void {
     if (!this.orderId) return;
     this.isChangingStatus = true;

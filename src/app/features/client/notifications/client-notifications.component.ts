@@ -63,6 +63,21 @@ function buildNotifications(orders: ClientOrder[]): ClientNotification[] {
         });
         break;
 
+      case 'PAID':
+        notifs.push({
+          id:          `paid-${o.id}`,
+          type:        'production',
+          orderId:     o.id,
+          orderCode:   code,
+          title:       'Pago confirmado',
+          body:        `Confirmamos el pago de tu pedido ${code}. El operario iniciará la producción en breve.`,
+          timeAgo:     ago,
+          read:        false,
+          actionLabel: 'Ver pedido',
+          actionRoute: ['/client/orders', o.id],
+        });
+        break;
+
       case 'IN_PROGRESS':
         notifs.push({
           id:          `prod-${o.id}`,

@@ -39,6 +39,7 @@ export type OrderStatus =
   | 'CLIENT_REVIEW_PENDING'
   | 'OPERATOR_REVIEW_PENDING'
   | 'PENDING_PAYMENT'
+  | 'PAID'
   | 'IN_PROGRESS'
   | 'READY'
   | 'DELIVERED'

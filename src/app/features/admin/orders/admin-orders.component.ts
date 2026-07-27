@@ -36,6 +36,7 @@ export class AdminOrdersComponent implements OnInit {
     { value: '',                 label: 'Todos los estados'   },
     { value: 'BUDGETED',        label: 'Presupuestado'        },
     { value: 'PENDING_PAYMENT', label: 'Pago pendiente'       },
+    { value: 'PAID',            label: 'Pago confirmado'      },
     { value: 'IN_PROGRESS',     label: 'En proceso'           },
     { value: 'READY',           label: 'Listo para recoger'   },
     { value: 'DELIVERED',       label: 'Entregado'            },
@@ -47,6 +48,7 @@ export class AdminOrdersComponent implements OnInit {
   private readonly statusMap: Record<string, StatusMeta> = {
     BUDGETED:        { label: 'Presupuestado',      classes: 'border-amber-300 bg-amber-50 text-amber-700'   },
     PENDING_PAYMENT: { label: 'Pago pendiente',     classes: 'border-orange-300 bg-orange-50 text-orange-700' },
+    PAID:            { label: 'Pago confirmado',    classes: 'border-teal-300 bg-teal-50 text-teal-700'      },
     IN_PROGRESS:     { label: 'En proceso',         classes: 'border-blue-300 bg-blue-50 text-blue-700'      },
     READY:           { label: 'Listo para recoger', classes: 'border-green-300 bg-green-50 text-green-700'   },
     DELIVERED:       { label: 'Entregado',          classes: 'border-teal-300 bg-teal-50 text-teal-700'      },

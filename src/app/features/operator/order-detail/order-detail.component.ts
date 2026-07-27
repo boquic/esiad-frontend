@@ -594,7 +594,11 @@ export class OperatorOrderDetailComponent implements OnInit {
   showReviewPanel      = false;
   reviewAction: 'APPROVE' | 'REJECT' | '' = '';
   reviewNotes          = '';
-  approvePriceValue: number | null = null;
+  // Texto crudo (no number) para poder exigir el formato exacto "20.00"
+  // (siempre con dos decimales), algo que un <input type="number"> no
+  // garantiza porque Angular lo liga a un valor numérico (20.00 y 20 son el
+  // mismo número, se pierde el formato).
+  approvePriceValue    = '';
   isSubmittingReview   = false;
 
   // ── Production Time ──────────────────────────────────────────────────────
@@ -954,16 +958,32 @@ export class OperatorOrderDetailComponent implements OnInit {
   selectReviewAction(action: 'APPROVE' | 'REJECT'): void {
     this.reviewAction = action;
     this.reviewNotes = '';
-    this.approvePriceValue = null;
+    this.approvePriceValue = '';
     this.error = null;
+  }
+
+  /** Exige exactamente dos decimales: "20.00", "0.50", "15.20"... no "20", "20.5" ni "20,00". */
+  private static readonly PRICE_FORMAT = /^\d+\.\d{2}$/;
+
+  get isApprovePriceFormatValid(): boolean {
+    return OperatorOrderDetailComponent.PRICE_FORMAT.test(this.approvePriceValue.trim());
   }
 
   submitReview(): void {
     if (!this.orderId || !this.reviewAction) return;
 
     if (this.reviewAction === 'APPROVE') {
-      if (!this.approvePriceValue || this.approvePriceValue <= 0) {
+      const raw = this.approvePriceValue.trim();
+      if (!raw) {
         this.error = 'Debes ingresar el precio final del pedido.';
+        return;
+      }
+      if (!this.isApprovePriceFormatValid) {
+        this.error = 'El precio debe tener el formato con dos decimales, ej: 20.00';
+        return;
+      }
+      if (parseFloat(raw) <= 0) {
+        this.error = 'El precio final debe ser mayor a 0.';
         return;
       }
     } else if (this.reviewNotesRequired && !this.reviewNotes.trim()) {
@@ -974,7 +994,7 @@ export class OperatorOrderDetailComponent implements OnInit {
     this.isSubmittingReview = true;
     this.error = null; this.success = null;
 
-    const price = this.reviewAction === 'APPROVE' ? (this.approvePriceValue ?? undefined) : undefined;
+    const price = this.reviewAction === 'APPROVE' ? parseFloat(this.approvePriceValue.trim()) : undefined;
 
     this.operatorService.reviewOrder(this.orderId, this.reviewAction as 'APPROVE' | 'REJECT', this.reviewNotes.trim() || undefined, price).subscribe({
       next: () => {
@@ -987,7 +1007,7 @@ export class OperatorOrderDetailComponent implements OnInit {
         this.showReviewPanel = false;
         this.reviewAction = '';
         this.reviewNotes = '';
-        this.approvePriceValue = null;
+        this.approvePriceValue = '';
         if (this.orderId) this.loadOrder(this.orderId, true);
       },
       error: (err: any) => {

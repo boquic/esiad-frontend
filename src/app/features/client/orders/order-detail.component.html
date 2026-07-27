@@ -208,20 +208,27 @@
         Se requiere tu revisión
       </h3>
 
-      <!-- Ajuste de precio -->
+      <!-- Precio fijado por el operario -->
       <div *ngIf="hasPriceAdjustment()" class="rounded-lg mb-3" style="padding:12px 14px;background:rgba(255,237,213,0.7);border:1px solid #fdba74;">
-        <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:8px;">El operario ajustó el precio</p>
+        <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9a3412;margin-bottom:8px;">El operario fijó el precio final</p>
         <div class="grid grid-cols-2 gap-3 mb-2">
           <div>
             <p style="font-size:11px;color:#9a3412;font-weight:600;">Precio estimado original</p>
             <p style="font-size:16px;font-weight:700;font-family:monospace;color:#374151;">S/ {{ getEstimatedPrice() | number:'1.2-2' }}</p>
           </div>
           <div>
-            <p style="font-size:11px;color:#9a3412;font-weight:600;">Precio final ajustado</p>
+            <p style="font-size:11px;color:#9a3412;font-weight:600;">Precio final</p>
             <p style="font-size:16px;font-weight:700;font-family:monospace;color:#dc2626;">S/ {{ getFinalPrice() | number:'1.2-2' }}</p>
           </div>
         </div>
-        <p style="font-size:12.5px;color:#7c2d12;"><strong>Motivo:</strong> {{ order?.operator_price_adjustment_reason }}</p>
+      </div>
+
+      <!-- Comentario del operario al aprobar, o motivo por el que no aprobó el pedido -->
+      <div *ngIf="getOperatorReviewNote()" class="rounded-lg mb-3" style="padding:12px 14px;background:rgba(254,226,226,0.5);border:1px solid #fca5a5;">
+        <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#991b1b;margin-bottom:6px;">
+          {{ hasPriceAdjustment() ? 'Comentario del operario' : 'El operario no aprobó tu pedido' }}
+        </p>
+        <p style="font-size:12.5px;color:#7f1d1d;">{{ getOperatorReviewNote() }}</p>
       </div>
 
       <!-- Notas de revisión previas -->

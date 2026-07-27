@@ -7,7 +7,7 @@
     <span style="color:#9ca3af;">›</span>
     <a routerLink="/client/orders" style="color:#6b7280;text-decoration:none;">Mis pedidos</a>
     <span style="color:#9ca3af;">›</span>
-    <span class="font-semibold" style="color:#374151;">{{ order ? '#' + order.id : 'Detalle' }}</span>
+    <span class="font-semibold" style="color:#374151;">{{ order ? 'Pedido ' + orderCode : 'Detalle' }}</span>
   </nav>
 
   <!-- Error -->
@@ -240,8 +240,12 @@
               class="inline-flex items-center justify-center font-bold rounded-lg text-white disabled:opacity-50"
               style="gap:7px;font-size:13px;padding:10px 18px;background:#ea580c;border:1px solid #c2410c;cursor:pointer;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-        Confirmar revisión
+        {{ hasPriceAdjustment() ? 'Aceptar precio y continuar' : (getReviewOutcome() === 'rejected' ? 'Reenviar a revisión' : 'Confirmar revisión') }}
       </button>
+
+      <p *ngIf="getReviewOutcome() === 'rejected'" style="font-size:12px;color:#9a3412;margin-top:8px;">
+        Puedes editar tus archivos y notas más abajo antes de reenviar tu pedido a revisión.
+      </p>
     </div>
 
     <!-- Enviar nueva observación -->
@@ -497,7 +501,7 @@
              style="padding:20px 24px 18px;border-bottom:1px solid rgba(224,224,224,0.65);">
           <div>
             <div class="flex items-center flex-wrap" style="gap:8px;margin-bottom:4px;">
-              <span style="font-size:11.5px;font-weight:600;color:#9ca3af;font-family:monospace;">#{{ order.id }}</span>
+              <span style="font-size:11.5px;font-weight:600;color:#9ca3af;font-family:monospace;">Pedido {{ orderCode }}</span>
               <span class="inline-flex items-center rounded-full text-xs font-semibold border"
                     style="padding:2px 10px;"
                     [class]="getStatusMeta(order.status).classes">
@@ -505,12 +509,12 @@
               </span>
             </div>
             <h2 class="font-bold" style="font-size:18px;color:#1f2937;letter-spacing:-0.01em;">{{ getServiceName() }}</h2>
-            <p style="font-size:13px;color:#6b7280;margin-top:3px;">{{ getMaterialName() }}</p>
+            <p *ngIf="hasOperatorPricing" style="font-size:13px;color:#6b7280;margin-top:3px;">{{ getMaterialName() }}</p>
           </div>
           <div *ngIf="hasOperatorPricing" class="shrink-0 text-right">
             <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;margin-bottom:4px;">Presupuesto</p>
             <p style="font-size:20px;font-weight:700;color:#2e7874;font-family:monospace;letter-spacing:-0.02em;line-height:1;">
-              <span style="font-size:12px;font-weight:600;opacity:.75;margin-right:3px;vertical-align:2px;">S/</span>{{ getEstimatedPrice() | number:'1.2-2' }}
+              <span style="font-size:12px;font-weight:600;opacity:.75;margin-right:3px;vertical-align:2px;">S/</span>{{ getFinalPrice() | number:'1.2-2' }}
             </p>
           </div>
         </div>
@@ -662,7 +666,7 @@
             </svg>
             Notas del pedido
           </div>
-          <button *ngIf="order?.status === 'BUDGETED' && !editingDraft" type="button" (click)="startEditDraft()"
+          <button *ngIf="(order?.status === 'BUDGETED' || getReviewOutcome() === 'rejected') && !editingDraft" type="button" (click)="startEditDraft()"
                   class="inline-flex items-center justify-center font-semibold rounded-lg"
                   style="gap:6px;font-size:12.5px;padding:7px 14px;color:#2e7874;border:1px solid rgba(58,143,139,0.30);background:rgba(58,143,139,0.07);cursor:pointer;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -673,16 +677,16 @@
         </div>
 
         <!-- Error de edición (notas) -->
-        <div *ngIf="draftError && order?.status === 'BUDGETED'" class="flex items-center" style="gap:9px;margin-bottom:12px;padding:10px 14px;border-radius:9px;background:#fff0f0;border:1px solid #f5c6c6;font-size:12.5px;color:#c0392b;font-weight:500;">
+        <div *ngIf="draftError && (order?.status === 'BUDGETED' || getReviewOutcome() === 'rejected')" class="flex items-center" style="gap:9px;margin-bottom:12px;padding:10px 14px;border-radius:9px;background:#fff0f0;border:1px solid #f5c6c6;font-size:12.5px;color:#c0392b;font-weight:500;">
           <svg class="shrink-0" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>
           {{ draftError }}
         </div>
 
         <!-- Lectura -->
-        <p *ngIf="!(editingDraft && order?.status === 'BUDGETED')" style="font-size:13.5px;color:#374151;line-height:1.7;">{{ order.notes || 'Sin notas' }}</p>
+        <p *ngIf="!(editingDraft && (order?.status === 'BUDGETED' || getReviewOutcome() === 'rejected'))" style="font-size:13.5px;color:#374151;line-height:1.7;">{{ order.notes || 'Sin notas' }}</p>
 
-        <!-- Edición (solo BUDGETED; el servicio ya no se puede cambiar aquí) -->
-        <div *ngIf="editingDraft && order?.status === 'BUDGETED'" class="flex flex-col" style="gap:12px;">
+        <!-- Edición (BUDGETED, o CLIENT_REVIEW_PENDING si el operario rechazó; el servicio ya no se puede cambiar aquí) -->
+        <div *ngIf="editingDraft && (order?.status === 'BUDGETED' || getReviewOutcome() === 'rejected')" class="flex flex-col" style="gap:12px;">
           <textarea id="budgetedNotes" [(ngModel)]="draftForm.notes" rows="3"
                     placeholder="Ej: escala 50%, indicaciones de corte por capas, acabado mate…"
                     class="w-full rounded-lg"
@@ -730,7 +734,7 @@
         </div>
       </section>
 
-      <!-- Resumen económico: recién aplica cuando el operario ya definió un precio real (no en DRAFT/BUDGETED/OPERATOR_REVIEW_PENDING) -->
+      <!-- Resumen económico: recién aplica cuando el operario aprobó el pedido y fijó un precio final -->
       <section *ngIf="hasOperatorPricing" class="rounded-xl overflow-hidden"
                style="background:rgba(255,255,255,0.75);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid #e0e0e0;">
         <div style="padding:16px 22px;background:linear-gradient(135deg,#3a8f8b,#2e7874);">

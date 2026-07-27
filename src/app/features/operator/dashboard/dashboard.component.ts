@@ -720,15 +720,32 @@ export class OperatorDashboardComponent implements OnInit, OnDestroy {
     return this.loadingOrderId === order.id;
   }
 
-  /** Fecha/hora en que el pedido fue enviado a cotización (aprox. = último cambio de estado). */
+  /** Fecha/hora en que el pedido fue enviado a cotización (momento real, no aproximado). */
   formatSentAt(order: OperatorOrder): string {
-    const iso = order.updated_at || order.created_at;
+    const iso = order.queued_at || order.updated_at || order.created_at;
     if (!iso) return 'Sin registrar';
     const d = new Date(iso);
     if (isNaN(d.getTime())) return 'Sin registrar';
     const date = d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const time = d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
     return `${date} · ${time}`;
+  }
+
+  // Cola 0: pedidos recién enviados a cotización, esperando que el operario
+  // los revise. Se ordenan por el momento real en que el cliente los envió
+  // (queued_at), no por creación del borrador, para respetar el orden real
+  // de llegada aunque el pedido haya quedado como borrador varios días.
+  get reviewQueue(): OperatorOrder[] {
+    return this.orders
+      .filter(o => o.status === 'OPERATOR_REVIEW_PENDING')
+      .sort((a, b) => this.timeOrInfinity(a.queued_at) - this.timeOrInfinity(b.queued_at));
+  }
+
+  /** Posición (1-based) del pedido dentro de la cola de revisión, o null si no aplica. */
+  reviewQueuePosition(order: OperatorOrder): number | null {
+    if (order.status !== 'OPERATOR_REVIEW_PENDING') return null;
+    const idx = this.reviewQueue.findIndex(o => o.id === order.id);
+    return idx === -1 ? null : idx + 1;
   }
 
   // ── Colas por orden de pago (número de orden) ──────────────────

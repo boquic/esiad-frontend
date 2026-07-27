@@ -236,20 +236,16 @@
         <strong>Tus observaciones previas:</strong> {{ order?.client_review_notes }}
       </div>
 
-      <button (click)="openConfirmReviewModal()" [disabled]="confirmingReview"
+      <button *ngIf="getReviewOutcome() !== 'rejected'" (click)="openConfirmReviewModal()" [disabled]="confirmingReview"
               class="inline-flex items-center justify-center font-bold rounded-lg text-white disabled:opacity-50"
               style="gap:7px;font-size:13px;padding:10px 18px;background:#ea580c;border:1px solid #c2410c;cursor:pointer;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-        {{ hasPriceAdjustment() ? 'Aceptar precio y continuar' : (getReviewOutcome() === 'rejected' ? 'Reenviar a revisión' : 'Confirmar revisión') }}
+        {{ hasPriceAdjustment() ? 'Aceptar precio y continuar' : 'Confirmar revisión' }}
       </button>
-
-      <p *ngIf="getReviewOutcome() === 'rejected'" style="font-size:12px;color:#9a3412;margin-top:8px;">
-        Puedes editar tus archivos y notas más abajo antes de reenviar tu pedido a revisión.
-      </p>
     </div>
 
-    <!-- Enviar nueva observación -->
-    <div style="padding:16px 24px;">
+    <!-- Enviar nueva observación (aprobado / caso general) -->
+    <div *ngIf="getReviewOutcome() !== 'rejected'" style="padding:16px 24px;">
       <p style="font-size:12.5px;font-weight:600;color:#9a3412;margin-bottom:8px;">Enviar nueva observación:</p>
       <div *ngIf="observationError" style="font-size:12px;color:#c0392b;margin-bottom:6px;">{{ observationError }}</div>
       <div *ngIf="observationSuccess" style="font-size:12px;color:#166534;margin-bottom:6px;">{{ observationSuccess }}</div>
@@ -266,6 +262,29 @@
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
           </svg>
           Enviar
+        </button>
+      </div>
+    </div>
+
+    <!-- Reenviar a revisión (rechazado): un solo botón, observación opcional -->
+    <div *ngIf="getReviewOutcome() === 'rejected'" style="padding:16px 24px;">
+      <p style="font-size:12px;color:#9a3412;margin-bottom:10px;">
+        Puedes editar tus archivos y notas más abajo. Agrega una observación opcional si quieres y reenvía tu pedido a revisión.
+      </p>
+      <div *ngIf="error" style="font-size:12px;color:#c0392b;margin-bottom:6px;">{{ error }}</div>
+      <div class="flex gap-2">
+        <textarea [(ngModel)]="confirmReviewNotes" rows="2" placeholder="Observación para el operario (opcional)"
+                  class="flex-1 rounded-lg"
+                  style="padding:9px 12px;font-size:13px;border:1px solid #fdba74;background:#fff7ed;resize:none;font-family:inherit;"></textarea>
+        <button (click)="confirmReview()" [disabled]="confirmingReview"
+                class="shrink-0 inline-flex items-center justify-center font-bold rounded-lg text-white disabled:opacity-50"
+                style="gap:6px;padding:9px 16px;font-size:13px;background:#ea580c;border:1px solid #c2410c;cursor:pointer;">
+          <svg *ngIf="!confirmingReview" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <svg *ngIf="confirmingReview" class="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+          </svg>
+          Reenviar a revisión
         </button>
       </div>
     </div>

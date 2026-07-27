@@ -116,6 +116,9 @@
           <div class="op-order-top">
             <span class="op-order-code">#{{ order.id.slice(0, 8).toUpperCase() }}</span>
             <span class="op-badge" [class]="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
+            <span *ngIf="reviewQueuePosition(order) as pos" class="op-queue-num" title="Orden de llegada a la cola de revisión">
+              #{{ pos }}
+            </span>
             <span *ngIf="paymentVerificationPosition(order) as pos" class="op-queue-num" title="Orden de verificación de pago">
               #{{ pos }}
             </span>

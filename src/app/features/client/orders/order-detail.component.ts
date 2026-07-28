@@ -606,6 +606,11 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     return this.ordersService.getOrderPayments(this.order).some((p) => p.status === 'PENDING');
   }
 
+  /** Precio total menos lo ya pagado y aprobado (ej. el adelanto). */
+  getRemainingBalance(): number {
+    return this.ordersService.getRemainingBalance(this.order);
+  }
+
   /**
    * El operario fijó un precio final durante su revisión (independientemente
    * de si dejó o no un comentario). Antes esto exigía también que hubiera un

@@ -140,6 +140,16 @@ export class OperatorService {
     return this.http.post<GenericResponse>(`/api/operator/orders/${orderId}/confirm-payment`, {});
   }
 
+  /** POST /api/operator/orders/:id/reject-payment — el operario revisó el comprobante y el pago no se realizó. El pedido se queda en PENDING_PAYMENT. */
+  rejectPayment(orderId: string): Observable<GenericResponse> {
+    return this.http.post<GenericResponse>(`/api/operator/orders/${orderId}/reject-payment`, {});
+  }
+
+  /** Descarga la captura del comprobante de pago subido por el cliente, como Blob (mismo motivo que downloadOrderFile). */
+  downloadPaymentVoucher(orderId: string): Observable<Blob> {
+    return this.http.get(`/api/operator/orders/${orderId}/payment-voucher`, { responseType: 'blob' });
+  }
+
   /**
    * Descarga un archivo del pedido como Blob (no con un <a href> plano), para
    * que el interceptor adjunte el JWT en el header Authorization. Una

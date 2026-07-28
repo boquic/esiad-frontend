@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { getUserName } from '../../../core/utils/jwt.utils';
@@ -23,7 +23,7 @@ type OrderStatusMeta = {
   imports: [CommonModule, RouterLink, DatePipe, FormsModule],
   templateUrl: './order-detail.component.html',
 })
-export class OrderDetailComponent {
+export class OrderDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private ordersService = inject(ClientOrdersService);
@@ -146,6 +146,12 @@ export class OrderDetailComponent {
     return this.router.url === path || this.router.url.startsWith(path + '?');
   }
 
+  // Refresco periódico silencioso para que el cliente vea sin recargar
+  // manualmente cuando el operario confirma/rechaza el pago, aprueba el
+  // pedido, etc. (mismo patrón que la cola del operario).
+  private readonly pollIntervalMs = 20000;
+  private pollHandle: ReturnType<typeof setInterval> | null = null;
+
   ngOnInit(): void {
     const orderId = this.route.snapshot.paramMap.get('id');
     if (!orderId) {
@@ -153,6 +159,11 @@ export class OrderDetailComponent {
       return;
     }
     this.loadOrder(orderId);
+    this.pollHandle = setInterval(() => this.loadOrder(orderId, true), this.pollIntervalMs);
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollHandle) clearInterval(this.pollHandle);
   }
 
   loadOrder(orderId: string, silent = false): void {

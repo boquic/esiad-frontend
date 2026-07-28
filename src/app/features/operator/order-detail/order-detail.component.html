@@ -337,8 +337,10 @@
         <!-- El pago con adelanto (ADVANCE_50) lo confirma el operario aquí mismo tras
              verificarlo (ej. en su celular); con contraentrega (CASH_ON_DELIVERY) no hay
              comprobante que verificar y se puede iniciar producción directamente. -->
-        <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition === 'CASH_ON_DELIVERY'" style="margin-top:4px;">
-          <button class="opd-btn primary lg" (click)="startOrder()" [disabled]="isChangingStatus">
+        <div *ngIf="order.status === 'PENDING_PAYMENT' && order.payment_condition === 'CASH_ON_DELIVERY'" style="margin-top:4px;display:flex;flex-direction:column;gap:8px;">
+          <input type="text" class="opd-textarea" [(ngModel)]="startProductionTimeValue"
+                 placeholder="Tiempo estimado de producción (ej: 48 horas) *" style="min-height:unset;padding:9px 12px;resize:none;"/>
+          <button class="opd-btn primary lg" (click)="startOrder()" [disabled]="isChangingStatus || !startProductionTimeValue.trim()">
             <svg *ngIf="!isChangingStatus" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
             <span *ngIf="isChangingStatus" class="opd-spin-sm"></span>
             {{ isChangingStatus ? 'Procesando...' : 'Iniciar producción' }}
@@ -357,8 +359,10 @@
           </button>
         </div>
 
-        <div *ngIf="order.status === 'PAID'" style="margin-top:4px;">
-          <button class="opd-btn primary lg" (click)="startOrder()" [disabled]="isChangingStatus">
+        <div *ngIf="order.status === 'PAID'" style="margin-top:4px;display:flex;flex-direction:column;gap:8px;">
+          <input type="text" class="opd-textarea" [(ngModel)]="startProductionTimeValue"
+                 placeholder="Tiempo estimado de producción (ej: 48 horas) *" style="min-height:unset;padding:9px 12px;resize:none;"/>
+          <button class="opd-btn primary lg" (click)="startOrder()" [disabled]="isChangingStatus || !startProductionTimeValue.trim()">
             <svg *ngIf="!isChangingStatus" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 3l14 9-14 9V3z"/></svg>
             <span *ngIf="isChangingStatus" class="opd-spin-sm"></span>
             {{ isChangingStatus ? 'Procesando...' : 'Iniciar producción' }}

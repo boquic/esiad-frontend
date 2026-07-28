@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -569,7 +569,7 @@ import { OperatorService, OperatorOrder } from '../operator.service';
     }
   `],
 })
-export class OperatorOrderDetailComponent implements OnInit {
+export class OperatorOrderDetailComponent implements OnInit, OnDestroy {
   private route           = inject(ActivatedRoute);
   private operatorService = inject(OperatorService);
   private cd              = inject(ChangeDetectorRef);
@@ -629,6 +629,11 @@ export class OperatorOrderDetailComponent implements OnInit {
         this.order        = (response?.data !== undefined ? response.data : response) as OperatorOrder;
         this.internalNotes = this.order?.operator_notes || this.order?.notes || '';
         if (!silent) this.isLoading = false;
+        if (this.order?.status === 'PENDING_PAYMENT' && this.order?.has_pending_payment) {
+          this.loadPaymentVoucher(id);
+        } else {
+          this.clearPaymentVoucher();
+        }
         this.cd.markForCheck();
       },
       error: (err: any) => {
@@ -637,6 +642,39 @@ export class OperatorOrderDetailComponent implements OnInit {
         this.cd.markForCheck();
       }
     });
+  }
+
+  // ── Comprobante de pago ──────────────────────────────────────────────────
+  voucherUrl: string | null = null;
+  loadingVoucher = false;
+  voucherError = '';
+
+  private clearPaymentVoucher(): void {
+    if (this.voucherUrl) URL.revokeObjectURL(this.voucherUrl);
+    this.voucherUrl = null;
+    this.voucherError = '';
+  }
+
+  private loadPaymentVoucher(orderId: string): void {
+    this.clearPaymentVoucher();
+    this.loadingVoucher = true;
+
+    this.operatorService.downloadPaymentVoucher(orderId).subscribe({
+      next: (blob) => {
+        this.voucherUrl = URL.createObjectURL(blob);
+        this.loadingVoucher = false;
+        this.cd.markForCheck();
+      },
+      error: () => {
+        this.voucherError = 'No se pudo cargar el comprobante.';
+        this.loadingVoucher = false;
+        this.cd.markForCheck();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.clearPaymentVoucher();
   }
 
   // ── Helpers ──────────────────────────────────────────────────
@@ -859,6 +897,25 @@ export class OperatorOrderDetailComponent implements OnInit {
       },
       error: (err) => {
         this.error = err?.error?.message || 'No se pudo confirmar el pago.';
+        this.isChangingStatus = false;
+      }
+    });
+  }
+
+  /** El operario revisó el comprobante y el pago no se realizó: no cambia el estado, solo notifica al cliente para que vuelva a intentar. */
+  rejectPayment(): void {
+    if (!this.orderId) return;
+    this.isChangingStatus = true;
+    this.error = null; this.success = null;
+
+    this.operatorService.rejectPayment(this.orderId).subscribe({
+      next: () => {
+        this.success = 'Pago marcado como no recibido. Se notificó al cliente para que vuelva a intentar.';
+        this.isChangingStatus = false;
+        if (this.orderId) this.loadOrder(this.orderId, true);
+      },
+      error: (err) => {
+        this.error = err?.error?.message || 'No se pudo marcar el pago como no recibido.';
         this.isChangingStatus = false;
       }
     });

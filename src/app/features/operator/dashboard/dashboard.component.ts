@@ -748,6 +748,17 @@ export class OperatorDashboardComponent implements OnInit, OnDestroy {
     return idx === -1 ? null : idx + 1;
   }
 
+  /** Fecha/hora en que el cliente subió el comprobante de pago pendiente de verificar. */
+  formatVoucherUploadedAt(order: OperatorOrder): string {
+    const iso = order.pending_payment_uploaded_at;
+    if (!iso) return 'Sin registrar';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return 'Sin registrar';
+    const date = d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const time = d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+    return `${date} · ${time}`;
+  }
+
   // ── Colas por orden de pago (número de orden) ──────────────────
   // Cola 1: pedidos con comprobante subido, esperando que el operario lo
   // verifique y confirme el pago. Se ordenan por el momento en que el

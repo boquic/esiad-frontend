@@ -99,8 +99,11 @@ export class OperatorService {
     return this.http.get<ResourceResponse<OperatorOrder>>(`/api/operator/orders/${orderId}`);
   }
 
-  updateOrderStatus(orderId: string, status: string): Observable<GenericResponse> {
-    return this.http.patch<GenericResponse>(`/api/operator/orders/${orderId}/status`, { status });
+  /** productionTimeEstimate es requerido por el backend cuando status === 'IN_PROGRESS'. */
+  updateOrderStatus(orderId: string, status: string, productionTimeEstimate?: string): Observable<GenericResponse> {
+    const body: Record<string, string> = { status };
+    if (productionTimeEstimate) body['production_time_estimate'] = productionTimeEstimate;
+    return this.http.patch<GenericResponse>(`/api/operator/orders/${orderId}/status`, body);
   }
 
   updateOrderNotes(orderId: string, notes: string): Observable<GenericResponse> {

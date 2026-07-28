@@ -605,6 +605,8 @@ export class OperatorOrderDetailComponent implements OnInit, OnDestroy {
   showProductionTimePanel   = false;
   productionTimeValue       = '';
   isSubmittingProductionTime = false;
+  /** Tiempo estimado que el operario ingresa al iniciar producción (PAID/CASH_ON_DELIVERY -> IN_PROGRESS). */
+  startProductionTimeValue  = '';
 
   // ── Lifecycle ─────────────────────────────────────────────────
   ngOnInit(): void {
@@ -921,16 +923,25 @@ export class OperatorOrderDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Pago ya confirmado (PAID): inicia producción -> IN_PROGRESS. */
+  /** Pago ya confirmado (PAID) o contraentrega: inicia producción -> IN_PROGRESS.
+   *  El tiempo estimado se registra en el mismo paso (ya no es un paso aparte
+   *  que el operario podía saltarse), para que el cliente siempre reciba una
+   *  referencia de cuándo estará listo. */
   startOrder(): void {
     if (!this.orderId) return;
+    const timeEstimate = this.startProductionTimeValue.trim();
+    if (!timeEstimate) {
+      this.error = 'Registra el tiempo estimado de producción antes de iniciar.';
+      return;
+    }
     this.isChangingStatus = true;
     this.error = null; this.success = null;
 
-    this.operatorService.updateOrderStatus(this.orderId, 'IN_PROGRESS').subscribe({
+    this.operatorService.updateOrderStatus(this.orderId, 'IN_PROGRESS', timeEstimate).subscribe({
       next: () => {
         this.success = 'Producción iniciada correctamente.';
         this.isChangingStatus = false;
+        this.startProductionTimeValue = '';
         if (this.orderId) this.loadOrder(this.orderId, true);
       },
       error: (err) => {

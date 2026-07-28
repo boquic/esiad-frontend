@@ -610,8 +610,11 @@ export class ClientPaymentComponent implements OnInit {
     this.ordersService.getOrderById(id).subscribe({
       next: (response) => {
         this.order = this.ordersService.unwrapResource(response);
-        if (this.order?.status !== 'PENDING_PAYMENT') {
+        const status = this.order?.status;
+        if (status !== 'PENDING_PAYMENT' && status !== 'READY') {
           this.error = 'Este pedido no está pendiente de pago.';
+        } else if (status === 'READY' && this.ordersService.getRemainingBalance(this.order) <= 0) {
+          this.error = 'Este pedido no tiene saldo pendiente por pagar.';
         }
         this.isLoading = false;
         this.cd.markForCheck();
@@ -627,6 +630,9 @@ export class ClientPaymentComponent implements OnInit {
 
   getAmountToPay(): number {
     if (!this.order) return 0;
+    if (this.order.status === 'READY') {
+      return this.ordersService.getRemainingBalance(this.order);
+    }
     if (this.order.payment_condition === 'ADVANCE_50') {
       const advance = typeof this.order.advance_amount === 'number'
         ? this.order.advance_amount
@@ -634,6 +640,16 @@ export class ClientPaymentComponent implements OnInit {
       return advance;
     }
     return this.ordersService.getOrderEstimatedPrice(this.order);
+  }
+
+  /** true si se está pagando el saldo restante (pedido ya READY), no el adelanto inicial. */
+  isBalancePayment(): boolean {
+    return this.order?.status === 'READY';
+  }
+
+  /** true si el pedido está READY pero ya no queda saldo por pagar (nada que hacer aquí). */
+  hasNothingToPay(): boolean {
+    return this.order?.status === 'READY' && this.ordersService.getRemainingBalance(this.order) <= 0;
   }
 
   onFileSelected(event: any): void {

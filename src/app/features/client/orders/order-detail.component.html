@@ -408,16 +408,43 @@
   </div>
 
   <!-- Banner Listo para recoger (informativo: el operario confirma la recogida en el local) -->
-  <div *ngIf="order?.status === 'READY'" class="rounded-xl mb-5 flex flex-col md:flex-row md:items-center justify-between"
-       style="gap:16px;padding:18px 24px;background:rgba(236,253,245,0.75);backdrop-filter:blur(20px) saturate(140%);border:1px solid #a7f3d0;">
-    <div>
-      <h3 class="font-bold flex items-center gap-2" style="font-size:16px;color:#065f46;letter-spacing:-0.01em;margin-bottom:4px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M5 12l5 5L20 7"/>
-        </svg>
-        Tu pedido está listo para recoger en tienda
-      </h3>
-      <p style="font-size:13px;color:#047857;margin:0;">Acércate al local con tu comprobante; el operario registrará la entrega al recibirlo.</p>
+  <div *ngIf="order?.status === 'READY'" class="rounded-xl mb-5 flex flex-col"
+       style="gap:0;background:rgba(236,253,245,0.75);backdrop-filter:blur(20px) saturate(140%);border:1px solid #a7f3d0;">
+    <div class="flex flex-col md:flex-row md:items-center justify-between"
+         style="gap:16px;padding:18px 24px;">
+      <div>
+        <h3 class="font-bold flex items-center gap-2" style="font-size:16px;color:#065f46;letter-spacing:-0.01em;margin-bottom:4px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12l5 5L20 7"/>
+          </svg>
+          Tu pedido está listo para recoger en tienda
+        </h3>
+        <p style="font-size:13px;color:#047857;margin:0;">Acércate al local con tu comprobante; el operario registrará la entrega al recibirlo.</p>
+      </div>
+    </div>
+
+    <!-- Saldo pendiente (adelanto 50%): pago opcional por adelantado, o presencial al recoger -->
+    <div *ngIf="order?.payment_condition === 'ADVANCE_50' && getRemainingBalance() > 0 && !hasPendingPaymentVoucher()"
+         class="flex flex-col md:flex-row md:items-center justify-between"
+         style="gap:14px;padding:16px 24px;border-top:1px solid rgba(167,243,208,0.6);background:rgba(255,255,255,0.4);">
+      <p style="font-size:13px;color:#065f46;margin:0;">
+        Si deseas, puedes realizar la transferencia del saldo pendiente de
+        <strong style="font-family:monospace;">S/ {{ getRemainingBalance() | number:'1.2-2' }}</strong>
+        ahora, o acercarte presencialmente a realizar el pago en nuestra sede.
+      </p>
+      <a [routerLink]="['/client/orders', order?.id, 'payment']"
+         class="shrink-0 inline-flex items-center justify-center no-underline font-bold rounded-lg text-white"
+         style="gap:7px;font-size:13px;padding:9px 18px;background:#2e7874;border:1px solid #245e5b;cursor:pointer;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        Pagar saldo pendiente
+      </a>
+    </div>
+
+    <div *ngIf="order?.payment_condition === 'ADVANCE_50' && hasPendingPaymentVoucher()"
+         class="flex items-center"
+         style="gap:10px;padding:14px 24px;border-top:1px solid rgba(167,243,208,0.6);background:rgba(255,255,255,0.4);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <p style="font-size:13px;color:#92400e;margin:0;">Tu comprobante del saldo está en revisión. El operario lo verificará.</p>
     </div>
   </div>
 

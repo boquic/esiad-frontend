@@ -343,6 +343,16 @@ export class ClientOrdersService {
     return Number.isFinite(parsed) ? parsed : 0;
   }
 
+  /** Precio total del pedido menos lo ya aprobado (ej. el adelanto). Nunca negativo. */
+  getRemainingBalance(order: ClientOrderDetail | null | undefined): number {
+    const total = this.getOrderFinalPrice(order) ?? this.getOrderEstimatedPrice(order);
+    const approved = this.getOrderPayments(order)
+      .filter((p) => p.status === 'APPROVED')
+      .reduce((sum, p) => sum + this.getPaymentAmount(p), 0);
+    const remaining = total - approved;
+    return remaining > 0 ? remaining : 0;
+  }
+
   getOrderFiles(order: ClientOrderDetail | null | undefined): OrderFile[] {
     return Array.isArray(order?.files) ? order.files : [];
   }

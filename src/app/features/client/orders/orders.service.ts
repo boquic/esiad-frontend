@@ -361,6 +361,26 @@ export class ClientOrdersService {
     return Array.isArray(order?.payments) ? order.payments : [];
   }
 
+  /**
+   * El comprobante más reciente que subió el cliente fue rechazado por el
+   * operario (no le llegó el pago) y el cliente todavía no reenvió uno
+   * nuevo. Se usa para avisarle que su pago no fue recibido y debe volver
+   * a intentarlo, en vez de mostrarle el aviso genérico de "realiza el pago"
+   * como si no hubiera intentado nada.
+   */
+  hasRejectedPayment(order: ClientOrderDetail | null | undefined): boolean {
+    const payments = this.getOrderPayments(order);
+    if (payments.length === 0) return false;
+
+    const mostRecent = [...payments].sort((a, b) => {
+      const ta = new Date((a.created_at ?? a.createdAt ?? 0) as string).getTime();
+      const tb = new Date((b.created_at ?? b.createdAt ?? 0) as string).getTime();
+      return tb - ta;
+    })[0];
+
+    return mostRecent?.status === 'REJECTED';
+  }
+
   getFileUrl(file: OrderFile | null | undefined): string {
     const url = file?.file_url ?? file?.fileUrl;
     return typeof url === 'string' ? url : '';

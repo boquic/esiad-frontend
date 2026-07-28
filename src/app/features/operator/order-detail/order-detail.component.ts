@@ -631,7 +631,8 @@ export class OperatorOrderDetailComponent implements OnInit, OnDestroy {
         this.order        = (response?.data !== undefined ? response.data : response) as OperatorOrder;
         this.internalNotes = this.order?.operator_notes || this.order?.notes || '';
         if (!silent) this.isLoading = false;
-        if (this.order?.status === 'PENDING_PAYMENT' && this.order?.has_pending_payment) {
+        const s = this.order?.status;
+        if ((s === 'PENDING_PAYMENT' || s === 'READY') && this.order?.has_pending_payment) {
           this.loadPaymentVoucher(id);
         } else {
           this.clearPaymentVoucher();
@@ -677,6 +678,45 @@ export class OperatorOrderDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.clearPaymentVoucher();
+  }
+
+  // ── Pago del saldo restante (READY, opcional) ────────────────────────────
+  // El operario puede subir la foto de la captura que el cliente le mostró
+  // presencialmente; queda igual que un comprobante subido en línea, a la
+  // espera de que el operario lo confirme/rechace con los mismos botones.
+  balanceCaptureFile: File | null = null;
+  isUploadingBalanceCapture = false;
+
+  onBalanceCaptureSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    if (file && !file.type.startsWith('image/')) {
+      this.error = 'Solo se permiten imágenes (jpg, png).';
+      this.balanceCaptureFile = null;
+      return;
+    }
+    this.error = null;
+    this.balanceCaptureFile = file;
+  }
+
+  uploadBalanceCapture(): void {
+    if (!this.orderId || !this.balanceCaptureFile) return;
+    this.isUploadingBalanceCapture = true;
+    this.error = null; this.success = null;
+
+    this.operatorService.uploadBalancePaymentCapture(this.orderId, this.balanceCaptureFile).subscribe({
+      next: () => {
+        this.success = 'Comprobante registrado. Revísalo y confírmalo antes de entregar el pedido.';
+        this.isUploadingBalanceCapture = false;
+        this.balanceCaptureFile = null;
+        if (this.orderId) this.loadOrder(this.orderId, true);
+      },
+      error: (err: any) => {
+        this.error = err?.error?.message || 'No se pudo registrar el comprobante.';
+        this.isUploadingBalanceCapture = false;
+        this.cd.markForCheck();
+      }
+    });
   }
 
   // ── Helpers ──────────────────────────────────────────────────

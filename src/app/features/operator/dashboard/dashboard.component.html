@@ -149,8 +149,8 @@
               </div>
             </div>
 
-            <!-- Pago pendiente con comprobante ya subido: mostramos fecha/hora de subida en vez de la especificación -->
-            <div class="op-detail-block" *ngIf="order.status === 'PENDING_PAYMENT' && order.has_pending_payment">
+            <!-- Pago pendiente (adelanto o saldo) con comprobante ya subido: mostramos fecha/hora de subida en vez de la especificación -->
+            <div class="op-detail-block" *ngIf="(order.status === 'PENDING_PAYMENT' || order.status === 'READY') && order.has_pending_payment">
               <div class="op-detail-label">Comprobante subido</div>
               <div class="op-detail-value">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -160,7 +160,7 @@
               </div>
             </div>
 
-            <div class="op-detail-block" *ngIf="order.status !== 'OPERATOR_REVIEW_PENDING' && !(order.status === 'PENDING_PAYMENT' && order.has_pending_payment)">
+            <div class="op-detail-block" *ngIf="order.status !== 'OPERATOR_REVIEW_PENDING' && !((order.status === 'PENDING_PAYMENT' || order.status === 'READY') && order.has_pending_payment)">
               <div class="op-detail-label">Especificación</div>
               <div class="op-detail-value">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -262,8 +262,14 @@
           <a [routerLink]="['/operator/orders', order.id]" class="op-btn ghost">Ver detalle</a>
         </ng-container>
 
+        <!-- Ready + saldo pendiente con comprobante por revisar -->
+        <ng-container *ngIf="order.status === 'READY' && order.payment_condition === 'ADVANCE_50' && order.has_pending_payment">
+          <a [routerLink]="['/operator/orders', order.id]" class="op-btn primary">Ver comprobante</a>
+          <div class="op-ready-hint" style="color:#7c3aed;">Comprobante del saldo subido, pendiente de verificar</div>
+        </ng-container>
+
         <!-- Ready -->
-        <ng-container *ngIf="order.status === 'READY'">
+        <ng-container *ngIf="order.status === 'READY' && !(order.payment_condition === 'ADVANCE_50' && order.has_pending_payment)">
           <a [routerLink]="['/operator/orders', order.id]" class="op-btn ghost">Ver detalle</a>
           <div class="op-ready-hint">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

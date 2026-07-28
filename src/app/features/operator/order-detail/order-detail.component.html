@@ -381,6 +381,70 @@
           </div>
         </div>
 
+        <!-- Saldo restante (READY + adelanto 50%): verificación opcional antes de entregar -->
+        <ng-container *ngIf="order.status === 'READY' && order.payment_condition === 'ADVANCE_50'">
+
+          <!-- Ya sin saldo pendiente -->
+          <div *ngIf="(order.remaining_balance ?? 0) <= 0" class="opd-state-explain"
+               style="background:rgba(20,184,166,0.10);border-color:rgba(20,184,166,0.35);color:#0f766e;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+            <span>Saldo del pedido pagado por completo.</span>
+          </div>
+
+          <!-- Hay un comprobante del saldo pendiente de revisar (subido por el cliente o por ti) -->
+          <ng-container *ngIf="(order.remaining_balance ?? 0) > 0 && order.has_pending_payment">
+            <div class="opd-state-explain" style="background:rgba(245,243,255,0.85);border-color:#c4b5fd;color:#6d28d9;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/></svg>
+              <span>Hay un comprobante del saldo restante pendiente de verificar. Confírmalo antes de entregar el pedido, o márcalo como no recibido si no corresponde.</span>
+            </div>
+
+            <div style="margin-top:4px;margin-bottom:4px;">
+              <div *ngIf="loadingVoucher" style="display:flex;align-items:center;gap:8px;color:#6d28d9;font-size:13px;">
+                <span class="opd-spin-sm"></span> Cargando comprobante...
+              </div>
+              <div *ngIf="voucherError" style="color:#c0392b;font-size:13px;">{{ voucherError }}</div>
+              <a *ngIf="voucherUrl" [href]="voucherUrl" target="_blank" rel="noopener"
+                 style="display:block;max-width:320px;border:1px solid #c4b5fd;border-radius:10px;overflow:hidden;">
+                <img [src]="voucherUrl" alt="Comprobante del saldo" style="display:block;width:100%;height:auto;" />
+              </a>
+            </div>
+
+            <div style="margin-top:4px;margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="opd-btn primary lg" style="width:auto;flex:1;min-width:160px;" (click)="confirmPayment()" [disabled]="isChangingStatus">
+                <svg *ngIf="!isChangingStatus" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+                <span *ngIf="isChangingStatus" class="opd-spin-sm"></span>
+                {{ isChangingStatus ? 'Procesando...' : 'Confirmar pago' }}
+              </button>
+              <button class="opd-btn lg" style="width:auto;flex:1;min-width:160px;background:#fff0f0;border:1px solid #f5c6c6;color:#c0392b;" (click)="rejectPayment()" [disabled]="isChangingStatus">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+                Pago no recibido
+              </button>
+            </div>
+          </ng-container>
+
+          <!-- Sin comprobante aún: saldo pendiente, pago opcional en línea o presencial -->
+          <ng-container *ngIf="(order.remaining_balance ?? 0) > 0 && !order.has_pending_payment">
+            <div class="opd-state-explain" style="background:rgba(255,247,237,0.8);border-color:#fdba74;color:#9a3412;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16v.01"/></svg>
+              <span>
+                Saldo pendiente: <b class="mono" style="font-family:'Geist Mono',monospace;">S/ {{ order.remaining_balance | number:'1.2-2' }}</b>.
+                Si el cliente ya pagó presencialmente y te mostró la captura, puedes subirla aquí (opcional) para dejarla registrada.
+              </span>
+            </div>
+
+            <div style="margin-top:4px;margin-bottom:14px;display:flex;flex-direction:column;gap:8px;">
+              <input type="file" accept="image/jpeg,image/png,image/jpg" class="opd-textarea"
+                     style="min-height:unset;padding:9px 12px;resize:none;"
+                     (change)="onBalanceCaptureSelected($event)" />
+              <button class="opd-btn secondary" (click)="uploadBalanceCapture()" [disabled]="!balanceCaptureFile || isUploadingBalanceCapture">
+                <span *ngIf="isUploadingBalanceCapture" class="opd-spin-sm"></span>
+                {{ isUploadingBalanceCapture ? 'Subiendo...' : 'Subir comprobante presencial' }}
+              </button>
+            </div>
+          </ng-container>
+
+        </ng-container>
+
         <div *ngIf="order.status === 'READY'" class="opd-done-box">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           <p class="opd-done-title">Producción finalizada</p>

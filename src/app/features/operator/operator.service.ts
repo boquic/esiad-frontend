@@ -33,9 +33,12 @@ export interface OperatorOrder {
   // Momento en que el pedido entró por primera vez a la cola del operario
   // (cliente dio "Enviar a cotización"). Null si aún no se ha enviado.
   queued_at?: string | null;
-  // Comprobante de pago del cliente aún no revisado por el operario.
+  // Comprobante de pago (adelanto o saldo restante) aún no revisado por el operario.
   has_pending_payment?: boolean;
   pending_payment_uploaded_at?: string | null;
+  // Saldo pendiente del pedido (total menos pagos aprobados). Relevante cuando
+  // el pedido ya está READY con adelanto 50%.
+  remaining_balance?: number;
   client?: {
     id: string;
     first_name: string;
@@ -151,6 +154,19 @@ export class OperatorService {
   /** Descarga la captura del comprobante de pago subido por el cliente, como Blob (mismo motivo que downloadOrderFile). */
   downloadPaymentVoucher(orderId: string): Observable<Blob> {
     return this.http.get(`/api/operator/orders/${orderId}/payment-voucher`, { responseType: 'blob' });
+  }
+
+  /**
+   * POST /api/operator/orders/:id/balance-payment — el operario registra
+   * (opcional) el pago del saldo restante de un pedido READY que el cliente
+   * pagó presencialmente, subiendo la foto de la captura que le mostró.
+   * Queda pendiente de revisión igual que un comprobante subido en línea
+   * (se confirma/rechaza con confirmPayment/rejectPayment).
+   */
+  uploadBalancePaymentCapture(orderId: string, file: File): Observable<GenericResponse> {
+    const formData = new FormData();
+    formData.append('capture', file);
+    return this.http.post<GenericResponse>(`/api/operator/orders/${orderId}/balance-payment`, formData);
   }
 
   /**

@@ -611,6 +611,11 @@ export class OrderDetailComponent implements OnInit, OnDestroy {
     return this.ordersService.getRemainingBalance(this.order);
   }
 
+  /** El operario revisó el último comprobante subido y no le llegó el pago: hay que reenviarlo. */
+  hasRejectedPayment(): boolean {
+    return this.ordersService.hasRejectedPayment(this.order);
+  }
+
   /**
    * El operario fijó un precio final durante su revisión (independientemente
    * de si dejó o no un comentario). Antes esto exigía también que hubiera un
